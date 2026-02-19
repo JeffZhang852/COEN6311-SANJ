@@ -1,0 +1,422 @@
+GET http://127.0.0.1:8000/test_token
+Content-Type: application/json
+Authorization: token 7d3da91bfe6c9564605916954efaca46dae27d49
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T182050.200.json
+
+###
+
+POST http://127.0.0.1:8000/login
+Content-Type: application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T182041.200.json
+
+###
+
+POST http://127.0.0.1:8000/signup
+Content-Type: application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T182037.200.json
+
+###
+
+GET http://127.0.0.1:8000/test_token
+Content-Type: application/json
+Authorization: token "adam"
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T181802.403.json
+
+###
+
+GET http://127.0.0.1:8000/test_token
+Content-Type: application/json
+Authorization: token adam
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T181756.403.json
+
+###
+
+GET http://127.0.0.1:8000/test_token
+Content-Type: application/json
+Authorization: token xxx
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T181743.403.json
+
+###
+
+POST http://127.0.0.1:8000/login
+Content-Type: application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T181737.200.json
+
+###
+
+POST http://127.0.0.1:8000/signup
+Content-Type: application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T181722.200.json
+
+###
+
+POST http://127.0.0.1:8000/signupContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T181616.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T181329.415.json
+
+###
+
+GET http://127.0.0.1:8000/test_tokenContent-Type:%20application/jsonAuthorization:%20token%20xxx
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T181327.200.json
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T181325.200.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T181323.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T181110.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T174030.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T173948.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T173939.415.json
+
+###
+
+POST http://127.0.0.1:8000/signupContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T173930.404.html
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 57
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{'id': "asdasd", 'password': "asdasd", 'email': "asdasd"}
+
+<> 2026-02-19T173906.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 57
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{'id': "asdasd", 'password': "asdasd", 'email': "asdasd"}
+
+<> 2026-02-19T173853.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 79
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{'id': "asdasd", 'username': "asdasd", 'password'; "asdasd", 'email': "asdasd"}
+
+<> 2026-02-19T173814.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 74
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@gmail.com" }
+
+<> 2026-02-19T173651.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T173603.415.json
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T173600.200.json
+
+###
+
+GET http://127.0.0.1:8000/test_tokenContent-Type:%20application/jsonAuthorization:%20token%20xxx
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T173556.200.json
+
+###
+
+GET http://127.0.0.1:8000/test_tokenContent-Type:%20application/jsonAuthorization:%20token%20xxx
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-19T173552.200.json
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T173550.200.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T173517.415.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 155
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "first_name": "ammar ", "last_name": "hahaha", "password": "Pass1234!", "concordia_email": "adam@mail.com", "student_id": "4165651" }
+
+<> 2026-02-19T173337.415.json
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T173302.200.json
+
+###
+
+POST http://127.0.0.1:8000/registerContent-Type:%20application/json
+Content-Length: 155
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "first_name": "ammar ", "last_name": "hahaha", "password": "Pass1234!", "concordia_email": "adam@mail.com", "student_id": "4165651" }
+
+<> 2026-02-19T173114.404.html
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T173045.404.html
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T172757.404.html
+
+###
+
+POST http://127.0.0.1:8000/loginContent-Type:%20application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!" }
+
+<> 2026-02-19T153648.404.html
+
+###
+
+POST http://127.0.0.1:8000/signupContent-Type:%20application/json
+Content-Length: 73
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+
+<> 2026-02-19T153634.404.html
+
+###
+
+POST http://127.0.0.1:8000/login
+Content-Type: application/json
+User-Agent: IntelliJ HTTP Client/PyCharm 2025.3.1.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+content-length: 0
+
+<> 2026-02-19T152214.404.html
+
+###
+
