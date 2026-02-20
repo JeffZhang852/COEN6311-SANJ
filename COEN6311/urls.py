@@ -22,5 +22,5 @@ from django.urls import include
 # this file forwards all urls to different apps
 # it starts here and depending on the url it gets forwarded to different apps
 urlpatterns = [
-    path('', include ("API.urls")),
+    path('', include ("frontend.urls"))
 ]

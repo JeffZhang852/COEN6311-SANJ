@@ -2,12 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/ad5ed7e4-8224-408d-a765-39754bbceabd.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/ad5ed7e4-8224-408d-a765-39754bbceabd/storage_v2/_src_/schema/main.uQUzAA.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/API/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/COEN6311.iml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/misc.xml" afterDir="false" />
@@ -20,11 +14,20 @@
       <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/admin.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/apps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/serializers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/tests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/views.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/COEN6311/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/COEN6311/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/asgi.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/settings.py" beforeDir="false" />
@@ -44,6 +47,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="HTML File" />
+        <option value="CSS File" />
       </list>
     </option>
   </component>
@@ -75,6 +80,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
     "Django Server.COEN6311.executor": "Run",
     "HTTP Request.All in test.executor": "Run",
     "HTTP Request.test | #1.executor": "Run",
@@ -90,11 +96,26 @@
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
     "git-widget-placeholder": "starting__API__development",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ",
+    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend",
+    "list.type.of.created.stylesheet": "CSS",
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\registeration" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\API\templates" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\static" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="configurationStatuses">
       <map>
@@ -185,6 +206,7 @@
       <workItem from="1771523207626" duration="699000" />
       <workItem from="1771525041787" duration="384000" />
       <workItem from="1771525484893" duration="8964000" />
+      <workItem from="1771597313829" duration="19409000" />
     </task>
     <servers />
   </component>
