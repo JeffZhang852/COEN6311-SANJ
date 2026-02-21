@@ -13,6 +13,9 @@ def gym(request):
     return render(request, 'frontend/gym.html')
 
 
+def memberships(request):
+    return render(request, 'frontend/membership.html')
+
 def login(request):
     return render(request, 'authentication/login.html')
 
