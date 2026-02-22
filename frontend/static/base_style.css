@@ -28,7 +28,7 @@ header {
 header h1 {
     a{
         text-decoration: none; /* remove the underline hyperlink formatting */
-        color: #3ed140;
+        color: #e1933a;
     }
 }
 
@@ -38,7 +38,11 @@ nav a {
     text-decoration: none; /* Removes underline */
     margin-left: 25px;
     font-weight: 500;
-    transition: 0.3s; /* Smooth hover effect */
+    font-size: 20px;
+    transition: 0.2s; /* Smooth hover effect */
+    display: inline-block;
+    vertical-align: middle;
+
 }
 
 /* Hover effect for navigation links */
@@ -95,12 +99,14 @@ nav a:hover {
 section {
     padding: 80px 8%;
     text-align: center;
+    color: #fff;
 }
 
 /* Section titles */
 .section-title {
     font-size: 36px;
     margin-bottom: 50px;
+    color: #fff;
 }
 
 /* ================= CARD SYSTEM ================= */
@@ -110,11 +116,13 @@ section {
     gap: 30px;              /* Space between cards */
     justify-content: center;
     flex-wrap: wrap;        /* Makes it responsive */
+
 }
 
 /* Individual card styling */
 .card {
     background: #1a1a1a;
+    color: #fff;
     padding: 30px;
     width: 300px;
     border-radius: 10px;
@@ -128,17 +136,9 @@ section {
 
 /* ================= PRICING SECTION ================= */
 .pricing {
-    background: #000;
+    background: #ed3fa2;
 }
 
-/* ================= FOOTER ================= */
-footer {
-    background: #000;
-    text-align: center;
-    padding: 20px;
-    font-size: 14px;
-    color: #aaa;
-}
 
 /* ================= RESPONSIVE DESIGN ================= */
 /* Adjusts hero heading size on smaller screens */
@@ -147,3 +147,7 @@ footer {
         font-size: 32px;
     }
 }
+
+
+
+

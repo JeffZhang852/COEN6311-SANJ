@@ -16,18 +16,13 @@
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/admin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/apps.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/serializers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/views.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/COEN6311/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/COEN6311/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/original-style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/base_style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/authentication/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/authentication/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/asgi.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/settings.py" beforeDir="false" />
@@ -47,8 +42,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
-        <option value="HTML File" />
         <option value="CSS File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -94,9 +89,9 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "starting__API__development",
+    "git-widget-placeholder": "starting__frontend",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend",
+    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend",
     "list.type.of.created.stylesheet": "CSS",
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
@@ -104,9 +99,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\registeration" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\images" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\images" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\API\templates" />
@@ -132,7 +129,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Django Server.COEN6311">
+  <component name="RunManager" selected="Django server.COEN6311">
     <configuration name="All in test" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/test.rest">
       <method v="2" />
     </configuration>
@@ -173,7 +170,6 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Django Server.COEN6311" />
       <item itemvalue="HTTP Request.All in test" />
       <item itemvalue="HTTP Request.test | #1" />
       <item itemvalue="HTTP Request.test | #2" />
@@ -191,7 +187,6 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.29346.308" />
         <option value="bundled-python-sdk-ca5e2b39c7df-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.308" />
       </set>
     </attachedChunks>

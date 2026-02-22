@@ -23,10 +23,16 @@
     <!-- This loads the font from Google's servers -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+    <!-- ICONS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
     <!-- External CSS File -->
     <!-- This connects the HTML file to static/style.css -->
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <link rel="stylesheet" href="{% static 'footer.css' %}">
+    <link rel="stylesheet" href="{% static 'base_style.css' %}">
+    <link rel="stylesheet" href="{% static 'footer.css' %}"/>
+    <link rel="stylesheet" href="{% static 'dropdown.css' %}"/>
+
+    {% block extra_styles %}{% endblock %}
 
 </head>
 
@@ -42,18 +48,31 @@
     </h1>
 
     <nav>
-        <!-- Navigation links use anchor tags -->
-        <!-- href="#sectionID" scrolls to that section -->
-        <a href="#services">Services</a>
-        <a href="memberships/">Memberships</a>
-        <a href="#pricing">Trial</a>
-        <a href="#trainers">Certified Trainers</a>
-        <a href="#Nutrition">Nutrition</a>
 
-        <a href="#contact">More Information</a>
-        <!-- add drop down menu with: amenities, schedule, contact -->
-        <a href="/login">Login</a>
+        <a href="/services">Services</a>
+        <a href="/memberships">Memberships</a>
+        <a href="/pricing">Trial</a>
+        <a href="/trainers">Certified Trainers</a>
+        <a href="/nutrition/">Nutrition</a>
+        <a>
+            <div class="dropdown">
+              <button class="dropbtn">More Information
+                  <span class="material-icons" style="font-size:20px;">arrow_drop_down
+                  </span>
+              </button>
+              <div class="dropdown-content">
+                <a href="/amenities">Amenities</a>
+                <a href="/schedule">Schedule</a>
+                <a href="/contact_us">Contact Us</a>
+                <a href="/about">About</a>
+              </div>
+            </div>
+        </a>
 
+        <a href="/login">
+            <span class="material-icons" style="font-size:50px;">account_circle
+            </span>
+        </a>
     </nav>
 </header>
 
@@ -127,10 +146,6 @@
 </footer>
 
 
-<script>
-    // Dynamically set the current year for the copyright notice
-    document.getElementById('year').textContent = new Date().getFullYear();
-</script>
 
 
 </body>
