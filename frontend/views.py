@@ -2,32 +2,39 @@ from django.shortcuts import render
 
 
 
-#Navbar
 def home(request):
     return render(request, 'frontend/home.html')
 
 
+# Navbar
+def services(request):
+    return render(request, 'frontend/navbar/services.html')
+
 def memberships(request):
-    return render(request, 'frontend/membership.html')
+    return render(request, 'frontend/navbar/membership.html')
+
+def trial(request):
+    return render(request, 'frontend/navbar/trial.html')
 
 def trainers(request):
-    return render(request, 'frontend/trainers.html')
+    return render(request, 'frontend/navbar/trainers.html')
 
 def nutrition(request):
-    return render(request, 'frontend/nutrition.html')
+    return render(request, 'frontend/navbar/nutrition.html')
 
 
-#Dropdown menu
+# Dropdown menu
 def amenities(request):
-    return render(request, 'frontend/amenities.html')
+    return render(request, 'frontend/dropdown/amenities.html')
 
 def schedule(request):
-    return render(request, 'frontend/schedule.html')
+    return render(request, 'frontend/dropdown/schedule.html')
 
 def contact(request):
-    return render(request, 'frontend/contact.html')
+    return render(request, 'frontend/dropdown/contact.html')
+
 def about(request):
-    return render(request, 'frontend/about.html')
+    return render(request, 'frontend/dropdown/about.html')
 
 
 
@@ -39,7 +46,7 @@ def gym(request):
 
 
 
-#Registration
+# Authentication
 def login(request):
     return render(request, 'authentication/login.html')
 

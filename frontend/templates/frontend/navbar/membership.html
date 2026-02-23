@@ -1,0 +1,105 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %} Services Page {% endblock %}
+
+{% block extra_styles %}
+
+    <link rel="stylesheet" href="{% static 'membership.css' %}"/>
+
+{% endblock %}
+
+{% block content %}
+
+<section class="membership-hero">
+    <h2>Choose Your Membership</h2>
+    <p>Flexible plans designed to fit your goals and lifestyle.</p>
+</section>
+
+<!-- ================= PRICING CARDS ================= -->
+<section class="pricing-section">
+
+    <div class="pricing-card">
+        <h3>Basic</h3>
+        <div class="price">$29<span>/month</span></div>
+        <ul>
+            <li>Gym Access</li>
+            <li>Locker Room Access</li>
+            <li>1 Free Class / Month</li>
+        </ul>
+        <button class="btn">Join Basic</button>
+    </div>
+
+    <div class="pricing-card popular">
+        <div class="badge">Most Popular</div>
+        <h3>Standard</h3>
+        <div class="price">$49<span>/month</span></div>
+        <ul>
+            <li>Unlimited Gym Access</li>
+            <li>Unlimited Classes</li>
+            <li>Basic Nutrition Plan</li>
+            <li>Progress Tracking</li>
+        </ul>
+        <button class="btn">Join Standard</button>
+    </div>
+
+    <div class="pricing-card">
+        <h3>Premium</h3>
+        <div class="price">$79<span>/month</span></div>
+        <ul>
+            <li>All Standard Features</li>
+            <li>Personal Trainer (2x/month)</li>
+            <li>Custom Nutrition Plan</li>
+            <li>Priority Booking</li>
+        </ul>
+        <button class="btn">Join Premium</button>
+    </div>
+
+</section>
+
+<!-- ================= FEATURE COMPARISON ================= -->
+<section class="comparison-section">
+    <h2 class="section-title">Membership Comparison</h2>
+
+    <table>
+        <tr>
+            <th>Features</th>
+            <th>Basic</th>
+            <th>Standard</th>
+            <th>Premium</th>
+        </tr>
+        <tr>
+            <td>Gym Access</td>
+            <td>✔</td>
+            <td>✔</td>
+            <td>✔</td>
+        </tr>
+        <tr>
+            <td>Group Classes</td>
+            <td>1 / month</td>
+            <td>Unlimited</td>
+            <td>Unlimited</td>
+        </tr>
+        <tr>
+            <td>Personal Trainer</td>
+            <td>✖</td>
+            <td>✖</td>
+            <td>2x/month</td>
+        </tr>
+        <tr>
+            <td>Nutrition Plan</td>
+            <td>✖</td>
+            <td>Basic</td>
+            <td>Custom</td>
+        </tr>
+    </table>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="membership-cta">
+    <h2>Start Your Fitness Journey Today</h2>
+    <button class="btn">Get Started</button>
+</section>
+
+
+{% endblock %}

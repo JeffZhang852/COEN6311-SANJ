@@ -14,13 +14,10 @@
       <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/original-style.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/base_style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/authentication/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/authentication/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/membership.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/navbar/membership.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/nutrition.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/navbar/nutrition.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/__init__.py" beforeDir="false" />
@@ -73,30 +70,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.COEN6311.executor": "Run",
-    "HTTP Request.All in test.executor": "Run",
-    "HTTP Request.test | #1.executor": "Run",
-    "HTTP Request.test | #2.executor": "Run",
-    "HTTP Request.test | #3.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "starting__frontend",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend",
-    "list.type.of.created.stylesheet": "CSS",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Django Server.COEN6311.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.All in test.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.test | #1.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.test | #2.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.test | #3.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;starting__frontend&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
@@ -106,11 +103,11 @@
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\dropdown" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\navbar" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\API\templates" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\static" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
     </key>
   </component>
   <component name="RunDashboard">
