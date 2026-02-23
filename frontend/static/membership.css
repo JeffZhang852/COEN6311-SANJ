@@ -1,0 +1,119 @@
+/* ================= HERO ================= */
+.membership-hero {
+    height: 50vh;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                url('https://images.unsplash.com/photo-1599058917212-d750089bc07e') center/cover no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.membership-hero h2 {
+    font-size: 42px;
+}
+
+.membership-hero p {
+    margin-top: 15px;
+}
+
+/* ================= PRICING SECTION ================= */
+.pricing-section {
+    padding: 80px 8%;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Individual pricing card */
+.pricing-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    width: 320px;
+    border-radius: 15px;
+    text-align: center;
+    transition: 0.4s ease;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Hover glow */
+.pricing-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 15px 40px rgba(255,60,0,0.25);
+    border: 1px solid rgba(255,60,0,0.4);
+}
+
+/* Highlight popular plan */
+.pricing-card.popular {
+    border: 1px solid #ff3c00;
+    transform: scale(1.05);
+}
+
+/* Popular badge */
+.badge {
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    background: #ff3c00;
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 20px;
+}
+
+/* Price styling */
+.price {
+    font-size: 40px;
+    margin: 20px 0;
+}
+
+.price span {
+    font-size: 16px;
+    color: #aaa;
+}
+
+/* Features list */
+.pricing-card ul {
+    list-style: none;
+    margin-bottom: 30px;
+}
+
+.pricing-card ul li {
+    margin-bottom: 12px;
+}
+
+/* ================= COMPARISON TABLE ================= */
+.comparison-section {
+    padding: 80px 8%;
+    text-align: center;
+}
+
+.comparison-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 40px;
+}
+
+.comparison-section th,
+.comparison-section td {
+    padding: 15px;
+    border: 1px solid #222;
+}
+
+.comparison-section th {
+    background: #ff3c00;
+}
+
+.comparison-section td {
+    background: #111;
+}
+
+/* ================= CTA ================= */
+.membership-cta {
+    padding: 80px 8%;
+    text-align: center;
+    background: #000;
+}

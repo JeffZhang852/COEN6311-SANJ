@@ -1,0 +1,129 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %} Services Page {% endblock %}
+
+{% block extra_styles %}
+
+    <link rel="stylesheet" href="{% static 'services.css' %}"/>
+
+{% endblock %}
+
+{% block content %}
+    <h1>Services Page</h1>
+
+
+    <!-- ================= HERO SECTION ================= -->
+<section class="services-hero">
+    <h2>Our Training Services</h2>
+    <p>Designed to help you reach peak performance.</p>
+</section>
+
+<!-- ================= SERVICES GRID ================= -->
+<section class="services-grid">
+
+    <div class="service-card">
+        <h3>Personal Training</h3>
+        <p>Customized workout plans and 1-on-1 coaching.</p>
+    </div>
+
+    <div class="service-card">
+        <h3>Group Fitness Classes</h3>
+        <p>High-energy sessions including HIIT, yoga, and strength.</p>
+    </div>
+
+    <div class="service-card">
+        <h3>Nutrition Coaching</h3>
+        <p>Meal plans tailored to your fitness goals.</p>
+    </div>
+
+    <div class="service-card">
+        <h3>Strength Programs</h3>
+        <p>Build muscle and improve endurance effectively.</p>
+    </div>
+
+    <div class="service-card">
+        <h3>Online Coaching</h3>
+        <p>Train remotely with expert guidance and tracking.</p>
+    </div>
+
+    <div class="service-card">
+        <h3>Rehabilitation Training</h3>
+        <p>Safe recovery programs supervised by professionals.</p>
+    </div>
+
+</section>
+
+<!-- ================= FEATURE SECTION ================= -->
+<section class="featured-program">
+    <div class="featured-content">
+        <h2>Intelligent Transformation Program</h2>
+        <p>
+            Add description about AI, nutrition, and personal training here.
+        </p>
+        <button class="btn">Learn More</button>
+    </div>
+</section>
+
+<!-- ================= COMPARISON TABLE ================= -->
+<section class="services-table">
+    <h2 class="section-title">Service Comparison</h2>
+
+    <table>
+        <tr>
+            <th>Service</th>
+            <th>Beginner</th>
+            <th>Intermediate</th>
+            <th>Advanced</th>
+        </tr>
+        <tr>
+            <td>Personal Training</td>
+            <td>✔</td>
+            <td>✔</td>
+            <td>✔</td>
+        </tr>
+        <tr>
+            <td>Nutrition Plan</td>
+            <td>✔</td>
+            <td>✔</td>
+            <td>✔</td>
+        </tr>
+        <tr>
+            <td>Performance Tracking</td>
+            <td>✖</td>
+            <td>✔</td>
+            <td>✔</td>
+        </tr>
+    </table>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="services-cta">
+    <h2>Ready to Get Started?</h2>
+    <button class="btn">Join Today</button>
+</section>
+
+<script>
+    /* ================= SCROLL REVEAL ANIMATION ================= */
+
+    const cards = document.querySelectorAll('.service-card');
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            }
+        });
+    }, {
+        threshold: 0.2
+    });
+
+    cards.forEach(card => {
+        observer.observe(card);
+    });
+</script>
+
+
+{% endblock %}
+
+

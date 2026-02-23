@@ -1,0 +1,40 @@
+
+/* ================= dropdown DESIGN ================= */
+.dropdown {
+  position: relative;
+  display: inline-block;             /* Makes parent full width */
+}
+
+.dropbtn {
+  width: 100%;              /* Button spans full width */
+  padding: 1px;
+  border: none;
+  background-color: rgba(0,0,0,0.8);
+  color: white;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;              /* KEY: spans parent width */
+  background-color: rgba(50,50,50,0.8);
+
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 1px;
+  text-decoration: none;
+  color: white;
+}
+
+.dropdown-content a:hover {
+  background-color: rgba(50,50,50,1);
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}

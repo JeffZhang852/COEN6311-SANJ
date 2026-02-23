@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- Declares this document as HTML5 -->
+
+<html lang="en">
+<!-- Root element of the webpage. lang="en" helps accessibility & SEO -->
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Defines character encoding (supports special characters properly) -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Makes the website responsive on mobile devices -->
+
+    <title>CUFitness</title>
+    <!-- Title that appears in the browser tab -->
+
+    <!-- Google Font Import (Poppins font family) -->
+    <!-- This loads the font from Google's servers -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS File -->
+    <!-- This connects the HTML file to css/style.css -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+<!-- Everything visible on the website goes inside the body -->
+
+<!-- ================= HEADER ================= -->
+<!-- Contains logo and navigation links -->
+<header>
+    <h1>CUFitness</h1>
+    <!-- Website logo / brand name -->
+
+    <nav>
+        <!-- Navigation links use anchor tags -->
+        <!-- href="#sectionID" scrolls to that section -->
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#trainers">Trainers</a>
+        <a href="#pricing">Membership</a>
+        <a href="#contact">Contact</a>
+        <a href="/login">Login</a>
+    </nav>
+</header>
+
+<!-- ================= HERO SECTION ================= -->
+<!-- This is the main banner users see first -->
+
+<!-- HOME PAGE -->
+<section class="hero" id="home">
+    <!-- class="hero" connects to CSS styling -->
+    <!-- id="home" allows navigation scrolling -->
+
+    <div>
+        <h2>Transform Your Body & Mind</h2>
+        <p>
+            Join CUFitness today and unlock your full potential
+            with professional trainers and world-class equipment.
+        </p>
+
+        <!-- Call-to-action button -->
+        <button class="btn">Join Now</button>
+    </div>
+</section>
+
+<!-- ================= SERVICES SECTION ================= -->
+<section id="services">
+    <h2 class="section-title">Our Services</h2>
+
+    <!-- cards container uses Flexbox (defined in CSS) -->
+    <div class="cards">
+
+        <!-- Individual service card -->
+        <div class="card">
+            <h3>Personal Training</h3>
+            <p>One-on-one coaching tailored to your fitness goals.</p>
+        </div>
+
+        <div class="card">
+            <h3>Group Classes</h3>
+            <p>High-energy classes including HIIT, yoga, and strength training.</p>
+        </div>
+
+        <div class="card">
+            <h3>Nutrition Plans</h3>
+            <p>Custom diet plans designed to maximize your results.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= TRAINERS SECTION ================= -->
+<section id="trainers">
+    <h2 class="section-title">Meet Our Trainers</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>John Carter</h3>
+            <p>Strength & Conditioning Specialist</p>
+        </div>
+
+        <div class="card">
+            <h3>Sarah Lee</h3>
+            <p>Certified Yoga Instructor</p>
+        </div>
+
+        <div class="card">
+            <h3>Mike Johnson</h3>
+            <p>HIIT & Cardio Expert</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= PRICING SECTION ================= -->
+<section class="pricing" id="pricing">
+    <!-- class="pricing" gives it special background color -->
+
+    <h2 class="section-title">Membership Plans</h2>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Basic</h3>
+            <p>$29/month</p>
+        </div>
+
+        <div class="card">
+            <h3>Standard</h3>
+            <p>$49/month</p>
+        </div>
+
+        <div class="card">
+            <h3>Premium</h3>
+            <p>$79/month</p>
+        </div>
+    </div>
+</section>
+
+<!-- ================= CONTACT SECTION ================= -->
+<section id="contact">
+    <h2 class="section-title">Contact Us</h2>
+    <p>Email: info@CUFitness.com</p>
+    <p>Phone: (123) 456-7890</p>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+    <!-- Copyright information -->
+    © 2026 CUFitness. All Rights Reserved.
+</footer>
+
+</body>
+</html>
