@@ -1,39 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/COEN6311.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/COEN6311.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/COEN6311/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/COEN6311/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/auth.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/base_style.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/base_style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/dropdown.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/dropdown.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/authentication/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/original-login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/authentication/signed_out.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/signed_out.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/authentication/signup.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/signup.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/asgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/settings.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/wsgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../manage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,23 +94,7 @@
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\API\templates" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="configurationStatuses">
-      <map>
-        <entry key="HttpClient.HttpRequestRunConfigurationType">
-          <value>
-            <map>
-              <entry key="All in test" value="STOPPED" />
-              <entry key="test | #1" value="STOPPED" />
-              <entry key="test | #2" value="STOPPED" />
-              <entry key="test | #3" value="STOPPED" />
-            </map>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="RunManager" selected="Django server.COEN6311">
+  <component name="RunManager">
     <configuration name="All in test" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/test.rest">
       <method v="2" />
     </configuration>
@@ -175,20 +134,6 @@
       <option name="customRunCommand" value="" />
       <method v="2" />
     </configuration>
-    <list>
-      <item itemvalue="HTTP Request.All in test" />
-      <item itemvalue="HTTP Request.test | #1" />
-      <item itemvalue="HTTP Request.test | #2" />
-      <item itemvalue="HTTP Request.test | #3" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="HTTP Request.test | #3" />
-        <item itemvalue="HTTP Request.test | #2" />
-        <item itemvalue="HTTP Request.test | #1" />
-        <item itemvalue="HTTP Request.All in test" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
