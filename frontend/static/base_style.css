@@ -17,7 +17,7 @@ body {
 /* ================= HEADER ================= */
 /* Uses Flexbox to position logo and navigation */
 header {
-	background: rgba(10, 10, 10, 0.8);
+	background: rgba(10, 10, 10, 1);
 	padding: 20px 2%;
 	display: flex;
 	/* Horizontal layout */
@@ -32,7 +32,8 @@ header h1 {
 	a {
 		text-decoration: none;
 		/* remove the underline hyperlink formatting */
-		color: #e1933a;
+		 /* concordia color converted to hsl format and brightness increases from ~35 to 45% */
+		color: hsl(349, 61.1%, 45%);
 	}
 }
 

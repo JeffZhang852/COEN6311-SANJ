@@ -39,3 +39,25 @@ class SignUpForm(UserCreationForm):
         self.fields['password2'].label = ''
         self.fields[
             'password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
+
+
+####################################################
+# new user model
+
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
+from .models import CustomUser
+
+
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta:
+        model = CustomUser
+        fields = ("email", "first_name", "last_name")
+
+
+class CustomUserChangeForm(UserChangeForm):
+
+    class Meta:
+        model = CustomUser
+        fields = ("email",)

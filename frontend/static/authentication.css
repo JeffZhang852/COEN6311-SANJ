@@ -1,0 +1,55 @@
+
+/* Full viewport height wrapper */
+.page-center {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;  /* horizontal */
+    align-items: center;      /* vertical */
+    	background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+		url('https://images.unsplash.com/photo-1558611848-73f7eb4001a1') center/cover no-repeat;
+}
+
+/* Card */
+.register-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+    background: rgba(145,35,56,0.9);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /*concordia logo color */
+    border-radius: 8px;
+    text-align: left;
+}
+
+.register-container form p {
+    text-align: left;
+    margin-bottom: 18px;
+}
+
+.register-container input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.register-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+
+    background: rgba(167,150,103,1);
+
+    border: 2px solid #ccc;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.register-container button:hover {
+    border: 2px solid #ccc;
+    background: rgba(145,35,56,1);
+}
+
+</style>

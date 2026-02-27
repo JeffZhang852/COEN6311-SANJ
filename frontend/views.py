@@ -9,6 +9,13 @@ from django.contrib import messages
 #django handles the backend database
 from .forms import SignUpForm
 
+# new user model
+from django.urls import reverse_lazy
+from django.views import generic
+from .forms import CustomUserCreationForm
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 
 def home(request):
@@ -46,16 +53,17 @@ def about(request):
     return render(request, 'frontend/dropdown/about.html')
 
 
-# new User Authentication
+# User Authentication
 def login_user(request):
     if request.method == 'POST':
-        #"email" is the "name" in the field
-        username = request.POST['username'] # change these to whatever fields put in the form
+        email = request.POST['email'] # change these to whatever fields put in the form
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, 'You have been logged in')
+            # display the first_name of the logged-in user
+            messages.success(request, 'You have been logged in as ' + User.objects.get(email=email).first_name)
+
             return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
         else:
             messages.success(request, 'Error')
@@ -63,14 +71,14 @@ def login_user(request):
     else:
         return render(request, 'frontend/authentication_templates/login.html') # render the HTML template on first visit
 
-
 def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out')
     return redirect('home')
 
 
-#linked to forms.py
+#   --------- OLD ---------
+# linked to forms.py
 def register_user(request):
     form = SignUpForm()
     if request.method == 'POST':
@@ -91,16 +99,22 @@ def register_user(request):
         return render(request, 'frontend/authentication_templates/register.html', {'form': form})
 
 
+# ------------------------------------------------------------------
+# user profile
+def user_profile(request):
+    return render(request, 'frontend/user_profile/user_profile.html')
 
+# linked to forms.py
+def update_user(request):
+    pass
 
-# OLD Authentication
-    #change name to login_user when moving it to auth/views.py
-#def login1(request):
-   # return render(request, 'frontend/authentication_templates/login.html')
-
-#def signed_out(request):
-   # return render(request, 'frontend/authentication_templates/signed_out.html')
-
-#def signup(request):
-    #return render(request, 'frontend/authentication_templates/signup.html')
-
+# ------------------------------------------------------------------
+#########
+# new user model
+#########
+# add auto login after successful registration
+# add ability to change role on sign up
+class Register(generic.CreateView):
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
+    template_name = "frontend/authentication_templates/register.html"
