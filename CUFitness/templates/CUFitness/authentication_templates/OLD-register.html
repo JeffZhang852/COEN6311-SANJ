@@ -1,0 +1,49 @@
+{% extends 'CUFitness/base.html' %}
+{% load static %}
+
+{% block title %} CUFitness Register{% endblock %}
+
+{% block extra_styles %}
+
+{% endblock %}
+
+
+{% block content %}
+
+{%if user.is_authenticated %}
+<p>You are logged in as {{user.username}}</p>
+
+{% else %}
+
+<p>You are not logged in</p>
+
+
+<form method="POST" action="{% url 'register' %}"> <!-- "url 'login'" because CUFitness/urls.py  we made the url as login -->
+
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Sign Up</button>
+
+</form>
+
+
+{% endif %}
+
+ <!-- display the messages that we have -->
+ <!-- need to fix this alert message its not working -->
+{% if messages %}
+
+    {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{message}}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+
+    {% endfor %}
+
+{% endif %}
+
+
+
+{% endblock %}

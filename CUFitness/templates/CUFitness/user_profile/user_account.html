@@ -1,0 +1,20 @@
+{% extends 'CUFitness/base.html' %}
+{% block title %} Profile Page {% endblock %}
+{% load static %}
+{% block extra_styles %}
+
+    <link rel="stylesheet" href="{% static 'user_profile.css' %}"/>
+
+{% endblock %}
+
+
+{% block content %}
+{% if user.is_authenticated %}
+  <p>Work in progress</p>
+
+{% else %}
+    <p>Please log in first</p>
+
+{% endif %}
+
+{% endblock %}

@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/OLD-register.html" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/COEN6311.iml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/misc.xml" afterDir="false" />
@@ -15,32 +14,49 @@
       <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/COEN6311/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/COEN6311/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/COEN6311/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/base_style.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/base_style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/static/dropdown.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/dropdown.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/original-login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/OLD-login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/register.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/signed_out.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/signup.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/about.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/about.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/amenities.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/amenities.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/contact.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/contact.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/schedule.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/nutrition.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/navbar/nutrition.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/trainers.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/navbar/trainers.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/trial.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/templates/frontend/navbar/trial.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/original-base.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/managers.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/managers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/migrations/0002_customuser_first_name_customuser_last_name.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/migrations/0002_customuser_first_name_customuser_last_name.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/authentication.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/authentication.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/base_style.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/base_style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/dropdown.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/dropdown.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/footer.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/footer.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/membership.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/membership.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/services.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/services.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/user_profile.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/user_profile.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/OLD-login.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/authentication_templates/OLD-login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/OLD-register.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/authentication_templates/OLD-register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/authentication_templates/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/authentication_templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/authentication_templates/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/about.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/dropdown/about.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/amenities.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/dropdown/amenities.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/contact.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/dropdown/contact.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/dropdown/schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/dropdown/schedule.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/gym.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/gym.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/membership.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/membership.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/nutrition.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/nutrition.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/services.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/services.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/trainers.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/trainers.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/navbar/trial.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/trial.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/user_profile/update_user.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/user_profile/update_user.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/templates/frontend/user_profile/user_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/user_profile/user_profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.rest" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/asgi.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../COEN6311/settings.py" beforeDir="false" />
@@ -66,6 +82,10 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <branch-grouping>
+      <option value="directory" />
+      <option value="repository" />
+    </branch-grouping>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
@@ -92,32 +112,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.COEN6311.executor": "Run",
-    "HTTP Request.All in test.executor": "Run",
-    "HTTP Request.test | #1.executor": "Run",
-    "HTTP Request.test | #2.executor": "Run",
-    "HTTP Request.test | #3.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.manage.executor": "Run",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "Authentication__Backend",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ",
-    "list.type.of.created.stylesheet": "CSS",
-    "settings.editor.selected.configurable": "advanced.settings",
-    "two.files.diff.last.used.file": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend/authentication_templates/signup.html",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Django Server.COEN6311.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.All in test.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.test | #1.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.test | #2.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.test | #3.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.manage.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Authentication__Backend&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;,
+    &quot;two.files.diff.last.used.file&quot;: &quot;C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend/authentication_templates/signup.html&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
@@ -230,6 +250,21 @@
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="User">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="*" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">

@@ -37,13 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "frontend",
+    "CUFitness",
     "rest_framework",
 ]
 
 #####
 # for user model
-AUTH_USER_MODEL = "frontend.CustomUser"
+AUTH_USER_MODEL = "CUFitness.CustomUser"
 
 #####
 

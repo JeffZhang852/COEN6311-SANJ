@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- Declares this document as HTML5 -->
+
+<html lang="en">
+<!-- Root element of the webpage. lang="en" helps accessibility & SEO -->
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Defines character encoding (supports special characters properly) -->
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Makes the website dynamic on various devices and screen sizes -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Title shows in browser tab -->
+    <title> {% block title %} CUFitness {% endblock %}</title>
+
+    <!-- Google Font Import (Poppins font family) -->
+    <!-- This loads the font from Google's servers -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- ICONS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <!-- External CSS File -->
+    <!-- This connects the HTML file to static/style.css -->
+    <link rel="stylesheet" href="{% static 'base_style.css' %}">
+    <link rel="stylesheet" href="{% static 'footer.css' %}" />
+    <link rel="stylesheet" href="{% static 'dropdown.css' %}" />
+
+    {% block extra_styles %}{% endblock %}
+
+</head>
+
+<body>
+    <!-- Everything visible on the website goes inside the body -->
+<!-- display alert messages if any -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ================= HEADER ================= -->
+    <!-- Contains logo and navigation links -->
+<header>
+    <h1>
+        <a href="/">CUFitness Logo</a>
+    </h1>
+
+    <nav>
+
+        <a href="/services">Services</a>
+        <a href="/memberships">Memberships</a>
+        <a href="/trial">Trial</a>
+        <a href="/trainers">Certified Trainers</a>
+        <a href="/nutrition">Nutrition</a>
+
+        <!-- More Info Dropdown -->
+        <div class="dropdown">
+            <button class="dropbtn">
+                More Information
+                <span class="material-icons">arrow_drop_down</span>
+            </button>
+
+            <div class="dropdown-content">
+                <a href="/amenities">Amenities</a>
+                <a href="/schedule">Schedule</a>
+                <a href="/contact">Contact Us</a>
+                <a href="/about">About</a>
+            </div>
+        </div>
+
+        <!-- Account Dropdown -->
+        <div class="dropdown">
+            <button class="dropbtn">
+                <span class="material-icons account-icon" >account_circle</span>
+                <span class="material-icons">arrow_drop_down</span>
+            </button>
+
+            <div class="dropdown-content account">
+                {% if user.is_authenticated %}
+                    <a href="/user_profile">Profile
+                        <span class="material-icons">person</span>
+                    </a>
+
+                    <a href="/user_account">Account
+                        <span class="material-icons">manage_accounts</span>
+                    </a>
+
+                    <a href="/logout">Log Out
+                        <span class="material-icons">logout</span>
+                    </a>
+                {% else %}
+                    <a href="/login">Login
+                        <span class="material-icons">login</span>
+                    </a>
+                    <a href="/register">Create Account
+                        <span class="material-icons">person_add</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </nav>
+</header>
+
+
+    {% block content %}
+
+    {% endblock %}
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="main-footer">
+
+        <div class="footer-container">
+
+            <!-- Column 1: Company Logo & About -->
+            <div class="footer-col">
+                <h2 class="footer-logo">CUFitness</h2>
+                <p>
+                    Empowering individuals to achieve their fitness goals through
+                    professional training, modern equipment, and a supportive community.
+                </p>
+            </div>
+
+            <!-- Column 2: Quick Links -->
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/memberships">Memberships</a></li>
+                    <li><a href="/trial">Trial</a></li>
+                    <li><a href="/trainers">Trainers</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Services -->
+            <div class="footer-col">
+                <h3>Services</h3>
+                <ul>
+                    <li><a href="/trainers">Personal Training</a></li>
+                    <li><a href="#">Group Classes</a></li>
+                    <li><a href="/nutrition">Nutrition Plans</a></li>
+                    <li><a href="#">Strength Programs</a></li>
+                    <li><a href="#">Online Coaching</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Contact & Social -->
+            <div class="footer-col">
+                <h3>Contact Us</h3>
+                <p>Email: info@CUFitness.com</p>
+                <p>Phone: (123) 456-7890</p>
+                <p>Location: 123 Fitness St, Your City</p>
+
+                <div class="social-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Twitter</a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Copyright Bar -->
+        <div class="footer-bottom">
+            © 2026 CUFitness. All Rights Reserved.
+        </div>
+
+    </footer>
+
+
+
+
+</body>
+
+</html>

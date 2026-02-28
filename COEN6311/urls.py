@@ -23,7 +23,7 @@ from django.urls import include
 # it starts here and depending on the url it gets forwarded to different apps
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include ("frontend.urls")),
+    path('', include ("CUFitness.urls")),
 
     #path('auth/', include ("authentication.urls"))
 ]
