@@ -4,7 +4,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-
+# --------------- used to test custom user class ---------------
 class UsersManagersTests(TestCase):
 
     def test_create_user(self):

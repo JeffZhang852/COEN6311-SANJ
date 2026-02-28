@@ -27,15 +27,12 @@ def home(request):
     return render(request, 'CUFitness/home.html')
 
 
-# Navbar
+# Navbar Pages
 def services(request):
     return render(request, 'CUFitness/navbar/services.html')
 
 def memberships(request):
     return render(request, 'CUFitness/navbar/membership.html')
-
-def trial(request):
-    return render(request, 'CUFitness/navbar/trial.html')
 
 def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
@@ -44,7 +41,7 @@ def nutrition(request):
     return render(request, 'CUFitness/navbar/nutrition.html')
 
 
-# Dropdown menu
+# Dropdown Menu Pages
 def amenities(request):
     return render(request, 'CUFitness/dropdown/amenities.html')
 
@@ -57,6 +54,10 @@ def contact(request):
 def about(request):
     return render(request, 'CUFitness/dropdown/about.html')
 
+
+# Footer Pages
+def faq(request):
+    return render(request, 'CUFitness/faq.html')
 
 # User Authentication
 def login_user(request):

@@ -10,7 +10,6 @@ urlpatterns = [
 # Navbar
     path ("services/", views.services, name='services'),
     path ("memberships/", views.memberships, name='memberships'),
-    path ("trial/", views.trial, name='trial'),
     path("trainers/", views.trainers, name='trainers'),
     path ("nutrition/", views.nutrition, name='nutrition'),
     path ("amenities/", views.amenities, name='amenities'),
