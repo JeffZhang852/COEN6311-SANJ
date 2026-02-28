@@ -1,0 +1,93 @@
+.profile-container {
+    padding: 50px 8%;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    background: rgba(255,255,255,0.05);
+    padding: 30px;
+    border-radius: 15px;
+}
+
+.profile-header img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid #ff3c00;
+}
+
+.profile-info h1 {
+    margin: 0;
+}
+
+.badge {
+    display: inline-block;
+    background: #ff3c00;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin-top: 10px;
+}
+
+.profile-info button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: none;
+    background: #ff3c00;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.profile-info button:hover {
+    background: #ff5e2e;
+}
+
+/* ================= STATS ================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.05);
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    transition: 0.4s;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(255,60,0,0.3);
+}
+
+/* ================= SESSIONS ================= */
+
+.sessions {
+    margin-top: 50px;
+}
+
+.sessions h2 {
+    margin-bottom: 20px;
+}
+
+.session-card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    transition: 0.3s;
+}
+
+.session-card:hover {
+    background: rgba(255,60,0,0.1);
+}

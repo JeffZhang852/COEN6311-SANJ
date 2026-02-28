@@ -1,0 +1,44 @@
+{% extends 'CUFitness/base.html' %}
+{% load static %}
+
+{% block title %} CUFitness Log in{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'authentication.css' %}">
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="page-center">
+    <div class="register-container">
+
+        {% if user.is_authenticated %}
+            <p>You are already logged in }</p>
+        {% else %}
+            <h2>Welcome Back</h2>
+
+            <form method="POST" action="{% url 'login' %}"> <!-- "url 'login' because CUFitness/urls.py  we made the url as login -->
+
+                {% csrf_token %} <!-- cross-site-request-forgery so hackers can't hijack the form -->
+
+                <div class="mb-3">
+
+                    <input type="email" class="form-control" name="email" placeholder="Enter email" required>
+
+                 </div>
+
+              <div class="mb-3">
+                <input type="password" class="form-control" name="password" placeholder="Enter Password" required>
+
+              </div>
+
+              <button type="submit" class="btn btn-primary">Log In</button>
+            </form>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

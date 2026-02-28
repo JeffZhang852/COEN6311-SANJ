@@ -1,0 +1,71 @@
+{% extends 'CUFitness/base.html' %}
+{% block title %} Profile Page {% endblock %}
+{% load static %}
+{% block extra_styles %}
+
+    <link rel="stylesheet" href="{% static 'user_profile.css' %}"/>
+
+{% endblock %}
+
+
+{% block content %}
+{% if user.is_authenticated %}
+<section class="profile-container">
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <img src="https://via.placeholder.com/150" alt="Profile Picture">
+        <div class="profile-info">
+            <h1> {{ user.first_name }} {{ user.email }}</h1>
+            <span class="badge">{{ user.profile.membership_tier }}</span>
+            <p>Member since January 2025</p>
+            <button>Edit Profile</button>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Workouts</h3>
+            <p>142</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Calories Burned</h3>
+            <p>32,450</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Sessions Booked</h3>
+            <p>18</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Active Plan</h3>
+            <p>Gold Tier</p>
+        </div>
+    </div>
+
+    <!-- Upcoming Sessions -->
+    <div class="sessions">
+        <h2>Upcoming Sessions</h2>
+
+        <div class="session-card">
+            <span>Personal Training</span>
+            <span>March 5 - 6:00 PM</span>
+        </div>
+
+        <div class="session-card">
+            <span>HIIT Class</span>
+            <span>March 8 - 5:30 PM</span>
+        </div>
+    </div>
+
+</section>
+
+{% else %}
+    <p>Please log in first</p>
+
+{% endif %}
+
+{% endblock %}
