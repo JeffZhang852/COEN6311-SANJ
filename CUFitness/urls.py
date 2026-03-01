@@ -20,11 +20,8 @@ urlpatterns = [
     path ("contact/", views.contact, name='contact'),
     path ("about/", views.about, name='about'),
 
-# Authentication
-   # path('login/', views.login, name='login'),
-    #path('signup/', views.signup, name='signup'),
-    #path('signed_out/', views.signed_out, name='signed_out'),
-
+#faq
+    path("faq/", views.faq, name='faq'),
 
 # new auth section
     path ("login/", views.login_user, name='login'),

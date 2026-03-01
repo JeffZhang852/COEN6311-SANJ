@@ -55,7 +55,12 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "first_name", "last_name")
+        fields = ("email", "first_name", "last_name", 'membership')
+        # dropdown membership selection
+        widgets = {
+            'membership': forms.Select(attrs={
+                'class': 'styled-select'})
+        }
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -63,3 +68,5 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = ("email",)
+
+####################################################

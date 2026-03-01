@@ -1,0 +1,120 @@
+{% extends 'CUFitness/base.html' %}
+{% load static %}
+{% block title %} sdfsdfsdf {% endblock %}
+
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'faq.css' %}"/>
+{% endblock %}
+
+
+
+{% block content %}
+    <div class="faq-container">
+
+      <h1>Frequently Asked Questions (FAQs)</h1>
+
+      <div class="faq-item">
+          <button class="faq-question">
+              Who is eligible to use the University Gym?
+              <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+              <ul>
+                  <li>Currently-enrolled students (full-time and part-time)</li>
+                  <li>Faculty and staff members</li>
+                  <li>Alumni with valid alumni association membership</li>
+                  <li>Registered student organization members during sponsored events</li>
+                  <li>Spouses/dependents of faculty/staff</li>
+              </ul>
+          </div>
+      </div>
+
+      <div class="faq-item">
+          <button class="faq-question">
+              Are you open during spring break/winter break?
+              <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            Yes, but with reduced hours:
+              <ul>
+                  <li>Winter Break: 10:00 AM - 6:00 PM (closed university holidays)</li>
+                  <li>Spring Break: 10:00 AM - 8:00 PM</li>
+                  <li>Summer Sessions: 7:00 AM - 8:00 PM weekdays, 10:00 AM - 4:00 PM weekends</li>
+              </ul>
+          </div>
+      </div>
+
+      <div class="faq-item">
+          <button class="faq-question">
+              How do I get my gym membership?
+              <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+              <ul>
+                  <li><strong>Students:</strong> Access included in student activity fees.</li>
+                  <li><strong>Faculty/Staff:</strong> Purchase semester or annual memberships.</li>
+                  <li><strong>Alumni:</strong> Available via Alumni Association or front desk.</li>
+              </ul>
+          </div>
+      </div>
+
+      <div class="faq-item">
+          <button class="faq-question">
+              What are the gym hours?
+              <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+              <ul>
+                  <li>Monday - Thursday: 6:00 AM - 11:00 PM</li>
+                  <li>Friday: 6:00 AM - 9:00 PM</li>
+                  <li>Saturday: 9:00 AM - 6:00 PM</li>
+                  <li>Sunday: 10:00 AM - 10:00 PM</li>
+              </ul>
+          </div>
+      </div>
+
+      <div class="faq-item">
+          <button class="faq-question">
+              What equipment does the gym have?
+              <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+              <ul>
+                  <li>Cardio machines (treadmills, bikes, rowers)</li>
+                  <li>Free weights (2-100 lbs)</li>
+                  <li>Squat racks & power cages</li>
+                  <li>Functional training area (TRX, kettlebells)</li>
+                  <li>Olympic lifting platforms</li>
+              </ul>
+          </div>
+      </div>
+
+      <div class="faq-item">
+          <button class="faq-question">
+              Do you offer personal training?
+              <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+              <ul>
+                  <li>Free 30-min fitness orientation</li>
+                  <li>1-on-1 personal training sessions</li>
+                  <li>Small group training</li>
+                  <li>Sport-specific and specialty packages</li>
+              </ul>
+          </div>
+      </div>
+
+  </div>
+
+  <script>
+  document.querySelectorAll(".faq-question").forEach(button => {
+      button.addEventListener("click", () => {
+
+          const faqItem = button.parentElement;
+
+          faqItem.classList.toggle("active");
+
+      });
+  });
+  </script>
+{% endblock %}
