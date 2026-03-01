@@ -5,6 +5,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
 from django.contrib import messages
 
+#   --------- User Permission ---------
+from django.contrib.auth.decorators import login_required, permission_required
+
+
+
+
 # registration
 #django handles the backend database
 #   --------- OLD -- NOT USED---------
@@ -18,8 +24,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 #   --------- Calendar ---------
-import calendar
-from calendar import HTMLCalendar
 
 
 
@@ -58,6 +62,7 @@ def about(request):
 # Footer Pages
 def faq(request):
     return render(request, 'CUFitness/faq.html')
+
 
 # User Authentication
 def login_user(request):
@@ -107,14 +112,16 @@ def register_user(request):
 '''
 
 # ------------------------------------------------------------------
-# user profile
+#   --------- User ---------
+@login_required(login_url='login')
 def user_profile(request):
     return render(request, 'CUFitness/user_profile/user_profile.html')
 
 # linked to forms.py
+@login_required(login_url='login')
 def update_user(request):
     pass
-
+@login_required(login_url='login')
 def user_account(request):
     return render(request, 'CUFitness/user_profile/user_account.html')
 
