@@ -1,11 +1,101 @@
 {% extends 'CUFitness/base.html' %}
 {% load static %}
-{% block title %} sdfsdfsdf {% endblock %}
+{% block title %} Nutrition & Recipes {% endblock %}
 
 {% block extra_styles %}
-
+    <link rel="stylesheet" href="{% static 'nutrition.css' %}"/>
 {% endblock %}
 
 {% block content %}
-    <h1>nuthadasd</h1>
+
+
+<section class="content-section">
+
+    <h2>Nutrition Articles</h2>
+
+    <div class="card-grid">
+
+        <!-- Free Article -->
+        <a href="#">
+            <div class="card">
+                <span class="badge free">Free</span>
+                <h3>Understanding Macronutrients</h3>
+                <p>Learn how proteins, carbs, and fats fuel your workouts.</p>
+                <button>Read More</button>
+            </div>
+        </a>
+
+        <!-- Locked Article -->
+        <a href="/login">
+            <div class="card locked">
+                <h3>Cutting vs Bulking Guide</h3>
+                <p>Advanced strategies to optimize muscle growth and fat loss.</p>
+                <!-- this is used to add blur overlay only -->
+                <div class="lock-overlay"></div>
+                <span class="badge premium">Log In to View </span>
+                <button>Read More</button>
+            </div>
+        </a>
+        <!-- Free Article -->
+        <a href="#">
+            <div class="card">
+                <span class="badge free">Free</span>
+                <h3>Hydration for Athletes</h3>
+                <p>Why water intake is critical for peak performance.</p>
+                <button>Read More</button>
+            </div>
+        </a>
+    </div>
+
+    </section>
+
+
+    <section class="content-section">
+
+    <h2>Healthy Recipes</h2>
+
+    <div class="card-grid">
+
+        <!-- Free Recipe -->
+        <div class="card">
+            <span class="badge free">Free</span>
+            <h3>High-Protein Breakfast Bowl</h3>
+            <p>Greek yogurt, oats, berries & almonds.</p>
+            <button>View Recipe</button>
+        </div>
+
+
+
+        <!-- Locked Recipe -->
+        <a href="/login">
+            <div class="card locked">
+
+                <h3>Lean Muscle Meal Plan (7 Days)</h3>
+                <p>Structured weekly plan designed for muscle gain.</p>
+                <!-- this is used to add blur overlay only -->
+                <div class="lock-overlay">
+                </div>
+                <span class="badge premium">Log In to View </span>
+                <button>View Recipe</button>
+            </div>
+
+        </a>
+
+
+
+
+        <!-- Free Recipe -->
+        <div class="card">
+            <span class="badge free">Free</span>
+            <h3>Post-Workout Smoothie</h3>
+            <p>Protein-packed recovery drink in 5 minutes.</p>
+            <button>View Recipe</button>
+        </div>
+
+    </div>
+
+    </section>
+
+
+
 {% endblock %}

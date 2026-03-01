@@ -23,6 +23,9 @@ urlpatterns = [
 #faq
     path("faq/", views.faq, name='faq'),
 
+#Privacy Policy
+    path("policy/", views.policy, name='policy'),
+
 # new auth section
     path ("login/", views.login_user, name='login'),
     path ('logout/', views.logout_user, name='logout'),

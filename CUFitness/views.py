@@ -23,8 +23,9 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-#   --------- Calendar ---------
 
+
+#   --------- Calendar ---------
 
 
 def home(request):
@@ -62,6 +63,9 @@ def about(request):
 # Footer Pages
 def faq(request):
     return render(request, 'CUFitness/faq.html')
+
+def policy(request):
+    return render(request, 'CUFitness/policy.html')
 
 
 # User Authentication

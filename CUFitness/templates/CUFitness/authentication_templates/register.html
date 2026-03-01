@@ -15,7 +15,7 @@
     <div class="register-container">
 
         {% if user.is_authenticated %}
-            <p>You are logged in as {{ user.username }}</p>
+            <p>You are logged in as {{ user.first_name }}</p>
         {% else %}
             <h2>Create Your Account</h2>
 
