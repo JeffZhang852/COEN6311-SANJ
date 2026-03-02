@@ -130,6 +130,31 @@ def user_account(request):
     return render(request, 'CUFitness/user_profile/user_account.html')
 
 # ------------------------------------------------------------------
+#   --------- Staff ---------
+
+def staff_login(request):
+    return render(request, 'CUFitness/staff_profile/staff_login.html')
+
+def staff_home(request):
+    return render(request, 'CUFitness/staff_profile/staff_home.html')
+
+def staff_profile(request):
+    return render(request, 'CUFitness/staff_profile/staff_profile.html')
+
+def members(request):
+    return render(request, 'CUFitness/staff_profile/members.html')
+
+def requests(request):
+    return render(request, 'CUFitness/staff_profile/requests.html')
+
+def reports(request):
+    return render(request, 'CUFitness/staff_profile/reports.html')
+
+def private_messages(request):
+    return render(request, 'CUFitness/staff_profile/messages.html')
+
+
+# ------------------------------------------------------------------
 #########
 # new user model
 #########

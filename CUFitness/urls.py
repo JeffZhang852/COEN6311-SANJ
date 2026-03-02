@@ -42,6 +42,17 @@ urlpatterns = [
 # user account
     path('user_account/', views.user_account, name='user_account'),
 
+# Staff
+    path('staff_login/', views.staff_login, name='staff_login'),
+    path('staff_home/', views.staff_home, name='staff_home'),
+    path('staff_profile/', views.staff_profile, name='staff_profile'),
+    path('members/', views.members, name='members'),
+    path('requests/', views.requests, name='requests'),
+    path('reports/', views.reports, name='reports'),
+    path('messages/', views.private_messages, name='messages'),
+
+
+
 
 # -----------   NEW    -----------
 # new user model and registration form

@@ -3,9 +3,104 @@
 {% block title %} Amenities Page {% endblock %}
 
 {% block extra_styles %}
-
+<link rel="stylesheet" href="{% static 'amenities.css' %}"/>
 {% endblock %}
 
 {% block content %}
-    <h1>Amenities Page</h1>
+    <section class="amenity-section">
+    <div class="amenity-content">
+        <div class="text">
+            <h2>Cardio Zone</h2>
+            <p>
+                Equipped with treadmills, stationary bikes, ellipticals, and rowing machines.
+                Perfect for endurance training and warm-ups.
+            </p>
+        </div>
+        <div class="image">
+            <img alt="Cardio Area">
+        </div>
+    </div>
+</section>
+
+<section class="amenity-section">
+    <div class="amenity-content">
+                <div class="text">
+            <h2>Strength Training</h2>
+            <p>
+                Free weights, squat racks, benches, cable machines, and resistance equipment
+                designed for progressive overload and muscle development.
+            </p>
+        </div>
+        <div class="image">
+            <img alt="Strength Training">
+        </div>
+
+    </div>
+</section>
+
+<section class="amenity-section">
+    <div class="amenity-content">
+        <div class="text">
+            <h2>Locker Rooms</h2>
+            <p>
+                Secure lockers, shower facilities, and clean changing areas
+                available for all active members.
+            </p>
+        </div>
+        <div class="image">
+            <img alt="Locker Room">
+        </div>
+    </div>
+</section>
+
+<section class="amenity-section">
+    <div class="amenity-content">
+                <div class="text">
+            <h2>Recovery & Stretch Area</h2>
+            <p>
+                Dedicated space for stretching, foam rolling, mobility work,
+                and post-workout recovery to optimize performance.
+            </p>
+        </div>
+        <div class="image">
+            <img alt="Recovery Area">
+        </div>
+
+    </div>
+</section>
+
+<section class="amenity-section">
+    <div class="amenity-content">
+        <div class="text">
+            <h2>Massage Area</h2>
+            <p>
+                Relax and recover with professional massage space designed
+                to reduce muscle tension, improve mobility, and accelerate recovery
+                after intense training sessions.
+            </p>
+        </div>
+        <div class="image ">
+            <img alt="Massage Area">
+        </div>
+    </div>
+</section>
+
+<section class="amenity-section">
+    <div class="amenity-content">
+        <div class="text">
+            <h2>Tanning Area</h2>
+            <p>
+                Access dedicated tanning facilities to support aesthetic goals
+                and post-workout recovery in a safe and controlled environment.
+            </p>
+        </div>
+        <div class="image">
+            <img alt="Tanning Area">
+        </div>
+
+
+    </div>
+</section>
+
+
 {% endblock %}
