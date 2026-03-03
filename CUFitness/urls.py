@@ -42,6 +42,23 @@ urlpatterns = [
 
 # -----------   NEW    -----------
 # new user model and registration form
-    path("register/", views.Register.as_view(), name="register")
+    path("register/", views.Register.as_view(), name="register"),
+
+
+
+    # TODO Newly added.
+    # Settings user setting. currently only member uses it.
+    path('settings/', views.settings_view, name='settings'),
+
+    # Coach list
+    path('coaches/', views.coach_list_view, name='coach_list'),
+
+    # Coach dashboard
+    path('coach/dashboard/', views.coach_dashboard, name='coach_dashboard'),
+    path('coach/availability/', views.manage_availability, name='manage_availability'),
+    path('coach/availability/delete/<int:slot_id>/', views.delete_availability, name='delete_availability'),
+    path('coach/appointments/', views.manage_appointments, name='manage_appointments'),
 
 ]
+
+

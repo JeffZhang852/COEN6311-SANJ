@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
@@ -85,7 +88,7 @@
     "two.files.diff.last.used.file": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend/authentication_templates/signup.html",
     "vue.rearranger.settings.migration": "true"
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
@@ -181,6 +184,7 @@
       </set>
     </attachedChunks>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="" />
@@ -203,6 +207,15 @@
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="RECENT_FILTERS">
       <map>
         <entry key="User">
@@ -214,15 +227,6 @@
                 </option>
               </RecentGroup>
             </list>
-          </value>
-        </entry>
-      </map>
-    </option>
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
           </value>
         </entry>
       </map>
