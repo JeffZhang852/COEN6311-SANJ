@@ -49,7 +49,7 @@ class SignUpForm(UserCreationForm):
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
-
+from .models import CustomUser
 
 class CustomUserCreationForm(UserCreationForm):
 

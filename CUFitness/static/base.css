@@ -1,0 +1,163 @@
+/* ================= GLOBAL RESET ================= */
+/* Removes default browser spacing and ensures consistent box model */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Poppins', sans-serif;
+}
+
+/* ================= BODY ================= */
+/* Sets overall page background and text color */
+body {
+	background-color: #111;
+	color: #fff;
+}
+
+/* ================= HEADER ================= */
+/* Uses Flexbox to position logo and navigation */
+header {
+	background: rgba(10, 10, 10, 1);
+	padding: 20px 2%;
+	display: flex;
+	/* Horizontal layout */
+	justify-content: space-between;
+	/* Pushes items apart */
+	align-items: center;
+	/* Vertically centers them */
+}
+
+/* Logo styling */
+header h1 {
+	a {
+		text-decoration: none;
+		/* remove the underline hyperlink formatting */
+		 /* concordia color converted to hsl format and brightness increases from ~35 to 50% */
+		color: hsl(349, 61.1%, 50%);
+	}
+}
+
+/* ================= NAVIGATION LINKS ================= */
+nav a {
+	background: rgba(10, 10, 10, 0.8);
+	color: #fff;
+	text-decoration: none;
+	/* Removes underline */
+	margin-left: 25px;
+	font-weight: 500;
+	font-size: 20px;
+	transition: 0.2s;
+	/* Smooth hover effect */
+	display: inline-block;
+	vertical-align: middle;
+
+}
+
+/* Hover effect for navigation links */
+nav a:hover {
+	color: #ff3c00;
+}
+
+/* ================= HERO SECTION ================= */
+/* Large full-screen banner */
+.hero {
+	height: 90vh;
+	/* 90% of viewport height */
+
+	/* Dark gradient overlay + background image */
+	background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+		url('https://images.unsplash.com/photo-1558611848-73f7eb4001a1') center/cover no-repeat;
+
+	display: flex;
+	/* Centers content */
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 0 20px;
+}
+
+/* Hero heading size */
+.hero h2 {
+	font-size: 48px;
+	margin-bottom: 20px;
+}
+
+/* Hero paragraph width control */
+.hero p {
+	max-width: 600px;
+	margin: 0 auto 30px;
+}
+
+/* ================= BUTTON STYLE ================= */
+.btn {
+	background: rgba(145,35,56,1);
+	color: #fff;
+	padding: 12px 25px;
+	border: none;
+	cursor: pointer;
+	font-weight: 600;
+	transition: 0.3s;
+}
+
+/* Button hover effect */
+.btn:hover {
+	background-color: rgba(157,37,60,1);
+	color: white;
+}
+
+/* ================= SECTION LAYOUT ================= */
+/* Applies spacing to every section */
+section {
+	padding: 80px 8%;
+	text-align: center;
+	color: #fff;
+}
+
+/* Section titles */
+.section-title {
+	font-size: 36px;
+	margin-bottom: 50px;
+	color: #fff;
+}
+
+/* ================= CARD SYSTEM ================= */
+/* Flexbox container for cards */
+.cards {
+	display: flex;
+	gap: 30px;
+	/* Space between cards */
+	justify-content: center;
+	flex-wrap: wrap;
+	/* Makes it responsive */
+
+}
+
+/* Individual card styling */
+.card {
+	background: rgba(145,35,56,1);
+	color: #fff;
+	padding: 30px;
+	width: 300px;
+	border-radius: 10px;
+	transition: 0.3s;
+}
+
+/* Lift effect on hover */
+.card:hover {
+	transform: translateY(-10px);
+	background-color: rgba(157,37,60,1);
+}
+
+/* ================= PRICING SECTION ================= */
+.pricing {
+	background: black;
+}
+
+
+/* ================= RESPONSIVE DESIGN ================= */
+/* Adjusts hero heading size on smaller screens */
+@media (max-width: 768px) {
+	.hero h2 {
+		font-size: 32px;
+	}
+}

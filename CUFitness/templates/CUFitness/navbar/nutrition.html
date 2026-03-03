@@ -1,44 +1,101 @@
 {% extends 'CUFitness/base.html' %}
 {% load static %}
-{% block title %} sdfsdfsdf {% endblock %}
+{% block title %} Nutrition & Recipes {% endblock %}
 
 {% block extra_styles %}
-
+    <link rel="stylesheet" href="{% static 'nutrition.css' %}"/>
 {% endblock %}
 
 {% block content %}
 
 
-<section class="nutrition-section">
-    <div class="container">
-        <h1>Nutrition & Wellness</h1>
-        <p>Fuel your body with the right nutrition to maximize performance, recovery, and overall health.</p>
+<section class="content-section">
 
-        <div class="nutrition-cards">
+    <h2>Nutrition Articles</h2>
 
-            <div class="nutrition-card">
-                <h3>Personalized Meal Plans</h3>
-                <p>Get customized meal plans tailored to your fitness goals, whether it’s muscle gain, weight loss, or maintenance.</p>
+    <div class="card-grid">
+
+        <!-- Free Article -->
+        <a href="#">
+            <div class="card">
+                <span class="badge free">Free</span>
+                <h3>Understanding Macronutrients</h3>
+                <p>Learn how proteins, carbs, and fats fuel your workouts.</p>
+                <button>Read More</button>
             </div>
+        </a>
 
-            <div class="nutrition-card">
-                <h3>Weight Management</h3>
-                <p>Our experts guide you through sustainable strategies to help you reach and maintain a healthy weight.</p>
+        <!-- Locked Article -->
+        <a href="/login">
+            <div class="card locked">
+                <h3>Cutting vs Bulking Guide</h3>
+                <p>Advanced strategies to optimize muscle growth and fat loss.</p>
+                <!-- this is used to add blur overlay only -->
+                <div class="lock-overlay"></div>
+                <span class="badge premium">Log In to View </span>
+                <button>Read More</button>
             </div>
-
-            <div class="nutrition-card">
-                <h3>Performance Nutrition</h3>
-                <p>Optimize your workouts with proper nutrient timing and balanced macronutrient planning.</p>
+        </a>
+        <!-- Free Article -->
+        <a href="#">
+            <div class="card">
+                <span class="badge free">Free</span>
+                <h3>Hydration for Athletes</h3>
+                <p>Why water intake is critical for peak performance.</p>
+                <button>Read More</button>
             </div>
-
-            <div class="nutrition-card">
-                <h3>Healthy Lifestyle Coaching</h3>
-                <p>Learn how to build long-term healthy habits that support both physical and mental well-being.</p>
-            </div>
-
-        </div>
+        </a>
     </div>
-</section>
+
+    </section>
+
+
+    <section class="content-section">
+
+    <h2>Healthy Recipes</h2>
+
+    <div class="card-grid">
+
+        <!-- Free Recipe -->
+        <div class="card">
+            <span class="badge free">Free</span>
+            <h3>High-Protein Breakfast Bowl</h3>
+            <p>Greek yogurt, oats, berries & almonds.</p>
+            <button>View Recipe</button>
+        </div>
+
+
+
+        <!-- Locked Recipe -->
+        <a href="/login">
+            <div class="card locked">
+
+                <h3>Lean Muscle Meal Plan (7 Days)</h3>
+                <p>Structured weekly plan designed for muscle gain.</p>
+                <!-- this is used to add blur overlay only -->
+                <div class="lock-overlay">
+                </div>
+                <span class="badge premium">Log In to View </span>
+                <button>View Recipe</button>
+            </div>
+
+        </a>
+
+
+
+
+        <!-- Free Recipe -->
+        <div class="card">
+            <span class="badge free">Free</span>
+            <h3>Post-Workout Smoothie</h3>
+            <p>Protein-packed recovery drink in 5 minutes.</p>
+            <button>View Recipe</button>
+        </div>
+
+    </div>
+
+    </section>
+
 
 
 {% endblock %}

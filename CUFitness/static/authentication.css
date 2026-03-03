@@ -88,5 +88,4 @@
 .styled-select:focus {
     outline: none;
     border: 2px solid rgba(167,150,103,1);
-    box-shadow: 0 0 0 3px rgba(230,57,70,0.2);
 }

@@ -1,0 +1,86 @@
+
+/* Hero */
+.amenities-hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+}
+
+.amenities-hero h1 {
+    font-size: 44px;
+    margin-bottom: 10px;
+}
+
+.amenities-hero p {
+    font-size: 18px;
+    opacity: 0.85;
+    max-width: 600px;
+    margin: auto;
+}
+
+/* Section */
+.amenity-section {
+    padding: 100px 60px;
+}
+
+.amenity-content {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap: 60px;
+
+}
+
+/* Reverse layout for alternating effect */
+.amenity-section.reverse .amenity-content {
+    flex-direction: row-reverse;
+}
+
+/* Text */
+.text h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.text p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: white;
+    max-width: 500px;
+}
+
+/* Images */
+.image img {
+    width: 500px;
+    max-width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+
+    .amenity-content {
+        flex-direction: column;
+        text-align: left;
+    }
+
+    .amenity-section.reverse .amenity-content {
+        flex-direction: column;
+    }
+
+    .image img {
+        width: 100%;
+    }
+
+    .amenity-section {
+        padding: 60px 25px;
+    }
+
+    .amenities-hero h1 {
+        font-size: 32px;
+    }
+}

@@ -1,54 +1,12 @@
+{% extends 'CUFitness/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<!-- Declares this document as HTML5 -->
+{% block title %} CUFitness {% endblock %}
 
-<html lang="en">
-<!-- Root element of the webpage. lang="en" helps accessibility & SEO -->
+{% block extra_styles %}
+{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <!-- Defines character encoding (supports special characters properly) -->
+{% block content %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Makes the website responsive on mobile devices -->
-
-    <title>CUFitness</title>
-    <!-- Title that appears in the browser tab -->
-
-    <!-- Google Font Import (Poppins font family) -->
-    <!-- This loads the font from Google's servers -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <!-- External CSS File -->
-    <!-- This connects the HTML file to css/style.css -->
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-</head>
-
-<body>
-<!-- Everything visible on the website goes inside the body -->
-
-<!-- ================= HEADER ================= -->
-<!-- Contains logo and navigation links -->
-<header>
-    <h1>CUFitness</h1>
-    <!-- Website logo / brand name -->
-
-    <nav>
-        <!-- Navigation links use anchor tags -->
-        <!-- href="#sectionID" scrolls to that section -->
-        <a href="#home">Home</a>
-        <a href="#services">Services</a>
-        <a href="#trainers">Trainers</a>
-        <a href="#pricing">Membership</a>
-        <a href="#contact">Contact</a>
-        <a href="/login">Login</a>
-    </nav>
-</header>
-
-<!-- ================= HERO SECTION ================= -->
-<!-- This is the main banner users see first -->
-
-<!-- HOME PAGE -->
 <section class="hero" id="home">
     <!-- class="hero" connects to CSS styling -->
     <!-- id="home" allows navigation scrolling -->
@@ -60,8 +18,8 @@
             with professional trainers and world-class equipment.
         </p>
 
-        <!-- Call-to-action button -->
-        <button class="btn">Join Now</button>
+        <a href="/register"> <button class="btn">Join Now </button> </a>
+
     </div>
 </section>
 
@@ -117,7 +75,7 @@
 
 <!-- ================= PRICING SECTION ================= -->
 <section class="pricing" id="pricing">
-    <!-- class="pricing" gives it special background color -->
+    <!-- class="pricing" can assign it special background color -->
 
     <h2 class="section-title">Membership Plans</h2>
 
@@ -139,18 +97,4 @@
     </div>
 </section>
 
-<!-- ================= CONTACT SECTION ================= -->
-<section id="contact">
-    <h2 class="section-title">Contact Us</h2>
-    <p>Email: info@CUFitness.com</p>
-    <p>Phone: (123) 456-7890</p>
-</section>
-
-<!-- ================= FOOTER ================= -->
-<footer>
-    <!-- Copyright information -->
-    © 2026 CUFitness. All Rights Reserved.
-</footer>
-
-</body>
-</html>
+{% endblock %}
