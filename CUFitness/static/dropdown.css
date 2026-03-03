@@ -11,6 +11,10 @@
 	position: relative;
 	display: inline-block;
 	/* Makes parent full width */
+
+	/* this ensure it stays on top of cards and not hidden behind them */
+	z-index: 9999;
+
 }
 /* make sure the bg color matches the header bg color */
 .dropbtn {

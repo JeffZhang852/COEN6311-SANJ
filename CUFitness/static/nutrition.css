@@ -1,0 +1,158 @@
+/* Hero */
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #111827, #1f2937);
+    color: white;
+}
+
+.hero h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 18px;
+    opacity: 0.85;
+}
+
+/* Sections */
+.content-section {
+    padding: 60px 80px;
+}
+
+.content-section h2 {
+    margin-bottom: 30px;
+    font-size: 26px;
+}
+
+/* Card Grid */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+
+    a{
+        text-decoration: none;
+    }
+}
+
+/* Cards */
+.card {
+    text-decoration: none;
+    position: relative;
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    background-color: rgba(145,35,56,1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    background-color: rgba(157,37,60,1);
+    border: 2px solid #ccc;
+}
+
+.card h3 {
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.card p {
+    margin: 10px 0 20px;
+    color: white;
+    font-size: 15px;
+}
+
+/* Buttons */
+.card button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(200,180,105,1);
+    color: black;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.card button:hover {
+    background: rgba(190,170,105,1);
+
+}
+
+/* Badges */
+.badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 25px;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.free {
+    background-color: white;
+    color: black;
+}
+
+.premium {
+    background: rgb(255,215,0);
+    color: #991b1b;
+}
+
+/* Locked Cards */
+.locked {
+    div button{
+        background: rgba(200,200,200,1);
+        padding: 10px 18px;
+        border: 1px solid black;
+    }
+
+    div button:hover{
+        background-color: rgba(255,182,193,1);
+    }
+}
+
+.lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+    backdrop-filter: blur(1px);
+
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lock-content {
+    text-align: center;
+    color: white;
+}
+
+.lock-content span {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+}
+.lock-content p {
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .content-section {
+        padding: 40px 20px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+}

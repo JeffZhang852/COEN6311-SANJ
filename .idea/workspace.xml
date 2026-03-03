@@ -1,241 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AutoImportSettings">
-    <option name="autoReloadType" value="SELECTIVE" />
-  </component>
   <component name="ChangeListManager">
-    <list default="true" id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="">
+    <list default="true" id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/gym.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/gym.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/nutrition.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/nutrition.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/trainers.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/trainers.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
-    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="CSS File" />
-        <option value="Python Script" />
-        <option value="HTML File" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
-    <branch-grouping>
-      <option value="directory" />
-      <option value="repository" />
-    </branch-grouping>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;AmmarZ0&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "AmmarZ0"
   }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/JeffZhang852/COEN6311-SANJ.git&quot;,
-    &quot;accountId&quot;: &quot;e7ec85fb-8d4d-42a9-8c95-3f1640c49e1f&quot;
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/JeffZhang852/COEN6311-SANJ.git",
+    "accountId": "e7ec85fb-8d4d-42a9-8c95-3f1640c49e1f"
   }
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 3
-}</component>
-  <component name="ProjectId" id="39tlNKZbt4lzQpeEuAT5W4bGKG9" />
-  <component name="ProjectLevelVcsManager">
-    <ConfirmationsSetting value="1" id="Add" />
-  </component>
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="3ARiYgowNmnPleHsftTOKVsJdGW" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.COEN6311.executor": "Run",
-    "HTTP Request.All in test.executor": "Run",
-    "HTTP Request.test | #1.executor": "Run",
-    "HTTP Request.test | #2.executor": "Run",
-    "HTTP Request.test | #3.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.manage.executor": "Run",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "nassi-text-update",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/nassi/Dev/COEN6311-SANJ",
-    "list.type.of.created.stylesheet": "CSS",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "two.files.diff.last.used.file": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend/authentication_templates/signup.html",
-    "vue.rearranger.settings.migration": "true"
+    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ"
   }
-}</component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\images" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\images" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\user_profile" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\authentication" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\dropdown" />
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\frontend\templates\frontend\navbar" />
-    </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="configurationStatuses">
-      <map>
-        <entry key="HttpClient.HttpRequestRunConfigurationType">
-          <value>
-            <map>
-              <entry key="All in test" value="STOPPED" />
-              <entry key="test | #1" value="STOPPED" />
-              <entry key="test | #2" value="STOPPED" />
-              <entry key="test | #3" value="STOPPED" />
-            </map>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="RunManager" selected="Django Server.COEN6311">
-    <configuration name="All in test" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/test.rest">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test.rest" executionIdentifier="#1" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | #2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test.rest" executionIdentifier="#2" index="2" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test | #3" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test.rest" executionIdentifier="#3" index="3" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="COEN6311" type="Python.DjangoServer" factoryName="Django server">
-      <module name="COEN6311" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-        <env name="DJANGO_SETTINGS_MODULE" value="COEN6311.settings" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="RUN_TOOL" value="" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
-      <method v="2" />
-    </configuration>
-    <list>
-      <item itemvalue="Django Server.COEN6311" />
-      <item itemvalue="HTTP Request.All in test" />
-      <item itemvalue="HTTP Request.test | #1" />
-      <item itemvalue="HTTP Request.test | #2" />
-      <item itemvalue="HTTP Request.test | #3" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="HTTP Request.test | #3" />
-        <item itemvalue="HTTP Request.test | #2" />
-        <item itemvalue="HTTP Request.test | #1" />
-        <item itemvalue="HTTP Request.All in test" />
-      </list>
-    </recent_temporary>
-  </component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.30387.173" />
-        <option value="bundled-python-sdk-4762d8aabb82-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.30387.173" />
+        <option value="bundled-python-sdk-ca5e2b39c7df-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.308" />
       </set>
     </attachedChunks>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="" />
-      <created>1771523206625</created>
+      <changelist id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="" />
+      <created>1772561832328</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1771523206625</updated>
-      <workItem from="1771523207626" duration="699000" />
-      <workItem from="1771525041787" duration="384000" />
-      <workItem from="1771525484893" duration="8964000" />
-      <workItem from="1771597313829" duration="19409000" />
-      <workItem from="1772474230146" duration="39000" />
-      <workItem from="1772474737800" duration="10000" />
-      <workItem from="1772474793759" duration="195000" />
-      <workItem from="1772474990872" duration="10263000" />
+      <updated>1772561832328</updated>
     </task>
     <servers />
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-    <option name="RECENT_FILTERS">
-      <map>
-        <entry key="User">
-          <value>
-            <list>
-              <RecentGroup>
-                <option name="FILTER_VALUES">
-                  <option value="*" />
-                </option>
-              </RecentGroup>
-            </list>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <option name="SHOW_DIRTY_RECURSIVELY" value="true" />
-    <ignored-roots>
-      <path value="$PROJECT_DIR$/.." />
-    </ignored-roots>
   </component>
 </project>
