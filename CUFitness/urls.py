@@ -53,7 +53,7 @@ urlpatterns = [
 
 # -----------   NEW    -----------
 # new user model and registration form
-    path("register/", views.Register.as_view(), name="register")
+    path("register/", views.Register.as_view(), name="register"),
 
 
 
