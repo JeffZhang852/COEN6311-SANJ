@@ -2,34 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b4881dab-55c1-4eae-a29b-9a71582e908b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/COEN6311.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../COEN6311/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/COEN6311.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/COEN6311.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/COEN6311.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/authentication.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/authentication.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/user_profile/user_account.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/user_profile/user_account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/user_profile/user_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/user_profile/user_profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/asgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/settings.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../COEN6311/wsgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../manage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/gym.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/gym.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/nutrition.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/nutrition.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/trainers.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/navbar/trainers.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,11 +77,11 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "nassi-text-update",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ",
+    "last_opened_file_path": "C:/Users/nassi/Dev/COEN6311-SANJ",
     "list.type.of.created.stylesheet": "CSS",
-    "settings.editor.selected.configurable": "advanced.settings",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "two.files.diff.last.used.file": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/frontend/templates/frontend/authentication_templates/signup.html",
     "vue.rearranger.settings.migration": "true"
   }
@@ -137,7 +118,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Django server.COEN6311">
+  <component name="RunManager" selected="Django Server.COEN6311">
     <configuration name="All in test" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/test.rest">
       <method v="2" />
     </configuration>
@@ -160,7 +141,6 @@
         <env name="DJANGO_SETTINGS_MODULE" value="COEN6311.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.14" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -178,6 +158,7 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Django Server.COEN6311" />
       <item itemvalue="HTTP Request.All in test" />
       <item itemvalue="HTTP Request.test | #1" />
       <item itemvalue="HTTP Request.test | #2" />
@@ -195,7 +176,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-ca5e2b39c7df-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.308" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.30387.173" />
+        <option value="bundled-python-sdk-4762d8aabb82-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.30387.173" />
       </set>
     </attachedChunks>
   </component>
@@ -210,6 +192,10 @@
       <workItem from="1771525041787" duration="384000" />
       <workItem from="1771525484893" duration="8964000" />
       <workItem from="1771597313829" duration="19409000" />
+      <workItem from="1772474230146" duration="39000" />
+      <workItem from="1772474737800" duration="10000" />
+      <workItem from="1772474793759" duration="195000" />
+      <workItem from="1772474990872" duration="10263000" />
     </task>
     <servers />
   </component>
@@ -244,5 +230,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_DIRTY_RECURSIVELY" value="true" />
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/.." />
+    </ignored-roots>
   </component>
 </project>
