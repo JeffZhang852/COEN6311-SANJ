@@ -43,3 +43,179 @@ class UsersManagersTests(TestCase):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
                 email="super@user.com", password="foo", is_superuser=False)
+
+
+#   --------- Extra Tests ---------
+from django.test import TestCase
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from datetime import timedelta
+
+from CUFitness.models import (
+    CustomUser,
+    EquipmentList,
+    Equipment_Booking,
+    CoachAvailability,
+    CoachAppointment
+)
+
+
+class CustomUserModelTest(TestCase):
+
+    def test_create_user_defaults(self):
+        user = CustomUser.objects.create_user(
+            email="test@example.com",
+            password="password123"
+        )
+
+        self.assertEqual(user.role, "MEMBER")
+        self.assertEqual(user.membership, "BASIC")
+        self.assertTrue(user.is_active)
+        self.assertEqual(str(user), "test@example.com")
+
+class EquipmentListTest(TestCase):
+
+    def test_create_equipment(self):
+        equipment = EquipmentList.objects.create(
+            name="Treadmill",
+            description="Cardio machine"
+        )
+
+        self.assertEqual(str(equipment), "Treadmill")
+        self.assertTrue(equipment.is_active)
+
+class EquipmentBookingTest(TestCase):
+
+    def setUp(self):
+        self.coach = CustomUser.objects.create_user(
+            email="coach@example.com",
+            password="pass123",
+            role="COACH"
+        )
+
+        self.equipment = EquipmentList.objects.create(
+            name="Bench Press"
+        )
+
+        self.start_time = timezone.now()
+        self.end_time = self.start_time + timedelta(hours=1)
+
+    def test_valid_booking(self):
+        booking = Equipment_Booking.objects.create(
+            equipment=self.equipment,
+            coach=self.coach,
+            start_time=self.start_time,
+            end_time=self.end_time
+        )
+
+        self.assertEqual(str(booking).startswith("Bench Press booked"), True)
+
+    def test_invalid_time_booking(self):
+        with self.assertRaises(ValidationError):
+            Equipment_Booking.objects.create(
+                equipment=self.equipment,
+                coach=self.coach,
+                start_time=self.end_time,
+                end_time=self.start_time
+            )
+
+    def test_overlapping_booking(self):
+        Equipment_Booking.objects.create(
+            equipment=self.equipment,
+            coach=self.coach,
+            start_time=self.start_time,
+            end_time=self.end_time
+        )
+
+        with self.assertRaises(ValidationError):
+            Equipment_Booking.objects.create(
+                equipment=self.equipment,
+                coach=self.coach,
+                start_time=self.start_time + timedelta(minutes=30),
+                end_time=self.end_time + timedelta(minutes=30)
+            )
+
+
+class CoachAvailabilityTest(TestCase):
+
+    def setUp(self):
+        self.coach = CustomUser.objects.create_user(
+            email="coach2@example.com",
+            password="pass123",
+            role="COACH"
+        )
+
+        self.start = timezone.now()
+        self.end = self.start + timedelta(hours=2)
+
+    def test_valid_availability(self):
+        availability = CoachAvailability.objects.create(
+            coach=self.coach,
+            start_time=self.start,
+            end_time=self.end
+        )
+
+        self.assertEqual(str(availability).startswith(self.coach.email), True)
+
+    def test_overlapping_availability(self):
+        CoachAvailability.objects.create(
+            coach=self.coach,
+            start_time=self.start,
+            end_time=self.end
+        )
+
+        with self.assertRaises(ValidationError):
+            CoachAvailability.objects.create(
+                coach=self.coach,
+                start_time=self.start + timedelta(minutes=30),
+                end_time=self.end + timedelta(minutes=30)
+            )
+
+
+class CoachAppointmentTest(TestCase):
+
+    def setUp(self):
+        self.coach = CustomUser.objects.create_user(
+            email="coach3@example.com",
+            password="pass123",
+            role="COACH"
+        )
+
+        self.member = CustomUser.objects.create_user(
+            email="member@example.com",
+            password="pass123",
+            role="MEMBER"
+        )
+
+        self.start = timezone.now()
+        self.end = self.start + timedelta(hours=1)
+
+    def test_valid_appointment(self):
+        appointment = CoachAppointment.objects.create(
+            coach=self.coach,
+            member=self.member,
+            start_time=self.start,
+            end_time=self.end,
+            status="accepted"
+        )
+
+        self.assertEqual(appointment.status, "accepted")
+
+    def test_double_booking_accepted(self):
+        CoachAppointment.objects.create(
+            coach=self.coach,
+            member=self.member,
+            start_time=self.start,
+            end_time=self.end,
+            status="accepted"
+        )
+
+        with self.assertRaises(ValidationError):
+            CoachAppointment.objects.create(
+                coach=self.coach,
+                member=self.member,
+                start_time=self.start + timedelta(minutes=30),
+                end_time=self.end + timedelta(minutes=30),
+                status="accepted"
+            )
+

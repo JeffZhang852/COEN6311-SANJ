@@ -1,41 +1,35 @@
 from django.shortcuts import render
 
-#new auth
+#   --------- User Authentication ---------
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.utils import timezone
+from django.urls import reverse_lazy
+from django.views import generic
+from .forms import CustomUserCreationForm
+from django.contrib.auth import get_user_model
 #   --------- User Permission ---------
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.urls import reverse
 
+#import CUFitness
+
+
 from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 
 
-# registration
-#django handles the backend database
-#   --------- OLD -- NOT USED---------
-#from .forms import SignUpForm
 
-# new user model
-from django.urls import reverse_lazy
-from django.views import generic
-from .forms import CustomUserCreationForm
-from django.contrib.auth import get_user_model
 User = get_user_model()
-
-#   --------- Calendar ---------
-
 
 
 def home(request):
     return render(request, 'CUFitness/home.html')
 
-
-# Navbar Pages
+# -----------   Navbar Pages  -----------
 def services(request):
     return render(request, 'CUFitness/navbar/services.html')
 
@@ -49,7 +43,7 @@ def nutrition(request):
     return render(request, 'CUFitness/navbar/nutrition.html')
 
 
-# Dropdown Menu Pages
+# -----------   Dropdown Menu Pages  -----------
 def amenities(request):
     return render(request, 'CUFitness/dropdown/amenities.html')
 
@@ -63,7 +57,7 @@ def about(request):
     return render(request, 'CUFitness/dropdown/about.html')
 
 
-# Footer Pages
+# -----------   Footer Pages  -----------
 def faq(request):
     return render(request, 'CUFitness/faq.html')
 
@@ -71,23 +65,30 @@ def policy(request):
     return render(request, 'CUFitness/policy.html')
 
 
-# User Authentication
+# -----------   User Authentication   -----------
+
+class Register(generic.CreateView):
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
+    template_name = "CUFitness/authentication_templates/register.html"
+
 def login_user(request):
     if request.method == 'POST':
         email = request.POST['email'] # change these to whatever fields put in the form
         password = request.POST['password']
         user = authenticate(request, email=email, password=password)
-        if user is not None:
+        if user is not None and (user.role == 'MEMBER' or user.role == 'COACH'):
             login(request, user)
             # display the first_name of the logged-in user
             messages.success(request, 'You have been logged in as ' + User.objects.get(email=email).first_name)
 
             return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
         else:
-            messages.success(request, 'Error')
+            messages.success(request, 'Invalid Account Email or Password')
             return redirect('login')
     else:
         return render(request, 'CUFitness/authentication_templates/login.html') # render the HTML template on first visit
+
 
 def logout_user(request):
     logout(request)
@@ -95,31 +96,7 @@ def logout_user(request):
     return redirect('home')
 
 
-#   --------- OLD -- NOT USED---------
-'''
-# linked to forms.py
-def register_user(request):
-    form = SignUpForm()
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password1']
-            #login user
-            user = authenticate(request, username=username, password=password)
-            login(request, user)
-            messages.success(request, 'You have registered')
-            return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
-        else:
-            messages.success(request, 'Error')
-            return redirect('register')
-    else:
-        return render(request, 'CUFitness/authentication_templates/register.html', {'form': form})
-'''
-
-# ------------------------------------------------------------------
-#   --------- User ---------
+# -----------   User Profile & Account   -----------
 @login_required(login_url='login')
 def user_profile(request):
     return render(request, 'CUFitness/user_profile/user_profile.html')
@@ -132,60 +109,76 @@ def update_user(request):
 def user_account(request):
     return render(request, 'CUFitness/user_profile/user_account.html')
 
-# ------------------------------------------------------------------
-#   --------- Staff ---------
+
+# -----------   Staff Pages  -----------
+def is_staff(user):
+    return user.is_authenticated and user.role == 'STAFF'
 
 def staff_login(request):
-    return render(request, 'CUFitness/staff_profile/staff_login.html')
+    if request.method == 'POST':
+        email = request.POST['email'] # change these to whatever fields put in the form
+        password = request.POST['password']
+        user = authenticate(request, email=email, password=password)
+        # only log in staff members
+        if user is not None and user.role == 'STAFF':
+            login(request, user)
+            # display the first_name of the logged-in user
+            messages.success(request, 'You have been logged in as ' + User.objects.get(email=email).first_name)
 
+            return redirect('staff_home') # cant write it as home.html because it's reverse searching for a template with the name "home"
+        else:
+            messages.success(request, 'Invalid Account Email or Password')
+            return redirect('staff_login')
+    else:
+        return render(request, 'CUFitness/staff_profile/staff_login.html') # render the HTML template on first visit
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def staff_home(request):
     return render(request, 'CUFitness/staff_profile/staff_home.html')
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def staff_profile(request):
     return render(request, 'CUFitness/staff_profile/staff_profile.html')
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def members(request):
     return render(request, 'CUFitness/staff_profile/members.html')
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def requests(request):
     return render(request, 'CUFitness/staff_profile/requests.html')
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def reports(request):
     return render(request, 'CUFitness/staff_profile/reports.html')
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def private_messages(request):
     return render(request, 'CUFitness/staff_profile/messages.html')
 
-
 # ------------------------------------------------------------------
-#########
-# new user model
-#########
-# add auto login after successful registration
-# add ability to change role on sign up
-class Register(generic.CreateView):
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy('login')
-    template_name = "CUFitness/authentication_templates/register.html"
-
-#   --------- Calendar ---------
-
-
-
 
 # Role checker. Needed to tell which account it is.
 def is_member(user):
-    return user.is_authenticated and user.role == 'member'
+    return user.is_authenticated and user.role == 'MEMBER'
 
 def is_coach(user):
-    return user.is_authenticated and user.role == 'coach'
+    return user.is_authenticated and user.role == 'COACH'
 
 #Not used yet. only coach n member are needed for now
 def is_admin(user):
-    return user.is_authenticated and user.role == 'admin'
+    return user.is_authenticated and user.role == 'ADMIN'
+
 
 # --- Member Views ---
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_member)
 def settings_view(request):
     """Member settings page"""
@@ -210,7 +203,7 @@ def settings_view(request):
     }
     return render(request, 'CUFitness/settings.html', context)
 
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_member)
 def coach_list_view(request):
     """List all approved coaches."""
@@ -222,7 +215,7 @@ def coach_list_view(request):
     return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
 
 # --- Coach Views ---
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_coach)
 def coach_dashboard(request):
     """Overview of coach's appointments and availability."""
@@ -246,7 +239,7 @@ def coach_dashboard(request):
 
     return render(request, 'CUFitness/coach_dashboard.html', context)
 
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_coach)
 def manage_availability(request):
     """Add/delete availability slots."""
@@ -270,7 +263,7 @@ def manage_availability(request):
 
     return render(request, 'CUFitness/manage_availability.html', context)
 
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_coach)
 def delete_availability(request, slot_id):
     slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
@@ -279,7 +272,7 @@ def delete_availability(request, slot_id):
         messages.success(request, 'Slot deleted.')
     return redirect('manage_availability')
 
-@login_required
+@login_required(login_url='login')
 @user_passes_test(is_coach)
 def manage_appointments(request):
     """View pending appointments and respond."""

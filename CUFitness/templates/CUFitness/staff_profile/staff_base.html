@@ -6,127 +6,107 @@
 <!-- Root element of the webpage. lang="en" helps accessibility & SEO -->
 
 <head>
-    <meta charset="UTF-8">
-    <!-- Defines character encoding (supports special characters properly) -->
+<meta charset="UTF-8">
+<!-- Defines character encoding (supports special characters properly) -->
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Makes the website dynamic on various devices and screen sizes -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Makes the website dynamic on various devices and screen sizes -->
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
-    <!-- Title shows in browser tab -->
-    <title> {% block title %} CUFitness {% endblock %}</title>
+<!-- Title shows in browser tab -->
+<title> {% block title %} CUFitness {% endblock %}</title>
 
-    <!-- Google Font Import (Poppins font family) -->
-    <!-- This loads the font from Google's servers -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Google Font Import (Poppins font family) -->
+<!-- This loads the font from Google's servers -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-    <!-- ICONS -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<!-- ICONS -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-    <!-- External CSS File -->
-    <!-- This connects the HTML file to static/style.css -->
-    <link rel="stylesheet" href="{% static 'base_style.css' %}">
-    <link rel="stylesheet" href="{% static 'footer.css' %}" />
-    <link rel="stylesheet" href="{% static 'dropdown.css' %}" />
+<!-- External CSS File -->
+<!-- This connects the HTML file to static/style.css -->
+<link rel="stylesheet" href="{% static 'base_style.css' %}">
+<link rel="stylesheet" href="{% static 'footer.css' %}" />
+<link rel="stylesheet" href="{% static 'dropdown.css' %}" />
 
-    {% block extra_styles %}{% endblock %}
+{% block extra_styles %}{% endblock %}
 
 </head>
 
 <body>
-    <!-- Everything visible on the website goes inside the body -->
+
+<!-- Everything visible on the website goes inside the body -->
 <!-- display alert messages if any -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                {{ message }}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+{% endif %}
 
-    <!-- ================= HEADER ================= -->
-    <!-- Contains logo and navigation links -->
+<!-- ================= HEADER ================= -->
+<!-- Contains logo and navigation links -->
 <header>
-    <h1>
-        <a href="/">CUFitness Logo</a>
-    </h1>
+<h1>
+<a href="/">CUFitness Logo</a>
+</h1>
 
-    <nav>
+<nav>
 
-        <a href="/">Members</a>
-        <a href="/memberships">Requests</a>
-        <a href="/trainers">Reports</a>
-        <a href="/nutrition">Messages</a>
+<a href="/members">Members</a>
+<a href="/requests">Requests</a>
+<a href="/reports">Reports</a>
+<a href="/messages">Messages</a>
 
-        <!-- More Info Dropdown -->
-        <div class="dropdown">
-            <button class="dropbtn">
-                More Information
-                <span class="material-icons">arrow_drop_down</span>
-            </button>
+<!-- Account Dropdown -->
+<div class="dropdown">
+<button class="dropbtn">
+    <span class="material-icons account-icon" >account_circle</span>
+    <span class="material-icons">arrow_drop_down</span>
+</button>
 
-            <div class="dropdown-content">
-                <a href="/amenities">Amenities</a>
-                <a href="/schedule">Schedule</a>
-                <a href="/contact">Contact Us</a>
-                <a href="/about">About</a>
-            </div>
-        </div>
+<div class="dropdown-content account">
+    {% if user.is_authenticated %}
+        <a href="/staff_profile">Profile
+            <span class="material-icons">person</span>
+        </a>
 
-        <!-- Account Dropdown -->
-        <div class="dropdown">
-            <button class="dropbtn">
-                <span class="material-icons account-icon" >account_circle</span>
-                <span class="material-icons">arrow_drop_down</span>
-            </button>
+        <a href="/logout">Log Out
+            <span class="material-icons">logout</span>
+        </a>
+    {% else %}
+        <a href="/login">Login
+            <span class="material-icons">login</span>
+        </a>
+    {% endif %}
+</div>
+</div>
 
-            <div class="dropdown-content account">
-                {% if user.is_authenticated %}
-                    <a href="/user_profile">Profile
-                        <span class="material-icons">person</span>
-                    </a>
-
-                    <a href="/user_account">Account
-                        <span class="material-icons">manage_accounts</span>
-                    </a>
-
-                    <a href="/logout">Log Out
-                        <span class="material-icons">logout</span>
-                    </a>
-                {% else %}
-                    <a href="/login">Login
-                        <span class="material-icons">login</span>
-                    </a>
-                    <a href="/register">Create Account
-                        <span class="material-icons">person_add</span>
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-    </nav>
+</nav>
 </header>
 
 
-    {% block content %}
+{% block content %}
 
-    {% endblock %}
+{% endblock %}
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
-    <!-- footer in a different html file -->
+<!-- footer in a different html file -->
 {% include 'CUFitness/footer.html' %}
 
 
 
 </body>
+
 
 </html>

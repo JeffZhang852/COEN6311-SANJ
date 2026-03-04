@@ -8,20 +8,21 @@ from .managers import CustomUserManager
 
 
 
+# TODO: everything for coach should be in separate class that inherits from CustomUser class
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     # List of roles, defaulting all to members
-    # Coach needs to request, staff n admin are done in backend
+    # Coach needs to request, staff and admin are done in backend
     ROLE_CHOICES = [
-        ('member', 'Member'),
-        ('coach', 'Coach'),
-        ('staff', 'Staff'),
-        ('admin', 'Admin'),
+        ('MEMBER', 'Member'),
+        ('COACH', 'Coach'),
+        ('STAFF', 'Staff'),
+        ('ADMIN', 'Admin'),
     ]
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
-        default='member',
+        default='MEMBER',
         verbose_name='user role'
     )
 
@@ -30,7 +31,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ("BASIC", "Basic"),
         ("STANDARD", "Standard"),
         ("PLATINUM", "Platinum"),
-        ("PER SESSION", "Per Session"),
+        ("PER_SESSION", "Per Session"),
     ]
     email = models.EmailField(_("email address"), unique=True)
     first_name = models.CharField(_("first name"), max_length=50, default='')
@@ -39,27 +40,27 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     # Coach appointment request
     REQUEST_STATUS_CHOICES = [
-        ('none', 'No Request'),
-        ('pending', 'Pending Approval'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ('NONE', 'No Request'),
+        ('PENDING', 'Pending Approval'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
     ]
     coach_request_status = models.CharField(
         max_length=20,
         choices=REQUEST_STATUS_CHOICES,
-        default='none',
+        default='NONE',
         verbose_name='Coach request status'
     )
 
     # User privacy control
     WORKOUT_VISIBILITY_CHOICES = [
-        ('public', 'Public'),
-        ('coach_only', 'Coach Only'),
+        ('PUBLIC', 'Public'),
+        ('COACH_ONLY', 'Coach Only'),
     ]
     workout_visibility = models.CharField(
         max_length=20,
         choices=WORKOUT_VISIBILITY_CHOICES,
-        default='coach_only',
+        default='COACH_ONLY',
         verbose_name='Workout history privacy setting'
     )
 
@@ -76,6 +77,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    class Meta:
+        permissions = [
+            ("can_ban_users", "Can ban users"),
+            ("can_view_coach_requests", "Can view coach requests"),
+            ("can_accept_coach_requests", "Can accept coach requests"),
+            ("can_change_user_role", "Can change user role"),
+            ("can_view_user_reports", "Can view user reports"),
+        ]
+
+
 class EquipmentList(models.Model):
     # Actual equipment list needs to be done in shell to make it add them one time.
 
@@ -89,9 +100,10 @@ class EquipmentList(models.Model):
     def __str__(self):
         return self.name
 
+
 class Equipment_Booking(models.Model):
     equipment = models.ForeignKey(EquipmentList, on_delete=models.CASCADE, related_name='bookings')
-    coach = models.ForeignKey('CustomUser', on_delete=models.CASCADE, limit_choices_to={'role': 'coach'})
+    coach = models.ForeignKey('CustomUser', on_delete=models.CASCADE, limit_choices_to={'role': 'COACH'})
     member = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='training_sessions', null=True,
                                blank=True, help_text="Paid user being trained (optional)")
     start_time = models.DateTimeField()
@@ -132,11 +144,12 @@ class Equipment_Booking(models.Model):
     def __str__(self):
         return f"{self.equipment.name} booked by {self.coach.email} from {self.start_time} to {self.end_time}"
 
+
 class CoachAvailability(models.Model):
     coach = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        limit_choices_to={'role': 'coach'},
+        limit_choices_to={'role': 'COACH'},
         related_name='availabilities'
     )
     start_time = models.DateTimeField()
@@ -164,6 +177,10 @@ class CoachAvailability(models.Model):
     def __str__(self):
         return f"{self.coach.email}: {self.start_time} - {self.end_time}"
 
+    def save(self, *args, **kwargs):
+        self.full_clean()   # runs validators including clean()
+        super().save(*args, **kwargs)
+
 class CoachAppointment(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -174,13 +191,13 @@ class CoachAppointment(models.Model):
     coach = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        limit_choices_to={'role': 'coach'},
+        limit_choices_to={'role': 'COACH'},
         related_name='coach_appointments'
     )
     member = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        limit_choices_to={'role': 'member'},
+        limit_choices_to={'role': 'MEMBER'},
         related_name='member_appointments'
     )
     availability = models.OneToOneField(
@@ -219,7 +236,9 @@ class CoachAppointment(models.Model):
     def __str__(self):
         return f"Appointment {self.member.email} with {self.coach.email} - {self.status}"
 
-
+    def save(self, *args, **kwargs):
+        self.full_clean()   # runs validators including clean()
+        super().save(*args, **kwargs)
 
 # Placeholder for review and report
 
