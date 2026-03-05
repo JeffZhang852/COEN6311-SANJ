@@ -186,6 +186,14 @@ def reports(request):
 def private_messages(request):
     return render(request, 'CUFitness/staff_profile/messages.html')
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def staff_user_detail(request, user_id):
+    user_obj = get_object_or_404(User, id=user_id)
+
+    return render(request, "CUFitness/staff_profile/user_detail.html", {
+        "user_obj": user_obj
+    })
 
 # ------------------------------------------------------------------
 
