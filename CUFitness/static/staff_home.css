@@ -1,0 +1,80 @@
+.dashboard-container {
+    padding: 50px 8%;
+    min-height: 80vh;
+    background-color: black;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+}
+
+/* User List */
+.user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-row {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.user-link {
+    display: flex;              /* makes row layout */
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 10px;
+    text-decoration: none;
+    color: white;
+    width: 100%;                /* fill full li width */
+    height: 100%;               /* fill full li height */
+    box-sizing: border-box;
+    transition: background 0.2s ease, padding-left 0.2s ease;
+}
+
+.user-link:hover {
+    background-color: #f3f6f9;
+    padding-left: 16px;
+}
+
+.user-email {
+    opacity: 0.6;
+    font-size: 14px;
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-email {
+    opacity: 0.6;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
