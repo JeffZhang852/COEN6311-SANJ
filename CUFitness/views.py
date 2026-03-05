@@ -1,9 +1,7 @@
-from django.shortcuts import render
 
 #   --------- User Authentication ---------
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
-from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.views import generic
@@ -11,23 +9,41 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import get_user_model
 #   --------- User Permission ---------
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
-
-#import CUFitness
 
 
 from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 
 
-
 User = get_user_model()
 
 
 def home(request):
-    return render(request, 'CUFitness/home.html')
+    if request.user.is_authenticated and request.user.role == 'STAFF':
+
+        active_members = CustomUser.objects.filter(
+            role="MEMBER",
+            is_active=True
+        ).order_by("first_name")
+
+        print(active_members)
+
+        active_coaches = CustomUser.objects.filter(
+            role="COACH",
+            is_active=True
+        ).order_by("first_name")
+
+        context = {
+            "active_members": active_members,
+            "active_coaches": active_coaches,
+        }
+
+        return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
+    else:
+        return render(request, 'CUFitness/home.html')
 
 # -----------   Navbar Pages  -----------
 def services(request):
@@ -89,7 +105,6 @@ def login_user(request):
     else:
         return render(request, 'CUFitness/authentication_templates/login.html') # render the HTML template on first visit
 
-
 def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out')
@@ -125,7 +140,7 @@ def staff_login(request):
             # display the first_name of the logged-in user
             messages.success(request, 'You have been logged in as ' + User.objects.get(email=email).first_name)
 
-            return redirect('staff_home') # cant write it as home.html because it's reverse searching for a template with the name "home"
+            return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
         else:
             messages.success(request, 'Invalid Account Email or Password')
             return redirect('staff_login')
@@ -136,7 +151,25 @@ def staff_login(request):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def staff_home(request):
-    return render(request, 'CUFitness/staff_profile/staff_home.html')
+    active_members = CustomUser.objects.filter(
+        role="MEMBER",
+        is_active=True
+    ).order_by("first_name")
+
+    print(active_members)
+
+    active_coaches = CustomUser.objects.filter(
+        role="COACH",
+        is_active=True
+    ).order_by("first_name")
+
+    context = {
+        "active_members": active_members,
+        "active_coaches": active_coaches,
+    }
+
+    return render(request, "CUFitness/staff/dashboard.html", {"active_members":active_members,"active_coaches":active_coaches})
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -163,6 +196,18 @@ def reports(request):
 def private_messages(request):
     return render(request, 'CUFitness/staff_profile/messages.html')
 
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def staff_user_detail(request, user_id):
+    user_obj = get_object_or_404(User, id=user_id)
+
+    return render(request, "CUFitness/staff_profile/user_detail.html", {
+        "user_obj": user_obj
+    })
+
+
+
 # ------------------------------------------------------------------
 
 # Role checker. Needed to tell which account it is.
@@ -178,6 +223,7 @@ def is_admin(user):
 
 
 # --- Member Views ---
+
 @login_required(login_url='login')
 @user_passes_test(is_member)
 def settings_view(request):
@@ -202,6 +248,7 @@ def settings_view(request):
         'coach_request_status': request.user.coach_request_status,
     }
     return render(request, 'CUFitness/settings.html', context)
+
 
 @login_required(login_url='login')
 @user_passes_test(is_member)

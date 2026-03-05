@@ -42,6 +42,9 @@ urlpatterns = [
     path('reports/', views.reports, name='reports'),
     path('messages/', views.private_messages, name='messages'),
 
+# path to user profiles from staff_home page
+    path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
+
 # -----------   Coach Pages  -----------
 
     # TODO Newly added.

@@ -1,10 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/staff_profile/staff_base.html' %}
+{% load static %}
+{% block title %} CUFitness {% endblock %}
 
-</body>
-</html>
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'authentication.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if user.role == "STAFF" %}
+
+    
+
+{% else %}
+    <p> not a staff member </p>
+{% endif %}
+
+{% endblock %}
