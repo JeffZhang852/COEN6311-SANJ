@@ -1,25 +1,19 @@
 
-#   --------- User Authentication ---------
-from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
-from .forms import CustomUserCreationForm
-from django.contrib.auth import get_user_model
-#   --------- User Permission ---------
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.shortcuts import render, get_object_or_404
-from django.contrib import messages
-from django.urls import reverse
 
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib import messages
 
 from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
+from .forms import CustomUserCreationForm
 
 
 User = get_user_model()
-
 
 def home(request):
     if request.user.is_authenticated and request.user.role == 'STAFF':
@@ -28,8 +22,6 @@ def home(request):
             role="MEMBER",
             is_active=True
         ).order_by("first_name")
-
-        print(active_members)
 
         active_coaches = CustomUser.objects.filter(
             role="COACH",
@@ -147,7 +139,6 @@ def staff_login(request):
     else:
         return render(request, 'CUFitness/staff_profile/staff_login.html') # render the HTML template on first visit
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def staff_home(request):
@@ -169,7 +160,6 @@ def staff_home(request):
     }
 
     return render(request, "CUFitness/staff/dashboard.html", {"active_members":active_members,"active_coaches":active_coaches})
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -195,17 +185,6 @@ def reports(request):
 @user_passes_test(is_staff)
 def private_messages(request):
     return render(request, 'CUFitness/staff_profile/messages.html')
-
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff)
-def staff_user_detail(request, user_id):
-    user_obj = get_object_or_404(User, id=user_id)
-
-    return render(request, "CUFitness/staff_profile/user_detail.html", {
-        "user_obj": user_obj
-    })
-
 
 
 # ------------------------------------------------------------------
