@@ -8,8 +8,6 @@ from .managers import CustomUserManager
 
 
 
-# TODO: everything for coach should be in separate class that inherits from CustomUser class
-
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     # List of roles, defaulting all to members
     # Coach needs to request, staff and admin are done in backend
@@ -87,6 +85,39 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
+
+# can also be used for messaging and contact us
+class Articles(models.Model):
+    # cascade means that if user is deleted then article will be deleted as well
+    # idk if we want that cause maybe we want to keep articles even staff are fired
+    user = models.ForeignKey(CustomUser, related_name="article", on_delete=models.CASCADE) # links each article to unique user
+    author = models.ForeignKey(CustomUser, related_name="author", on_delete=models.CASCADE)
+    title = models.CharField(max_length=75)
+
+    locked = models.BooleanField(default=False)
+
+    description = models.CharField(max_length = 250, blank=False, help_text="Add description here")
+    body = models.TextField()
+
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return (
+            f"{self.user}"
+            f"{self.created_at:%Y-%m-%d %H:%M}"
+            f"{self.updated_at:%Y-%m-%d %H:%M}"
+            f"{self.author}"
+            f"{self.title}"
+            f"{self.body}"
+            f"{self.locked}"
+            f"{self.description}"
+        )
+
+
+
+
 class EquipmentList(models.Model):
     # Actual equipment list needs to be done in shell to make it add them one time.
 
@@ -99,7 +130,6 @@ class EquipmentList(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class Equipment_Booking(models.Model):
     equipment = models.ForeignKey(EquipmentList, on_delete=models.CASCADE, related_name='bookings')
@@ -143,7 +173,6 @@ class Equipment_Booking(models.Model):
 
     def __str__(self):
         return f"{self.equipment.name} booked by {self.coach.email} from {self.start_time} to {self.end_time}"
-
 
 class CoachAvailability(models.Model):
     coach = models.ForeignKey(

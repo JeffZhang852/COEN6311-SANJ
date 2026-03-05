@@ -8,7 +8,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
+from .models import CustomUser, CoachAppointment, CoachAvailability, Equipment_Booking, Articles
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 from .forms import CustomUserCreationForm
 
@@ -48,7 +48,9 @@ def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
 
 def nutrition(request):
-    return render(request, 'CUFitness/navbar/nutrition.html')
+    free_articles = Articles.objects.filter(locked=False)
+    locked_articles = Articles.objects.filter(locked=True)
+    return render(request, 'CUFitness/navbar/nutrition.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
 
 # -----------   Dropdown Menu Pages  -----------
@@ -139,6 +141,8 @@ def staff_login(request):
     else:
         return render(request, 'CUFitness/staff_profile/staff_login.html') # render the HTML template on first visit
 
+# prob not needed at this point
+# everything is handled through home function
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def staff_home(request):
@@ -159,7 +163,7 @@ def staff_home(request):
         "active_coaches": active_coaches,
     }
 
-    return render(request, "CUFitness/staff/dashboard.html", {"active_members":active_members,"active_coaches":active_coaches})
+    return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members":active_members,"active_coaches":active_coaches})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
