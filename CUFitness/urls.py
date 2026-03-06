@@ -41,6 +41,8 @@ urlpatterns = [
     path('requests/', views.requests, name='requests'),
     path('reports/', views.reports, name='reports'),
     path('messages/', views.private_messages, name='messages'),
+    path('articles/', views.articles, name='articles'),
+    path('create_article/', views.create_article, name='create_article'),
 
 # path to user profiles from staff_home page
     path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),

@@ -99,7 +99,6 @@ class Articles(models.Model):
     description = models.CharField(max_length = 250, blank=False, help_text="Add description here")
     body = models.TextField()
 
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -114,8 +113,6 @@ class Articles(models.Model):
             f"{self.locked}"
             f"{self.description}"
         )
-
-
 
 
 class EquipmentList(models.Model):

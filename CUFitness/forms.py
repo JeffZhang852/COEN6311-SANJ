@@ -8,6 +8,7 @@ from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
+from .models import Articles
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -27,6 +28,15 @@ class CustomUserCreationForm(UserCreationForm):
 #     class Meta:
 #         model = CustomUser
 #         fields = ("email",)
+
+
+class ArticleForm(forms.ModelForm):
+    class Meta:
+        model = Articles
+        fields = ['title','description', 'body', 'locked']
+        widgets = {}
+
+
 
 
 

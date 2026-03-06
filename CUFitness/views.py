@@ -10,7 +10,7 @@ from django.contrib import messages
 
 from .models import CustomUser, CoachAppointment, CoachAvailability, Equipment_Booking, Articles
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, ArticleForm
 
 
 User = get_user_model()
@@ -198,6 +198,27 @@ def staff_user_detail(request, user_id):
     return render(request, "CUFitness/staff_profile/user_detail.html", {
         "user_obj": user_obj
     })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def articles(request):
+    articles = Articles.objects.all()
+    return render(request, "CUFitness/staff_profile/articles.html", {"articles":articles})
+
+def create_article(request):
+    if request.method == "POST":
+        form = ArticleForm(request.POST)
+        if form.is_valid():
+            form.save(commit=False) #dont immedietly save because we need to add more data to the form (user, author...)
+            form.author = request.user
+            form.user = request.user
+            form.save() # now save everything
+            return redirect('articles.html')
+    else:
+        form = ArticleForm()
+    return render(request, "CUFitness/staff_profile/create_article.html", {"form":form})
+
+
 
 # ------------------------------------------------------------------
 
