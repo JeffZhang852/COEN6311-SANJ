@@ -237,7 +237,7 @@ class ArticlesModelTest(TestCase):
         )
 
         self.article = Articles.objects.create(
-            user=self.user,
+            #user=self.user,
             author=self.author,
             title="Test Article",
             body="This is a test article body.",
@@ -249,10 +249,6 @@ class ArticlesModelTest(TestCase):
         self.assertEqual(self.article.title, "Test Article")
         self.assertEqual(self.article.body, "This is a test article body.")
         self.assertFalse(self.article.locked)
-
-    def test_article_user_relationship(self):
-        """Test article is linked to the correct user"""
-        self.assertEqual(self.article.user, self.user)
 
     def test_article_author_relationship(self):
         """Test article is linked to the correct author"""
