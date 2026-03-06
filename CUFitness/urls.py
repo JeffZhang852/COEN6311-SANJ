@@ -46,6 +46,8 @@ urlpatterns = [
 
 # path to user profiles from staff_home page
     path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
+# path to article pages from staff-articles page
+    path("staff/article/<int:id>/", views.article_details, name="article_details"),
 
 # -----------   Coach Pages  -----------
 

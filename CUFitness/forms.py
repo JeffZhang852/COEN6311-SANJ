@@ -34,10 +34,8 @@ class ArticleForm(forms.ModelForm):
     class Meta:
         model = Articles
         fields = ['title','description', 'body', 'locked']
+        exclude = ["author"] # we set it manually
         widgets = {}
-
-
-
 
 
 class CoachRequestForm(forms.ModelForm):

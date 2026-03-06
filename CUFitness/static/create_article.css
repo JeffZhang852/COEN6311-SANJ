@@ -1,0 +1,104 @@
+/* ========================= */
+/* FULL PAGE ARTICLE FORM */
+/* ========================= */
+
+.article-page {
+    width: 100%;
+    min-height: 100vh;
+    background: grey;
+    padding: 60px 80px;
+}
+
+/* Container now fills width */
+.article-container {
+    width: 100%;
+}
+
+/* Title */
+.article-container h2 {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #111827;
+}
+
+/* Form Layout */
+.article-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Field Group */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Labels */
+.form-group label {
+    font-weight: 600;
+    font-size: 15px;
+    color: #374151;
+}
+
+/* Inputs */
+.article-container input,
+.article-container textarea,
+.article-container select {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    font-size: 15px;
+    background: white;
+    transition: 0.2s ease;
+}
+
+/* Bigger body field */
+.article-container textarea {
+    min-height: 250px;
+    resize: vertical;
+}
+
+/* Focus */
+.article-container input:focus,
+.article-container textarea:focus,
+.article-container select:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+/* Button */
+.article-container button {
+    width: 200px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.article-container button:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+}
+
+/* Checkbox Fix */
+.form-group.checkbox {
+    flex-direction: row;
+    align-items: center;
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    transform: scale(1.2);
+    cursor: pointer;
+}

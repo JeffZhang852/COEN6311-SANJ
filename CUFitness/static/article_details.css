@@ -1,0 +1,82 @@
+/* ======================= */
+/* Blog Page Container */
+/* ======================= */
+
+.blog-container {
+    max-width: 1000px;
+    margin: 80px auto;
+    padding: 60px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+}
+
+/* ======================= */
+/* Header */
+/* ======================= */
+
+.blog-header {
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.blog-title {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #111827;
+}
+
+.blog-meta {
+    font-size: 14px;
+    color: #6b7280;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.blog-description {
+    font-size: 20px;
+    color: #4b5563;
+    line-height: 1.7;
+}
+
+/* ======================= */
+/* Blog Body Sections */
+/* ======================= */
+
+.blog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 50px; /* space between sections */
+}
+
+/* Each paragraph becomes a section block */
+.blog-content p {
+    font-size: 17px;
+    line-height: 1.9;
+    padding: 25px;
+    border-left: 6px solid #2563eb;
+    background: #f9fafb;
+    border-radius: 12px;
+    transition: 0.3s ease;
+}
+
+/* Hover effect for section blocks */
+.blog-content p:hover {
+    transform: translateX(6px);
+    background: #f3f4f6;
+}
+
+/* Links */
+.blog-content a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.blog-content a:hover {
+    text-decoration: underline;
+}

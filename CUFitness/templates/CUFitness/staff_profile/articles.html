@@ -21,7 +21,7 @@
 
     <div class="card-grid">
         {% for article in articles %}
-            <a href="#">
+            <a href="{% url 'article_details' article.id %}">
                 <div class="card">
                     <h3>{{article.title}}</h3>
                     <p>{{article.description}}</p>

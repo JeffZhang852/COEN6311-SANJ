@@ -205,20 +205,28 @@ def articles(request):
     articles = Articles.objects.all()
     return render(request, "CUFitness/staff_profile/articles.html", {"articles":articles})
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
 def create_article(request):
     if request.method == "POST":
         form = ArticleForm(request.POST)
         if form.is_valid():
-            form.save(commit=False) #dont immedietly save because we need to add more data to the form (user, author...)
-            form.author = request.user
-            form.user = request.user
-            form.save() # now save everything
-            return redirect('articles.html')
+            article = form.save(commit=False) #dont immedietly save because we need to add more data to the form (user, author...)
+            article.author = request.user
+            article.save() # now save everything
+            return redirect('articles')
     else:
         form = ArticleForm()
     return render(request, "CUFitness/staff_profile/create_article.html", {"form":form})
 
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def article_details(request, id):
+    article_obj = get_object_or_404(Articles, id=id)
 
+    return render(request, "CUFitness/staff_profile/article_details.html", {
+        "article_obj": article_obj
+    })
 
 # ------------------------------------------------------------------
 

@@ -90,28 +90,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 class Articles(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
     # idk if we want that cause maybe we want to keep articles even staff are fired
-    user = models.ForeignKey(CustomUser, related_name="article", on_delete=models.CASCADE) # links each article to unique user
-    author = models.ForeignKey(CustomUser, related_name="author", on_delete=models.CASCADE)
+   # user = models.ForeignKey(CustomUser, related_name="article", on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, related_name="authors", on_delete=models.CASCADE)# links each article to unique user
     title = models.CharField(max_length=75)
 
     locked = models.BooleanField(default=False)
 
-    description = models.CharField(max_length = 250, blank=False, help_text="Add description here")
-    body = models.TextField()
+    description = models.CharField(max_length = 250, help_text="Add description here")
+    body = models.TextField(help_text="Add body here")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return (
-            f"{self.user}"
-            f"{self.created_at:%Y-%m-%d %H:%M}"
-            f"{self.updated_at:%Y-%m-%d %H:%M}"
-            f"{self.author}"
-            f"{self.title}"
-            f"{self.body}"
-            f"{self.locked}"
-            f"{self.description}"
+            f" {self.created_at:%Y-%m-%d %H:%M} - {self.updated_at:%Y-%m-%d %H:%M} - {self.author} - {self.title} - {self.body} - {self.locked} - {self.description}"
         )
 
 

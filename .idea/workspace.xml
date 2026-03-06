@@ -5,8 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CUFitness/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CUFitness/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/nutrition.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/nutrition.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff_profile/staff_base.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff_profile/staff_base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff_profile/articles.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff_profile/articles.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff_profile/create_article.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff_profile/create_article.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CUFitness/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CUFitness/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
