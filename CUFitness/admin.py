@@ -8,6 +8,7 @@ from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CoachRequestForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking,EquipmentList
 
+from .models import Articles
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -60,3 +61,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     list_filter = ('status', 'coach')
     search_fields = ('member__email', 'coach__email')
     date_hierarchy = 'start_time'
+
+
+# added to make the admin able to view the articles
+admin.site.register(Articles)

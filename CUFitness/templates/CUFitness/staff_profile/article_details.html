@@ -1,0 +1,35 @@
+{% extends 'CUFitness/staff_profile/staff_base.html' %}
+{% load static %}
+{% block title %} CUFitness {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'article_detail.css' %}">
+{% endblock %}
+{% block content %}
+{% if user.role == "STAFF" %}
+<div class="blog-container">
+
+    <!-- Header -->
+    <div class="blog-header">
+        <h1 class="blog-title">{{ article_obj.title }}</h1>
+
+        <div class="blog-meta">
+            <span>By {{ article_obj.author }}</span>
+            <span>•</span>
+            <span>{{ article_obj.created_at|date:"F d, Y" }}</span>
+        </div>
+
+        <p class="blog-description">
+            {{ article_obj.description }}
+        </p>
+    </div>
+
+    <!-- Body -->
+    <div class="blog-content">
+        {{ article_obj.body }}
+    </div>
+
+</div>
+{% else %}
+<p> not a staff member </p>
+{% endif %}
+{% endblock %}

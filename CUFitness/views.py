@@ -8,9 +8,9 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
+from .models import CustomUser, CoachAppointment, CoachAvailability, Equipment_Booking, Articles
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, ArticleForm
 
 
 User = get_user_model()
@@ -48,7 +48,9 @@ def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
 
 def nutrition(request):
-    return render(request, 'CUFitness/navbar/nutrition.html')
+    free_articles = Articles.objects.filter(locked=False)
+    locked_articles = Articles.objects.filter(locked=True)
+    return render(request, 'CUFitness/navbar/nutrition.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
 
 # -----------   Dropdown Menu Pages  -----------
@@ -139,6 +141,8 @@ def staff_login(request):
     else:
         return render(request, 'CUFitness/staff_profile/staff_login.html') # render the HTML template on first visit
 
+# prob not needed at this point
+# everything is handled through home function
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def staff_home(request):
@@ -159,7 +163,7 @@ def staff_home(request):
         "active_coaches": active_coaches,
     }
 
-    return render(request, "CUFitness/staff/dashboard.html", {"active_members":active_members,"active_coaches":active_coaches})
+    return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members":active_members,"active_coaches":active_coaches})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -193,6 +197,35 @@ def staff_user_detail(request, user_id):
 
     return render(request, "CUFitness/staff_profile/user_detail.html", {
         "user_obj": user_obj
+    })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def articles(request):
+    articles = Articles.objects.all()
+    return render(request, "CUFitness/staff_profile/articles.html", {"articles":articles})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def create_article(request):
+    if request.method == "POST":
+        form = ArticleForm(request.POST)
+        if form.is_valid():
+            article = form.save(commit=False) #dont immedietly save because we need to add more data to the form (user, author...)
+            article.author = request.user
+            article.save() # now save everything
+            return redirect('articles')
+    else:
+        form = ArticleForm()
+    return render(request, "CUFitness/staff_profile/create_article.html", {"form":form})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def article_details(request, id):
+    article_obj = get_object_or_404(Articles, id=id)
+
+    return render(request, "CUFitness/staff_profile/article_details.html", {
+        "article_obj": article_obj
     })
 
 # ------------------------------------------------------------------

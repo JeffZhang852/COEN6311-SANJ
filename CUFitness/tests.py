@@ -56,8 +56,10 @@ from CUFitness.models import (
     EquipmentList,
     Equipment_Booking,
     CoachAvailability,
-    CoachAppointment
+    CoachAppointment, Articles
+
 )
+User = get_user_model()
 
 
 class CustomUserModelTest(TestCase):
@@ -218,4 +220,55 @@ class CoachAppointmentTest(TestCase):
                 end_time=self.end + timedelta(minutes=30),
                 status="accepted"
             )
+
+
+
+class ArticlesModelTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="user@test.com",
+            password="password123"
+        )
+
+        self.author = User.objects.create_user(
+            email="author@test.com",
+            password="password123"
+        )
+
+        self.article = Articles.objects.create(
+            #user=self.user,
+            author=self.author,
+            title="Test Article",
+            body="This is a test article body.",
+            locked=False
+        )
+
+    def test_article_creation(self):
+        """Test article is created successfully"""
+        self.assertEqual(self.article.title, "Test Article")
+        self.assertEqual(self.article.body, "This is a test article body.")
+        self.assertFalse(self.article.locked)
+
+    def test_article_author_relationship(self):
+        """Test article is linked to the correct author"""
+        self.assertEqual(self.article.author, self.author)
+
+    def test_locked_field(self):
+        """Test locked field can be toggled"""
+        self.article.locked = True
+        self.article.save()
+
+        article = Articles.objects.get(id=self.article.id)
+        self.assertTrue(article.locked)
+
+    def test_str_method(self):
+        """Test __str__ method returns a string"""
+        self.assertIsInstance(str(self.article), str)
+
+    def test_article_timestamps(self):
+        """Test timestamps are auto created"""
+        self.assertIsNotNone(self.article.created_at)
+        self.assertIsNotNone(self.article.updated_at)
+
 
