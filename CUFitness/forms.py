@@ -1,13 +1,9 @@
-# registration form
-#django handles the backend database
 
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+
 from django import forms
 
-
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking
+from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking
 from .models import Articles
 
 

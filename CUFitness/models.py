@@ -85,7 +85,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
-
 # can also be used for messaging and contact us
 class Articles(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
@@ -121,7 +120,7 @@ class EquipmentList(models.Model):
     def __str__(self):
         return self.name
 
-class Equipment_Booking(models.Model):
+class EquipmentBooking(models.Model):
     equipment = models.ForeignKey(EquipmentList, on_delete=models.CASCADE, related_name='bookings')
     coach = models.ForeignKey('CustomUser', on_delete=models.CASCADE, limit_choices_to={'role': 'COACH'})
     member = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='training_sessions', null=True,
@@ -146,7 +145,7 @@ class Equipment_Booking(models.Model):
         if self.start_time >= self.end_time:
             raise ValidationError('End time must be after start time.')
 
-        overlapping = Equipment_Booking.objects.filter(
+        overlapping = EquipmentBooking.objects.filter(
             equipment=self.equipment,
             start_time__lt=self.end_time,
             end_time__gt=self.start_time,
@@ -163,6 +162,7 @@ class Equipment_Booking(models.Model):
 
     def __str__(self):
         return f"{self.equipment.name} booked by {self.coach.email} from {self.start_time} to {self.end_time}"
+
 
 class CoachAvailability(models.Model):
     coach = models.ForeignKey(

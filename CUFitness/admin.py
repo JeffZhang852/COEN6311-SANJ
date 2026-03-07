@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .forms import CustomUserCreationForm, CoachRequestForm
-from .models import CustomUser,CoachAppointment,CoachAvailability,Equipment_Booking,EquipmentList
+from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking,EquipmentList
 
 from .models import Articles
 
@@ -42,11 +42,11 @@ class EquipmentAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('name',)
 
-@admin.register(Equipment_Booking)
+@admin.register(EquipmentBooking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = ('equipment', 'coach', 'start_time', 'end_time', 'is_cancelled')
     list_filter = ('is_cancelled', 'coach')
-    search_fields = ('equipment__name', 'coach__email')
+    search_fields = ('EquipmentBooking_name', 'coach__email')
     date_hierarchy = 'start_time'
 
 @admin.register(CoachAvailability)

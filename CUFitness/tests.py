@@ -54,7 +54,7 @@ from datetime import timedelta
 from CUFitness.models import (
     CustomUser,
     EquipmentList,
-    Equipment_Booking,
+    EquipmentBooking,
     CoachAvailability,
     CoachAppointment, Articles
 
@@ -103,7 +103,7 @@ class EquipmentBookingTest(TestCase):
         self.end_time = self.start_time + timedelta(hours=1)
 
     def test_valid_booking(self):
-        booking = Equipment_Booking.objects.create(
+        booking = EquipmentBookingBooking.objects.create(
             equipment=self.equipment,
             coach=self.coach,
             start_time=self.start_time,
@@ -114,7 +114,7 @@ class EquipmentBookingTest(TestCase):
 
     def test_invalid_time_booking(self):
         with self.assertRaises(ValidationError):
-            Equipment_Booking.objects.create(
+            EquipmentBookingBooking.objects.create(
                 equipment=self.equipment,
                 coach=self.coach,
                 start_time=self.end_time,
@@ -122,7 +122,7 @@ class EquipmentBookingTest(TestCase):
             )
 
     def test_overlapping_booking(self):
-        Equipment_Booking.objects.create(
+        EquipmentBookingBooking.objects.create(
             equipment=self.equipment,
             coach=self.coach,
             start_time=self.start_time,
@@ -130,7 +130,7 @@ class EquipmentBookingTest(TestCase):
         )
 
         with self.assertRaises(ValidationError):
-            Equipment_Booking.objects.create(
+            EquipmentBookingBooking.objects.create(
                 equipment=self.equipment,
                 coach=self.coach,
                 start_time=self.start_time + timedelta(minutes=30),
