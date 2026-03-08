@@ -12,8 +12,27 @@ from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBo
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 from .forms import CustomUserCreationForm, ArticleForm
 
+from django.contrib.auth import update_session_auth_hash
+from .forms import UpdateEmailForm, UpdatePasswordForm
+
 
 User = get_user_model()
+
+# Role checker. Needed to tell which account it is.
+def is_member(user):
+    return user.is_authenticated and user.role == 'MEMBER'
+
+def is_coach(user):
+    return user.is_authenticated and user.role == 'COACH'
+
+def is_staff(user):
+    return user.is_authenticated and user.role == 'STAFF'
+
+#Not used yet
+def is_admin(user):
+    return user.is_authenticated and user.role == 'ADMIN'
+
+
 
 def home(request):
     if request.user.is_authenticated and request.user.role == 'STAFF':
@@ -52,7 +71,6 @@ def nutrition(request):
     locked_articles = Articles.objects.filter(locked=True)
     return render(request, 'CUFitness/navbar/nutrition.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
-
 # -----------   Dropdown Menu Pages  -----------
 def amenities(request):
     return render(request, 'CUFitness/dropdown/amenities.html')
@@ -66,13 +84,14 @@ def contact(request):
 def about(request):
     return render(request, 'CUFitness/dropdown/about.html')
 
-
 # -----------   Footer Pages  -----------
 def faq(request):
     return render(request, 'CUFitness/faq.html')
 
 def policy(request):
     return render(request, 'CUFitness/policy.html')
+
+
 
 
 # -----------   User Authentication   -----------
@@ -106,23 +125,63 @@ def logout_user(request):
     return redirect('home')
 
 
+
 # -----------   User Profile & Account   -----------
 @login_required(login_url='login')
 def user_profile(request):
     return render(request, 'CUFitness/user_profile/user_profile.html')
 
-# linked to forms.py
 @login_required(login_url='login')
-def update_user(request):
-    pass
-@login_required(login_url='login')
-def user_account(request):
-    return render(request, 'CUFitness/user_profile/user_account.html')
+@user_passes_test(lambda user: is_member(user) or is_coach(user))
+def user_settings(request):
+    """Settings page for members and coaches — email, password, privacy, coach request."""
+    privacy_form = PrivacySettingsForm(instance=request.user)
+    email_form = UpdateEmailForm(instance=request.user)
+    password_form = UpdatePasswordForm(user=request.user)
+
+    if request.method == 'POST':
+
+        if 'privacy_submit' in request.POST:
+            privacy_form = PrivacySettingsForm(request.POST, instance=request.user)
+            if privacy_form.is_valid():
+                privacy_form.save()
+                messages.success(request, 'Privacy settings updated.')
+                return redirect('settings')
+
+        elif 'email_submit' in request.POST:
+            email_form = UpdateEmailForm(request.POST, instance=request.user)
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(request, 'Email address updated.')
+                return redirect('settings')
+
+        elif 'password_submit' in request.POST:
+            password_form = UpdatePasswordForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # keeps the user logged in after a password change -- without that line, Django would log the user out immediately after saving the new password.
+                update_session_auth_hash(request, password_form.user)
+                messages.success(request, 'Password updated successfully.')
+                return redirect('settings')
+
+        elif 'coach_request_submit' in request.POST:
+            request.user.coach_request_status = 'PENDING'
+            request.user.save()
+            messages.success(request, 'Coach request submitted for approval.')
+            return redirect('settings')
+
+    context = {
+        'privacy_form': privacy_form,
+        'email_form': email_form,
+        'password_form': password_form,
+        'coach_request_status': request.user.coach_request_status,
+    }
+    return render(request, 'CUFitness/user_profile/settings.html', context)
+
 
 
 # -----------   Staff Pages  -----------
-def is_staff(user):
-    return user.is_authenticated and user.role == 'STAFF'
+
 
 def staff_login(request):
     if request.method == 'POST':
@@ -165,6 +224,28 @@ def staff_home(request):
 @user_passes_test(is_staff)
 def staff_profile(request):
     return render(request, 'CUFitness/staff_profile/staff_profile.html')
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def staff_settings(request):
+    """Settings page for staff — password only."""
+    password_form = UpdatePasswordForm(user=request.user)
+
+    if request.method == 'POST':
+        if 'password_submit' in request.POST:
+            password_form = UpdatePasswordForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # keeps the user logged in after a password change -- without that line, Django would log the user out immediately after saving the new password.
+                update_session_auth_hash(request, password_form.user)
+                messages.success(request, 'Password updated successfully.')
+                return redirect('staff_settings')
+
+    return render(request, 'CUFitness/staff_profile/staff_settings.html', {
+        'password_form': password_form,
+    })
+
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -215,11 +296,18 @@ def create_article(request):
         form = ArticleForm()
     return render(request, "CUFitness/staff_profile/create_article.html", {"form":form})
 
-def article_details(request, id):
-    article_obj = get_object_or_404(Articles, id=id)
 
-    return render(request, "CUFitness/staff_profile/article_details.html", {
-        "article_obj": article_obj
+def article_details(request, id):
+    article = get_object_or_404(Articles, id=id)
+
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff_profile/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+    else:
+        base = 'CUFitness/base.html'
+
+    return render(request, 'CUFitness/staff_profile/article_details.html', {
+        'article_obj': article,
+        'base_template': base,
     })
 
 @login_required(login_url='staff_login')
@@ -239,7 +327,6 @@ def edit_article(request, id):
             form = ArticleForm(instance=article)
     return render(request, 'CUFitness/staff_profile/edit_article.html', {'form': form, 'article': article})
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def delete_article(request, id):
@@ -258,53 +345,14 @@ def delete_article(request, id):
 
 # ------------------------------------------------------------------
 
-# Role checker. Needed to tell which account it is.
-def is_member(user):
-    return user.is_authenticated and user.role == 'MEMBER'
-
-def is_coach(user):
-    return user.is_authenticated and user.role == 'COACH'
-
-#Not used yet. only coach n member are needed for now
-def is_admin(user):
-    return user.is_authenticated and user.role == 'ADMIN'
-
 
 # --- Member Views ---
 
 @login_required(login_url='login')
 @user_passes_test(is_member)
-def settings_view(request):
-    """Member settings page"""
-    """Now has: privacy control and request coach role."""
-    privacy_form = PrivacySettingsForm(instance=request.user)
-    if request.method == 'POST':
-        if 'privacy_submit' in request.POST:
-            privacy_form = PrivacySettingsForm(request.POST, instance=request.user)
-            if privacy_form.is_valid():
-                privacy_form.save()
-                messages.success(request, 'Privacy settings updated.')
-                return redirect('settings')
-        elif 'coach_request_submit' in request.POST:
-            # Update coach_request_status to 'pending'
-            request.user.coach_request_status = 'PENDING'
-            request.user.save()
-            messages.success(request, 'Coach request submitted for approval.')
-            return redirect('settings')
-    context = {
-        'privacy_form': privacy_form,
-        'coach_request_status': request.user.coach_request_status,
-    }
-    return render(request, 'CUFitness/user_profile/settings.html', context)
-
-
-
-
-@login_required(login_url='login')
-@user_passes_test(is_member)
 def coach_list_view(request):
     """List all approved coaches."""
-    coaches = CustomUser.objects.filter(role='coach', is_active=True)
+    coaches = CustomUser.objects.filter(role='COACH', is_active=True)
 
 
     # TODO need a html page to display the list of coach. change url if necessary
@@ -373,7 +421,7 @@ def delete_availability(request, slot_id):
 @user_passes_test(is_coach)
 def manage_appointments(request):
     """View pending appointments and respond."""
-    pending = CoachAppointment.objects.filter(coach=request.user, status='pending').order_by('start_time')
+    pending = CoachAppointment.objects.filter(coach=request.user, status='PENDING').order_by('start_time')
     if request.method == 'POST':
         appointment_id = request.POST.get('appointment_id')
         appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user)

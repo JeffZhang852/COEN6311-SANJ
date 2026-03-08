@@ -29,8 +29,7 @@ urlpatterns = [
 
 # -----------   User Profile & Account   -----------
     path('user_profile/', views.user_profile, name='user_profile'),
-    path('update_user/', views.update_user, name='update_user'),
-    path('user_account/', views.user_account, name='user_account'),
+    path('user_settings/', views.user_settings, name='settings'),
 
 # -----------   Staff Pages  -----------
     path('staff_login/', views.staff_login, name='staff_login'),
@@ -40,6 +39,7 @@ urlpatterns = [
     path('requests/', views.requests, name='requests'),
     path('reports/', views.reports, name='reports'),
     path('messages/', views.private_messages, name='messages'),
+    path('staff_settings/', views.staff_settings, name='staff_settings'),
 
 # -----------   Article Pages  -----------
     path('articles/', views.articles, name='articles'),
@@ -57,7 +57,7 @@ urlpatterns = [
 
     # TODO Newly added.
 # Settings user setting. currently only member uses it.
-    path('settings/', views.settings_view, name='settings'),
+    path('user_settings/', views.user_settings, name='settings'),
 
 # Coach list
     path('coaches/', views.coach_list_view, name='coach_list'),

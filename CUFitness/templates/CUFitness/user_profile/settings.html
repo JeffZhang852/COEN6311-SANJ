@@ -1,10 +1,238 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/base.html' %}
+{% load static %}
+{% block title %} Settings — CUFitness {% endblock %}
 
-</body>
-</html>
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'settings.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <div class="settings-wrapper">
+
+        <!-- Page Header -->
+        <div class="settings-header">
+            <h1 class="settings-title">Account Settings</h1>
+            <p class="settings-subtitle">Manage your privacy and membership preferences</p>
+        </div>
+
+        <!-- User Info Banner -->
+        <div class="user-banner">
+            <div class="user-avatar">
+                {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                <span class="user-email">{{ request.user.email }}</span>
+            </div>
+            <div class="user-membership">
+                <span class="membership-badge {{ request.user.membership|lower }}">
+                    {{ request.user.get_membership_display }}
+                </span>
+            </div>
+        </div>
+
+        <div class="settings-grid">
+
+            <!-- ── Privacy Settings Card ── -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons">lock</span>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Privacy Settings</h2>
+                        <p class="card-desc">Control who can see your workout history</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="form-label">Workout History Visibility</label>
+
+                        <div class="radio-group">
+                            <label class="radio-option {% if request.user.workout_visibility == 'COACH_ONLY' %}selected{% endif %}">
+                                <input type="radio" name="workout_visibility" value="COACH_ONLY"
+                                    {% if request.user.workout_visibility == 'COACH_ONLY' %}checked{% endif %}>
+                                <div class="radio-content">
+                                    <span class="material-icons radio-icon">supervisor_account</span>
+                                    <div>
+                                        <span class="radio-title">Coach Only</span>
+                                        <span class="radio-desc">Only your assigned coach can view your workout history</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="radio-option {% if request.user.workout_visibility == 'PUBLIC' %}selected{% endif %}">
+                                <input type="radio" name="workout_visibility" value="PUBLIC"
+                                    {% if request.user.workout_visibility == 'PUBLIC' %}checked{% endif %}>
+                                <div class="radio-content">
+                                    <span class="material-icons radio-icon">public</span>
+                                    <div>
+                                        <span class="radio-title">Public</span>
+                                        <span class="radio-desc">All coaches and staff can view your workout history</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" name="privacy_submit" class="btn-primary">
+                        <span class="material-icons">save</span>
+                        Save Privacy Settings
+                    </button>
+                </form>
+            </div>
+
+
+            <!-- ── Email Card ── -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons">email</span>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Email Address</h2>
+                        <p class="card-desc">Update your login email address</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Current Email</label>
+                        <div class="current-value">{{ request.user.email }}</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_email">New Email Address</label>
+                        <input type="email" name="email" id="id_email"
+                               class="text-input" placeholder="Enter new email address" required>
+                        {% if email_form.email.errors %}
+                            <span class="field-error">{{ email_form.email.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="email_submit" class="btn-primary">
+                        <span class="material-icons">save</span>
+                        Update Email
+                    </button>
+                </form>
+                </div>
+
+                <!-- ── Password Card ── -->
+                <div class="settings-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons">key</span>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Change Password</h2>
+                        <p class="card-desc">Choose a strong password you don't use elsewhere</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label" for="id_old_password">Current Password</label>
+                        <input type="password" name="old_password" id="id_old_password"
+                               class="text-input" placeholder="Enter current password" required>
+                        {% if password_form.old_password.errors %}
+                            <span class="field-error">{{ password_form.old_password.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_new_password1">New Password</label>
+                        <input type="password" name="new_password1" id="id_new_password1"
+                               class="text-input" placeholder="Enter new password" required>
+                        {% if password_form.new_password1.errors %}
+                            <span class="field-error">{{ password_form.new_password1.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_new_password2">Confirm New Password</label>
+                        <input type="password" name="new_password2" id="id_new_password2"
+                               class="text-input" placeholder="Confirm new password" required>
+                        {% if password_form.new_password2.errors %}
+                            <span class="field-error">{{ password_form.new_password2.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="password_submit" class="btn-primary">
+                        <span class="material-icons">lock_reset</span>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+
+            {% if request.user.role == "MEMBER" %}
+            <!-- ── Coach Request Card ── -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons">fitness_center</span>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Become a Coach</h2>
+                        <p class="card-desc">Request to upgrade your account to a coach role</p>
+                    </div>
+                </div>
+
+                <!-- Status display -->
+                <div class="status-block status-{{ coach_request_status|lower }}">
+                    {% if coach_request_status == 'NONE' %}
+                        <span class="material-icons status-icon">info</span>
+                        <div>
+                            <span class="status-title">No Request Submitted</span>
+                            <span class="status-desc">Submit a request below to become a coach at CUFitness</span>
+                        </div>
+                    {% elif coach_request_status == 'PENDING' %}
+                        <span class="material-icons status-icon">hourglass_top</span>
+                        <div>
+                            <span class="status-title">Request Pending</span>
+                            <span class="status-desc">Your request is being reviewed by our staff</span>
+                        </div>
+                    {% elif coach_request_status == 'APPROVED' %}
+                        <span class="material-icons status-icon">check_circle</span>
+                        <div>
+                            <span class="status-title">Request Approved!</span>
+                            <span class="status-desc">Your account has been upgraded to coach status</span>
+                        </div>
+                    {% elif coach_request_status == 'REJECTED' %}
+                        <span class="material-icons status-icon">cancel</span>
+                        <div>
+                            <span class="status-title">Request Rejected</span>
+                            <span class="status-desc">Your request was not approved. You may submit a new request</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Only show the button if they haven't already applied or been approved -->
+                {% if coach_request_status == 'NONE' or coach_request_status == 'REJECTED' %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" name="coach_request_submit" class="btn-secondary">
+                        <span class="material-icons">send</span>
+                        Submit Coach Request
+                    </button>
+                </form>
+                {% elif coach_request_status == 'PENDING' %}
+                <button class="btn-secondary disabled" disabled>
+                    <span class="material-icons">hourglass_top</span>
+                    Request Pending Review
+                </button>
+                {% elif coach_request_status == 'APPROVED' %}
+                <button class="btn-secondary disabled" disabled>
+                    <span class="material-icons">check_circle</span>
+                    Already a Coach
+                </button>
+                {% endif %}
+
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

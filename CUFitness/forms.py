@@ -6,6 +6,8 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking
 from .models import Articles
 
+from django.contrib.auth.forms import PasswordChangeForm
+
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -32,6 +34,24 @@ class ArticleForm(forms.ModelForm):
         fields = ['title','description', 'body', 'locked']
         exclude = ["author"] # we set it manually
         widgets = {}
+
+class UpdateEmailForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['email']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Make sure no other user already has this email
+        if CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError('This email address is already in use.')
+        return email
+
+class UpdatePasswordForm(PasswordChangeForm):
+    # PasswordChangeForm already handles old/new/confirm password validation
+    pass
+
+
 
 class CoachRequestForm(forms.ModelForm):
     class Meta:
