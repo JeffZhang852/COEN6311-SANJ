@@ -1,0 +1,80 @@
+{% extends 'CUFitness/staff_profile/staff_base.html' %}
+{% load static %}
+{% block title %} Settings — CUFitness {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <div class="settings-wrapper">
+
+        <div class="settings-header">
+            <h1 class="settings-title">Account Settings</h1>
+            <p class="settings-subtitle">Manage your staff account</p>
+        </div>
+
+        <div class="user-banner">
+            <div class="user-avatar">
+                {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                <span class="user-email">{{ request.user.email }}</span>
+            </div>
+            <div class="user-membership">
+                <span class="membership-badge" style="background:#374151; color:#d1d5db;">Staff</span>
+            </div>
+        </div>
+
+        <div class="settings-grid" style="grid-template-columns: 1fr;">
+
+            <!-- Password Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons">key</span>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Change Password</h2>
+                        <p class="card-desc">Choose a strong password you don't use elsewhere</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label" for="id_old_password">Current Password</label>
+                        <input type="password" name="old_password" id="id_old_password"
+                               class="text-input" placeholder="Enter current password" required>
+                        {% if password_form.old_password.errors %}
+                            <span class="field-error">{{ password_form.old_password.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_new_password1">New Password</label>
+                        <input type="password" name="new_password1" id="id_new_password1"
+                               class="text-input" placeholder="Enter new password" required>
+                        {% if password_form.new_password1.errors %}
+                            <span class="field-error">{{ password_form.new_password1.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_new_password2">Confirm New Password</label>
+                        <input type="password" name="new_password2" id="id_new_password2"
+                               class="text-input" placeholder="Confirm new password" required>
+                        {% if password_form.new_password2.errors %}
+                            <span class="field-error">{{ password_form.new_password2.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="password_submit" class="btn-primary">
+                        <span class="material-icons">lock_reset</span>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

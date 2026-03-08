@@ -1,4 +1,7 @@
-{% extends 'CUFitness/staff_profile/staff_base.html' %}
+
+<!-- passed from the view function in views.py based role of user (staff or not) -->
+{% extends base_template %}
+
 {% load static %}
 {% block title %} CUFitness - {{ article_obj.title }} {% endblock %}
 {% block extra_styles %}
@@ -13,32 +16,34 @@
 
         <!-- Header -->
         <div class="blog-header">
-            <div class="title-row">
-                <h1 class="blog-title">{{ article_obj.title }}</h1>
-                <div class="article-actions">
+        <div class="title-row">
+            <h1 class="blog-title">{{ article_obj.title }}</h1>
 
-                    {% if user == article_obj.author %}
-                        <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
-                            <span class="material-icons">edit</span>
-                            <span>Edit Article</span>
-                        </a>
-                        <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
-                            <span class="material-icons">delete</span>
-                            <span>Delete Article</span>
-                        </button>
-                    {% else %}
-                        <button class="edit-btn disabled" disabled title="Only the author can edit this article">
-                            <span class="material-icons">edit</span>
-                            <span>Edit Article</span>
-                        </button>
-                        <button class="delete-btn disabled" disabled title="Only the author can delete this article">
-                            <span class="material-icons">delete</span>
-                            <span>Delete Article</span>
-                        </button>
-                    {% endif %}
-
-                </div>
+            {% if user.is_authenticated and user.role == "STAFF" %}
+            <div class="article-actions">
+                {% if user == article_obj.author %}
+                    <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
+                        <span class="material-icons">edit</span>
+                        <span>Edit Article</span>
+                    </a>
+                    <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+                        <span class="material-icons">delete</span>
+                        <span>Delete Article</span>
+                    </button>
+                {% else %}
+                    <button class="edit-btn disabled" disabled title="Only the author can edit this article">
+                        <span class="material-icons">edit</span>
+                        <span>Edit Article</span>
+                    </button>
+                    <button class="delete-btn disabled" disabled title="Only the author can delete this article">
+                        <span class="material-icons">delete</span>
+                        <span>Delete Article</span>
+                    </button>
+                {% endif %}
             </div>
+            {% endif %}
+
+        </div>
 
             <div class="blog-meta">
                 <div class="meta-avatar">{{ article_obj.author.first_name|first }}{{ article_obj.author.last_name|first }}</div>
