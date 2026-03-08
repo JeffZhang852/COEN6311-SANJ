@@ -100,9 +100,10 @@ class Articles(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# what the admin sees on the article list page
     def __str__(self):
         return (
-            f" {self.created_at:%Y-%m-%d %H:%M} - {self.updated_at:%Y-%m-%d %H:%M} - {self.author} - {self.title} - {self.body} - {self.locked} - {self.description}"
+            f" {self.created_at:%Y-%m-%d %H:%M} - {self.updated_at:%Y-%m-%d %H:%M} - {self.author} - {self.title} - {self.locked} - {self.description}"
         )
 
 
@@ -201,10 +202,10 @@ class CoachAvailability(models.Model):
 
 class CoachAppointment(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-        ('refused', 'Refused'),
-        ('cancelled', 'Cancelled'),
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REFUSED', 'Refused'),
+        ('CANCELLED', 'Cancelled'),
     ]
     coach = models.ForeignKey(
         CustomUser,

@@ -36,7 +36,7 @@ urlpatterns = [
     path('staff_home/', views.staff_home, name='staff_home'),
     path('staff_profile/', views.staff_profile, name='staff_profile'),
     path('members/', views.members, name='members'),
-    path('requests/', views.requests, name='requests'),
+    path('coach_requests/', views.coach_requests, name='coach_requests'),
     path('reports/', views.reports, name='reports'),
     path('messages/', views.private_messages, name='messages'),
     path('staff_settings/', views.staff_settings, name='staff_settings'),
@@ -52,6 +52,9 @@ urlpatterns = [
     # path to edit article page from article_details page
     path("staff/article/<int:id>/edit/", views.edit_article, name="edit_article"),
     path("staff/article/<int:id>/delete/", views.delete_article, name="delete_article"),
+
+# -----------   Coach Request Handling  -----------
+    path("staff/coach-request/<int:user_id>/", views.handle_coach_request, name="handle_coach_request"),  # NEW
 
 
 # -----------   Coach Pages  -----------

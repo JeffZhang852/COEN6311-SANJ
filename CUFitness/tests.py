@@ -35,6 +35,22 @@ Form validation tests — tests ArticleForm, CustomUserCreationForm, and Privacy
 Nutrition page tests — checks that free/locked articles are passed in the correct context variables
 Public pages tests — a simple smoke test that every public URL returns a 200. Quick to run and immediately catches broken URL configs or template errors.
 
+CoachRequestSubmissionGuardTest:
+    - tests the server-side guard you need to add to user_settings.
+    - Verifies that PENDING and APPROVED members can't reset their status via a direct POST, while NONE and REJECTED members can submit normally.
+
+StaffRequestsPageTest:
+    - tests the /coach_requests/ page itself.
+    - Covers access control (unauthenticated + member blocked), that each status bucket (pending_requests, approved_requests, rejected_requests) is correctly populated in context,
+    - that NONE-status members don't leak into any list, and that multiple pending members all show up.
+
+HandleCoachRequestTest:
+    - access control (unauthenticated + member blocked),
+    - safe GET redirect, approve sets status + promotes role to COACH,
+    - reject sets status + leaves role as MEMBER, redirects after both actions,
+    - invalid action value does nothing, acting on a user with no request is blocked, 404 on nonexistent user,
+    - re-approving a previously rejected request works, and any staff member can handle requests (not just a specific one).
+
 """
 
 from django.test import TestCase, Client
@@ -743,6 +759,293 @@ class CoachRequestTest(TestCase):
         self.member.refresh_from_db()
         self.assertEqual(self.member.coach_request_status, 'PENDING')
 
+# ══════════════════════════════════════════════════
+# COACH REQUEST — MEMBER SUBMISSION GUARD TESTS
+# (extends existing CoachRequestTest)
+# ══════════════════════════════════════════════════
+
+class CoachRequestSubmissionGuardTest(TestCase):
+    """
+    Tests the server-side guard on coach_request_submit in user_settings.
+    Covers edge cases that the template buttons alone can't prevent.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.member = make_member()
+
+    def test_pending_member_cannot_resubmit(self):
+        """A member with PENDING status should not be able to reset back to PENDING via a direct POST."""
+        self.member.coach_request_status = 'PENDING'
+        self.member.save()
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.member.refresh_from_db()
+        # status should remain PENDING, not be reset
+        self.assertEqual(self.member.coach_request_status, 'PENDING')
+
+    def test_approved_member_cannot_resubmit(self):
+        """An already-approved member should not be able to reset their status back to PENDING."""
+        self.member.coach_request_status = 'APPROVED'
+        self.member.save()
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'APPROVED')
+
+    def test_rejected_member_can_resubmit(self):
+        """A member whose request was rejected should be allowed to submit again."""
+        self.member.coach_request_status = 'REJECTED'
+        self.member.save()
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'PENDING')
+
+    def test_none_member_can_submit(self):
+        """A member with no prior request (NONE) should be able to submit."""
+        self.assertEqual(self.member.coach_request_status, 'NONE')
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'PENDING')
+
+
+# ══════════════════════════════════════════════════
+# STAFF REQUESTS PAGE TESTS
+# ══════════════════════════════════════════════════
+
+class StaffRequestsPageTest(TestCase):
+    """Tests the /requests/ staff page — loading, context data, and access control."""
+
+    def setUp(self):
+        self.client = Client()
+        self.staff = make_staff()
+        self.member = make_member()
+        self.other_member = make_member(email='other@test.com')
+
+    def test_requests_page_loads_for_staff(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('coach_requests'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_unauthenticated_cannot_access_requests_page(self):
+        response = self.client.get(reverse('coach_requests'))
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_member_cannot_access_requests_page(self):
+        self.client.force_login(self.member)
+        response = self.client.get(reverse('coach_requests'))
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_pending_requests_in_context(self):
+        """Members with PENDING status should appear in pending_requests context."""
+        self.member.coach_request_status = 'PENDING'
+        self.member.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('coach_requests'))
+        self.assertIn(self.member, response.context['pending_requests'])
+
+    def test_approved_requests_in_context(self):
+        """Members with APPROVED status should appear in approved_requests context."""
+        self.member.coach_request_status = 'APPROVED'
+        self.member.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('coach_requests'))
+        self.assertIn(self.member, response.context['approved_requests'])
+
+    def test_rejected_requests_in_context(self):
+        """Members with REJECTED status should appear in rejected_requests context."""
+        self.member.coach_request_status = 'REJECTED'
+        self.member.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('coach_requests'))
+        self.assertIn(self.member, response.context['rejected_requests'])
+
+    def test_none_status_members_not_in_any_list(self):
+        """Members who never submitted a request should not appear in any context list."""
+        self.assertEqual(self.member.coach_request_status, 'NONE')
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('coach_requests'))
+        self.assertNotIn(self.member, response.context['pending_requests'])
+        self.assertNotIn(self.member, response.context['approved_requests'])
+        self.assertNotIn(self.member, response.context['rejected_requests'])
+
+    def test_multiple_pending_requests_all_shown(self):
+        """All pending members should appear, not just the first one."""
+        self.member.coach_request_status = 'PENDING'
+        self.member.save()
+        self.other_member.coach_request_status = 'PENDING'
+        self.other_member.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('coach_requests'))
+        pending = list(response.context['pending_requests'])
+        self.assertIn(self.member, pending)
+        self.assertIn(self.other_member, pending)
+
+
+# ══════════════════════════════════════════════════
+# HANDLE COACH REQUEST VIEW TESTS
+# ══════════════════════════════════════════════════
+
+class HandleCoachRequestTest(TestCase):
+    """
+    Tests the handle_coach_request view — approving, rejecting,
+    role promotion, access control, and invalid inputs.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.staff = make_staff()
+        self.other_staff = make_staff(email='otherstaff@test.com')
+        self.member = make_member()
+        # Put member in PENDING so actions are valid
+        self.member.coach_request_status = 'PENDING'
+        self.member.save()
+
+    # --- Access control ---
+
+    def test_unauthenticated_cannot_access(self):
+        response = self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_member_cannot_access(self):
+        other_member = make_member(email='another@test.com')
+        self.client.force_login(other_member)
+        response = self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_get_request_redirects_without_changes(self):
+        """A GET to this URL should redirect safely and not change anything."""
+        self.client.force_login(self.staff)
+        response = self.client.get(
+            reverse('handle_coach_request', args=[self.member.id])
+        )
+        self.assertRedirects(response, reverse('coach_requests'))
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'PENDING')
+
+    # --- Approve ---
+
+    def test_approve_sets_status_to_approved(self):
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'APPROVED')
+
+    def test_approve_promotes_role_to_coach(self):
+        """Approving a request must also change the user's role to COACH."""
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.role, 'COACH')
+
+    def test_approve_redirects_to_requests_page(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.assertRedirects(response, reverse('coach_requests'))
+
+    # --- Reject ---
+
+    def test_reject_sets_status_to_rejected(self):
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'REJECTED'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'REJECTED')
+
+    def test_reject_does_not_change_role(self):
+        """Rejecting a request must NOT change the user's role — they stay MEMBER."""
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'REJECTED'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.role, 'MEMBER')
+
+    def test_reject_redirects_to_requests_page(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'REJECTED'}
+        )
+        self.assertRedirects(response, reverse('coach_requests'))
+
+    # --- Edge cases ---
+
+    def test_invalid_action_does_not_change_status(self):
+        """Sending a garbage action value should not modify the member."""
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'MAKE_ADMIN'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'PENDING')
+        self.assertEqual(self.member.role, 'MEMBER')
+
+    def test_cannot_act_on_member_with_no_request(self):
+        """Acting on a user whose status is NONE should be blocked."""
+        no_request_member = make_member(email='norequst@test.com')
+        self.assertEqual(no_request_member.coach_request_status, 'NONE')
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[no_request_member.id]),
+            {'action': 'APPROVED'}
+        )
+        no_request_member.refresh_from_db()
+        # Should not have been approved
+        self.assertNotEqual(no_request_member.coach_request_status, 'APPROVED')
+        self.assertNotEqual(no_request_member.role, 'COACH')
+
+    def test_nonexistent_user_returns_404(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse('handle_coach_request', args=[99999]),
+            {'action': 'APPROVED'}
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_approve_rejected_request_works(self):
+        """Staff should be able to approve a previously rejected request."""
+        self.member.coach_request_status = 'REJECTED'
+        self.member.save()
+        self.client.force_login(self.staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.coach_request_status, 'APPROVED')
+        self.assertEqual(self.member.role, 'COACH')
+
+    def test_any_staff_member_can_handle_requests(self):
+        """It should not matter which staff member approves — any staff can do it."""
+        self.client.force_login(self.other_staff)
+        self.client.post(
+            reverse('handle_coach_request', args=[self.member.id]),
+            {'action': 'APPROVED'}
+        )
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.role, 'COACH')
 
 # ══════════════════════════════════════════════════
 # PUBLIC PAGES TESTS
