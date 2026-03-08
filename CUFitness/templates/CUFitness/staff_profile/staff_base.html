@@ -19,15 +19,25 @@
 <!-- Title shows in browser tab -->
 <title> {% block title %} CUFitness {% endblock %}</title>
 
+
+<style>
+    :root {
+        --color-primary: rgba(145, 35, 56, 1);
+        --color-accent:  rgba(200, 180, 105, 1);
+        --color-primary-hover: rgba(157, 37, 60, 1);
+        --color-accent-hover:  rgba(190, 170, 105, 1);
+    }
+</style>
+
 <!-- Google Font Import (Poppins font family) -->
 <!-- This loads the font from Google's servers -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <!-- ICONS -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <!-- External CSS File -->
-<!-- This connects the HTML file to static/style.css -->
 <link rel="stylesheet" href="{% static 'base_style.css' %}">
 <link rel="stylesheet" href="{% static 'footer.css' %}" />
 <link rel="stylesheet" href="{% static 'dropdown.css' %}" />
@@ -38,7 +48,6 @@
 
 <body>
 
-<!-- Everything visible on the website goes inside the body -->
 <!-- display alert messages if any -->
 {% if messages %}
 {% for message in messages %}
@@ -52,7 +61,6 @@
 {% endif %}
 
 <!-- ================= HEADER ================= -->
-<!-- Contains logo and navigation links -->
 <header>
 <h1>
 <a href="/">CUFitness</a>

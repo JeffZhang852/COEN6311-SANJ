@@ -8,7 +8,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, Equipment_Booking, Articles
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Articles
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 from .forms import CustomUserCreationForm, ArticleForm
 
@@ -84,20 +84,21 @@ class Register(generic.CreateView):
 
 def login_user(request):
     if request.method == 'POST':
-        email = request.POST['email'] # change these to whatever fields put in the form
+        email = request.POST['email']
         password = request.POST['password']
         user = authenticate(request, email=email, password=password)
         if user is not None and (user.role == 'MEMBER' or user.role == 'COACH'):
             login(request, user)
-            # display the first_name of the logged-in user
-            messages.success(request, 'You have been logged in as ' + User.objects.get(email=email).first_name)
-
-            return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
+            messages.success(request, 'You have been logged in as ' + user.first_name)
+            return redirect('home')
+        elif user is not None and user.role == 'STAFF':
+            messages.error(request, 'Staff members go to staff login')
+            return redirect('staff_login')
         else:
-            messages.success(request, 'Invalid Account Email or Password')
+            messages.error(request, 'Invalid Account Email or Password')
             return redirect('login')
     else:
-        return render(request, 'CUFitness/authentication_templates/login.html') # render the HTML template on first visit
+        return render(request, 'CUFitness/authentication_templates/login.html')
 
 def logout_user(request):
     logout(request)
@@ -132,11 +133,11 @@ def staff_login(request):
         if user is not None and user.role == 'STAFF':
             login(request, user)
             # display the first_name of the logged-in user
-            messages.success(request, 'You have been logged in as ' + User.objects.get(email=email).first_name)
+            messages.success(request, 'You have been logged in as ' + user.first_name)
 
             return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
         else:
-            messages.success(request, 'Invalid Account Email or Password')
+            messages.error(request, 'Invalid Account Email or Password')
             return redirect('staff_login')
     else:
         return render(request, 'CUFitness/staff_profile/staff_login.html') # render the HTML template on first visit
@@ -157,11 +158,6 @@ def staff_home(request):
         role="COACH",
         is_active=True
     ).order_by("first_name")
-
-    context = {
-        "active_members": active_members,
-        "active_coaches": active_coaches,
-    }
 
     return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members":active_members,"active_coaches":active_coaches})
 
@@ -219,14 +215,46 @@ def create_article(request):
         form = ArticleForm()
     return render(request, "CUFitness/staff_profile/create_article.html", {"form":form})
 
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff)
 def article_details(request, id):
     article_obj = get_object_or_404(Articles, id=id)
 
     return render(request, "CUFitness/staff_profile/article_details.html", {
         "article_obj": article_obj
     })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def edit_article(request, id):
+    article = get_object_or_404(Articles, id=id)
+    if request.user != article.author:
+        messages.error(request, 'You do not have permission to edit this article.')
+        return redirect('articles')
+    if request.method == 'POST':
+        form = ArticleForm(request.POST, instance=article)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Article updated successfully.')
+            return redirect('article_details', id=article.id)
+    else:
+            form = ArticleForm(instance=article)
+    return render(request, 'CUFitness/staff_profile/edit_article.html', {'form': form, 'article': article})
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def delete_article(request, id):
+    article = get_object_or_404(Articles, id=id)
+
+    if request.user != article.author:
+        messages.error(request, 'You do not have permission to delete this article.')
+        return redirect('articles')
+
+    if request.method == 'POST':
+        article.delete()
+        messages.success(request, 'Article deleted successfully.')
+        return redirect('articles')
+
+    return redirect('article_details', id=id)
 
 # ------------------------------------------------------------------
 

@@ -15,7 +15,7 @@
 
         <div class="card-grid">
             {% for free_article in free_articles %}
-                <a href="#">
+                <a href="{% url 'article_details' free_article.id %}">
                     <div class="card">
                         <h3>{{free_article.title}}</h3>
                         <p>{{free_article.description}}</p>
@@ -28,7 +28,7 @@
 
             {% if user.is_authenticated %}
                 {% for locked_article in locked_articles %}
-                    <a href="#">
+                    <a href="{% url 'article_details' locked_article.id %}">
                         <div class="card">
                             <h3>{{locked_article.title}}</h3>
                             <p>{{locked_article.description}}</p>

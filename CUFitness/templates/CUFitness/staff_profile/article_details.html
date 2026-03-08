@@ -1,35 +1,78 @@
 {% extends 'CUFitness/staff_profile/staff_base.html' %}
 {% load static %}
-{% block title %} CUFitness {% endblock %}
+{% block title %} CUFitness - {{ article_obj.title }} {% endblock %}
 {% block extra_styles %}
-<link rel="stylesheet" href="{% static 'article_detail.css' %}">
+<link rel="stylesheet" href="{% static 'article_details.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
 {% endblock %}
+
 {% block content %}
-{% if user.role == "STAFF" %}
-<div class="blog-container">
+<div class="article-page">
+    <div class="blog-container">
 
-    <!-- Header -->
-    <div class="blog-header">
-        <h1 class="blog-title">{{ article_obj.title }}</h1>
+        <!-- Header -->
+        <div class="blog-header">
+            <div class="title-row">
+                <h1 class="blog-title">{{ article_obj.title }}</h1>
+                {% if user.role == "STAFF" %}
+                    <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
+                        <span class="material-icons edit">edit</span>
+                        <span>Edit Article</span>
+                    </a>
 
-        <div class="blog-meta">
-            <span>By {{ article_obj.author }}</span>
-            <span>•</span>
-            <span>{{ article_obj.created_at|date:"F d, Y" }}</span>
+                    <!-- Delete button triggers popup -->
+                    {% if user == article_obj.author %}
+                        <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+                            <span class="material-icons">delete</span>
+                            <span>Delete Article</span>
+                        </button>
+                    {% else %}
+                        <button class="delete-btn disabled" disabled title="Only the author can delete this article">
+                            <span class="material-icons">delete</span>
+                            <span>Delete Article</span>
+                        </button>
+                    {% endif %}
+
+                        <!-- Confirmation popup -->
+                        <div id="delete-modal" class="modal-overlay">
+                            <div class="modal-box">
+                                <h3>Delete Article</h3>
+                                <p>Are you sure you want to delete <strong>{{ article_obj.title }}</strong>? This cannot be undone.</p>
+                                <div class="modal-actions">
+                                    <form method="POST" action="{% url 'delete_article' article_obj.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-confirm-delete">Yes, Delete</button>
+                                    </form>
+                                    <button class="btn-cancel" onclick="document.getElementById('delete-modal').style.display='none'">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                {% endif %}
+            </div>
+
+            <div class="blog-meta">
+                <div class="meta-avatar">{{ article_obj.author.first_name|first }}{{ article_obj.author.last_name|first }}</div>
+                <div class="meta-info">
+                    <span class="meta-author">{{ article_obj.author.first_name }} {{ article_obj.author.last_name }}</span>
+                    <span class="meta-date">{{ article_obj.created_at|date:"F d, Y" }}</span>
+                </div>
+            </div>
+
+            <p class="blog-description">{{ article_obj.description }}</p>
         </div>
 
-        <p class="blog-description">
-            {{ article_obj.description }}
-        </p>
-    </div>
+        <div class="blog-divider"></div>
 
-    <!-- Body -->
-    <div class="blog-content">
-        {{ article_obj.body }}
-    </div>
+        <!-- Body -->
+        <div class="blog-content">
+            {{ article_obj.body|linebreaks }}
+        </div>
 
+    </div>
 </div>
-{% else %}
-<p> not a staff member </p>
-{% endif %}
 {% endblock %}

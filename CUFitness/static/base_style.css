@@ -101,7 +101,7 @@ nav a:hover {
 
 /* Button hover effect */
 .btn:hover {
-	background-color: rgba(157,37,60,1);
+	background-color: var(--color-primary-hover);
 	color: white;
 }
 
@@ -145,7 +145,7 @@ section {
 /* Lift effect on hover */
 .card:hover {
 	transform: translateY(-10px);
-	background-color: rgba(157,37,60,1);
+	background-color: var(--color-primary-hover);
 }
 
 /* ================= PRICING SECTION ================= */

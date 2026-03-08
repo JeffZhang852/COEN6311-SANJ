@@ -11,7 +11,6 @@ urlpatterns = [
     path ("memberships/", views.memberships, name='memberships'),
     path("trainers/", views.trainers, name='trainers'),
     path ("nutrition/", views.nutrition, name='nutrition'),
-    path ("amenities/", views.amenities, name='amenities'),
 
 # -----------   Dropdown Menu Pages  -----------
     path ("amenities/", views.amenities, name='amenities'),
@@ -41,13 +40,18 @@ urlpatterns = [
     path('requests/', views.requests, name='requests'),
     path('reports/', views.reports, name='reports'),
     path('messages/', views.private_messages, name='messages'),
+
+# -----------   Article Pages  -----------
     path('articles/', views.articles, name='articles'),
     path('create_article/', views.create_article, name='create_article'),
+    # path to article pages from staff-articles page
+    path("staff/article/<int:id>/", views.article_details, name="article_details"),
+    # path to edit article page from article_details page
+    path("staff/article/<int:id>/edit/", views.edit_article, name="edit_article"),
+    path("staff/article/<int:id>/delete/", views.delete_article, name="delete_article"),
 
 # path to user profiles from staff_home page
     path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
-# path to article pages from staff-articles page
-    path("staff/article/<int:id>/", views.article_details, name="article_details"),
 
 # -----------   Coach Pages  -----------
 

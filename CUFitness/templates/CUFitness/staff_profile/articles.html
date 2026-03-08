@@ -7,7 +7,7 @@
 {% block content %}
 
 
-{% if user.role == "STAFF" and user.is_authenticated %}
+{% if user.is_authenticated and user.role == "STAFF" %}
 
 
 <section class="content-section">
@@ -38,9 +38,9 @@
 
 
 
-
-
 {% else %}
+
 <p> not a staff member </p>
+
 {% endif %}
 {% endblock %}
