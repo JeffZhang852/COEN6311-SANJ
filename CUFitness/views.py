@@ -287,7 +287,7 @@ def settings_view(request):
                 return redirect('settings')
         elif 'coach_request_submit' in request.POST:
             # Update coach_request_status to 'pending'
-            request.user.coach_request_status = 'pending'
+            request.user.coach_request_status = 'PENDING'
             request.user.save()
             messages.success(request, 'Coach request submitted for approval.')
             return redirect('settings')
@@ -295,7 +295,9 @@ def settings_view(request):
         'privacy_form': privacy_form,
         'coach_request_status': request.user.coach_request_status,
     }
-    return render(request, 'CUFitness/settings.html', context)
+    return render(request, 'CUFitness/user_profile/settings.html', context)
+
+
 
 
 @login_required(login_url='login')
@@ -317,7 +319,7 @@ def coach_dashboard(request):
     upcoming_appointments = CoachAppointment.objects.filter(
         coach=request.user,
         start_time__gte=timezone.now(),
-        status__in=['pending', 'accepted']
+        status__in=['PENDING', 'ACCEPTED']
     )
     past_appointments = CoachAppointment.objects.filter(
         coach=request.user,

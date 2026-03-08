@@ -33,7 +33,6 @@ class ArticleForm(forms.ModelForm):
         exclude = ["author"] # we set it manually
         widgets = {}
 
-
 class CoachRequestForm(forms.ModelForm):
     class Meta:
         model = CustomUser
