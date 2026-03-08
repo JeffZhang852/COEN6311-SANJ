@@ -1,5 +1,3 @@
-
-
 from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -97,7 +95,7 @@ class AppointmentResponseForm(forms.ModelForm):
     def clean(self):
         status = self.cleaned_data.get('status')
         reason = self.cleaned_data.get('refusal_reason')
-        if status == 'refused' and not reason:
+        if status == 'REFUSED' and not reason:
             raise forms.ValidationError("Please provide a reason for refusal.")
         return self.cleaned_data
 

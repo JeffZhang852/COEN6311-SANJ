@@ -228,7 +228,7 @@ class CoachAppointment(models.Model):
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     refusal_reason = models.TextField(blank=True, help_text='Reason if refused')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -240,12 +240,12 @@ class CoachAppointment(models.Model):
         if self.start_time >= self.end_time:
             raise ValidationError('End time must be after start time.')
         # Check coach is not double-booked (excluding pending? maybe only accepted)
-        if self.status == 'accepted':
+        if self.status == 'ACCEPTED':
             overlapping = CoachAppointment.objects.filter(
                 coach=self.coach,
                 start_time__lt=self.end_time,
                 end_time__gt=self.start_time,
-                status='accepted'
+                status='ACCEPTED'
             )
             if self.pk:
                 overlapping = overlapping.exclude(pk=self.pk)

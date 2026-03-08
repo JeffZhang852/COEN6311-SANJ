@@ -1,4 +1,3 @@
-
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
@@ -421,7 +420,7 @@ def coach_dashboard(request):
     upcoming_appointments = CoachAppointment.objects.filter(
         coach=request.user,
         start_time__gte=timezone.now(),
-        status__in=['pending', 'accepted']
+        status__in=['PENDING', 'ACCEPTED']
     )
     past_appointments = CoachAppointment.objects.filter(
         coach=request.user,
@@ -475,7 +474,7 @@ def delete_availability(request, slot_id):
 @user_passes_test(is_coach)
 def manage_appointments(request):
     """View pending appointments and respond."""
-    pending = CoachAppointment.objects.filter(coach=request.user, status='pending').order_by('start_time')
+    pending = CoachAppointment.objects.filter(coach=request.user, status='PENDING').order_by('start_time')
     if request.method == 'POST':
         appointment_id = request.POST.get('appointment_id')
         appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user)
@@ -494,4 +493,3 @@ def manage_appointments(request):
     # TODO New url needed
 
     return render(request, 'CUFitness/manage_appointments.html', context)
-

@@ -264,10 +264,10 @@ class CoachAppointmentTest(TestCase):
             member=self.member,
             start_time=self.start,
             end_time=self.end,
-            status="accepted"
+            status="ACCEPTED"
         )
 
-        self.assertEqual(appointment.status, "accepted")
+        self.assertEqual(appointment.status, "ACCEPTED")
 
     def test_double_booking_accepted(self):
         CoachAppointment.objects.create(
@@ -275,7 +275,7 @@ class CoachAppointmentTest(TestCase):
             member=self.member,
             start_time=self.start,
             end_time=self.end,
-            status="accepted"
+            status="ACCEPTED"
         )
 
         with self.assertRaises(ValidationError):
@@ -284,7 +284,7 @@ class CoachAppointmentTest(TestCase):
                 member=self.member,
                 start_time=self.start + timedelta(minutes=30),
                 end_time=self.end + timedelta(minutes=30),
-                status="accepted"
+                status="ACCEPTED"
             )
 
 class ArticlesModelTest(TestCase):
