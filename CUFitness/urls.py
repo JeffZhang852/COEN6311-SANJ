@@ -27,7 +27,7 @@ urlpatterns = [
     path ("login/", views.login_user, name='login'),
     path ('logout/', views.logout_user, name='logout'),
 
-# -----------   User Profile & Account   -----------
+# -----------   User Profile & Settings   -----------
     path('user_profile/', views.user_profile, name='user_profile'),
     path('user_settings/', views.user_settings, name='settings'),
 
@@ -36,10 +36,13 @@ urlpatterns = [
     path('staff_home/', views.staff_home, name='staff_home'),
     path('staff_profile/', views.staff_profile, name='staff_profile'),
     path('members/', views.members, name='members'),
-    path('requests/', views.requests, name='requests'),
+    path('coach_requests/', views.coach_requests, name='coach_requests'),
     path('reports/', views.reports, name='reports'),
     path('messages/', views.private_messages, name='messages'),
     path('staff_settings/', views.staff_settings, name='staff_settings'),
+
+# path to user profiles from staff_home page
+    path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
 
 # -----------   Article Pages  -----------
     path('articles/', views.articles, name='articles'),
@@ -50,14 +53,11 @@ urlpatterns = [
     path("staff/article/<int:id>/edit/", views.edit_article, name="edit_article"),
     path("staff/article/<int:id>/delete/", views.delete_article, name="delete_article"),
 
-# path to user profiles from staff_home page
-    path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
+# -----------   Coach Request Handling  -----------
+    path("staff/coach-request/<int:user_id>/", views.handle_coach_request, name="handle_coach_request"),  # NEW
+
 
 # -----------   Coach Pages  -----------
-
-    # TODO Newly added.
-# Settings user setting. currently only member uses it.
-    path('user_settings/', views.user_settings, name='settings'),
 
 # Coach list
     path('coaches/', views.coach_list_view, name='coach_list'),

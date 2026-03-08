@@ -1,0 +1,228 @@
+{% extends 'CUFitness/staff_profile/staff_base.html' %}
+{% load static %}
+{% block title %} CUFitness — Coach Requests {% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'coach_requests.css' %}">
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated and user.role == "STAFF" %}
+
+<div class="requests-container">
+
+    <!-- Page Header -->
+    <div class="requests-header">
+        <div class="header-left">
+            <h1 class="page-title">Coach Requests</h1>
+            <p class="page-subtitle">Review and manage member applications to become a coach</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-pill">
+                <span class="material-icons">pending</span>
+                <span>{{ pending_requests|length }} Pending</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="pending">
+            <span class="material-icons">hourglass_top</span>
+            Pending
+            {% if pending_requests %}
+                <span class="tab-badge">{{ pending_requests|length }}</span>
+            {% endif %}
+        </button>
+        <button class="tab-btn" data-tab="approved">
+            <span class="material-icons">check_circle</span>
+            Approved
+        </button>
+        <button class="tab-btn" data-tab="rejected">
+            <span class="material-icons">cancel</span>
+            Rejected
+        </button>
+    </div>
+
+    <!-- Pending Tab -->
+    <div class="tab-content active" id="tab-pending">
+        {% if pending_requests %}
+            <div class="requests-list">
+                {% for member in pending_requests %}
+                <div class="request-card">
+                    <div class="request-card-left">
+                        <div class="request-avatar">
+                            {{ member.first_name|first }}{{ member.last_name|first }}
+                        </div>
+                        <div class="request-info">
+                            <h3 class="request-name">{{ member.first_name }} {{ member.last_name }}</h3>
+                            <p class="request-email">{{ member.email }}</p>
+                            <div class="request-meta">
+                                <span class="meta-chip">
+                                    <span class="material-icons">card_membership</span>
+                                    {{ member.get_membership_display }}
+                                </span>
+                                <span class="meta-chip">
+                                    <span class="material-icons">calendar_today</span>
+                                    Joined {{ member.date_joined|date:"M d, Y" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="request-card-right">
+                        <span class="status-badge pending">
+                            <span class="material-icons">hourglass_top</span>
+                            Pending
+                        </span>
+                        <div class="action-buttons">
+                            <form method="POST" action="{% url 'handle_coach_request' member.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="APPROVED">
+                                <button type="submit" class="btn-approve">
+                                    <span class="material-icons">check</span>
+                                    Approve
+                                </button>
+                            </form>
+                            <form method="POST" action="{% url 'handle_coach_request' member.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="REJECTED">
+                                <button type="submit" class="btn-reject">
+                                    <span class="material-icons">close</span>
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <span class="material-icons empty-icon">inbox</span>
+                <h3>No Pending Requests</h3>
+                <p>All coach applications have been reviewed.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Approved Tab -->
+    <div class="tab-content" id="tab-approved">
+        {% if approved_requests %}
+            <div class="requests-list">
+                {% for member in approved_requests %}
+                <div class="request-card">
+                    <div class="request-card-left">
+                        <div class="request-avatar approved">
+                            {{ member.first_name|first }}{{ member.last_name|first }}
+                        </div>
+                        <div class="request-info">
+                            <h3 class="request-name">{{ member.first_name }} {{ member.last_name }}</h3>
+                            <p class="request-email">{{ member.email }}</p>
+                            <div class="request-meta">
+                                <span class="meta-chip">
+                                    <span class="material-icons">card_membership</span>
+                                    {{ member.get_membership_display }}
+                                </span>
+                                <span class="meta-chip">
+                                    <span class="material-icons">fitness_center</span>
+                                    Now a Coach
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="request-card-right">
+                        <span class="status-badge approved">
+                            <span class="material-icons">check_circle</span>
+                            Approved
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <span class="material-icons empty-icon">check_circle</span>
+                <h3>No Approved Requests</h3>
+                <p>No coach requests have been approved yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Rejected Tab -->
+    <div class="tab-content" id="tab-rejected">
+        {% if rejected_requests %}
+            <div class="requests-list">
+                {% for member in rejected_requests %}
+                <div class="request-card">
+                    <div class="request-card-left">
+                        <div class="request-avatar rejected">
+                            {{ member.first_name|first }}{{ member.last_name|first }}
+                        </div>
+                        <div class="request-info">
+                            <h3 class="request-name">{{ member.first_name }} {{ member.last_name }}</h3>
+                            <p class="request-email">{{ member.email }}</p>
+                            <div class="request-meta">
+                                <span class="meta-chip">
+                                    <span class="material-icons">card_membership</span>
+                                    {{ member.get_membership_display }}
+                                </span>
+                                <span class="meta-chip">
+                                    <span class="material-icons">calendar_today</span>
+                                    Joined {{ member.date_joined|date:"M d, Y" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="request-card-right">
+                        <span class="status-badge rejected">
+                            <span class="material-icons">cancel</span>
+                            Rejected
+                        </span>
+                        <!-- Allow re-approving a previously rejected request -->
+                        <div class="action-buttons">
+                            <form method="POST" action="{% url 'handle_coach_request' member.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="APPROVED">
+                                <button type="submit" class="btn-approve">
+                                    <span class="material-icons">redo</span>
+                                    Approve
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <span class="material-icons empty-icon">cancel</span>
+                <h3>No Rejected Requests</h3>
+                <p>No coach requests have been rejected.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Tab switching JS -->
+<script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById('tab-' + target).classList.add('active');
+        });
+    });
+</script>
+
+{% else %}
+<p>Not a staff member.</p>
+{% endif %}
+{% endblock %}

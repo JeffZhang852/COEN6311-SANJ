@@ -1,4 +1,3 @@
-
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
@@ -164,10 +163,14 @@ def user_settings(request):
                 messages.success(request, 'Password updated successfully.')
                 return redirect('settings')
 
+# server-side check to prevent multiple submissions
         elif 'coach_request_submit' in request.POST:
-            request.user.coach_request_status = 'PENDING'
-            request.user.save()
-            messages.success(request, 'Coach request submitted for approval.')
+            if request.user.coach_request_status in ('NONE', 'REJECTED'):
+                request.user.coach_request_status = 'PENDING'
+                request.user.save()
+                messages.success(request, 'Coach request submitted for approval.')
+            else:
+                messages.error(request, 'You already have an active or approved request.')
             return redirect('settings')
 
     context = {
@@ -245,8 +248,6 @@ def staff_settings(request):
         'password_form': password_form,
     })
 
-
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def members(request):
@@ -254,8 +255,60 @@ def members(request):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
-def requests(request):
-    return render(request, 'CUFitness/staff_profile/requests.html')
+def coach_requests(request):
+    pending = CustomUser.objects.filter(coach_request_status='PENDING')
+    approved = CustomUser.objects.filter(coach_request_status='APPROVED')
+    rejected = CustomUser.objects.filter(coach_request_status='REJECTED')
+    return render(request, 'CUFitness/staff_profile/coach_requests.html', {
+        'pending_requests': pending,
+        'approved_requests': approved,
+        'rejected_requests': rejected,
+    })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def handle_coach_request(request, user_id):
+    """
+    Staff-only. Approve or reject a member's coach request.
+    Expects a POST with 'action' = 'APPROVED' or 'REJECTED'.
+    Approving also promotes the user's role from MEMBER → COACH.
+    """
+    if request.method != 'POST':
+        return redirect('coach_requests')
+
+    member = get_object_or_404(CustomUser, id=user_id)
+
+    # Safety check: only act on users who have actually submitted a request
+    if member.coach_request_status not in ('PENDING', 'REJECTED'):
+        messages.error(request, 'This user does not have an active coach request.')
+        return redirect('coach_requests')
+
+    action = request.POST.get('action')
+
+    if action == 'APPROVED':
+        member.coach_request_status = 'APPROVED'
+        member.role = 'COACH'        # promote the account
+        member.save()
+        messages.success(
+            request,
+            f'{member.first_name} {member.last_name} has been approved and promoted to Coach. They will need to log out and back in for changes to take effect.'
+        )
+
+    elif action == 'REJECTED':
+        member.coach_request_status = 'REJECTED'
+        # role stays MEMBER
+        member.save()
+        messages.success(
+            request,
+            f'{member.first_name} {member.last_name}\'s coach request has been rejected.'
+        )
+
+    else:
+        messages.error(request, 'Invalid action.')
+
+    return redirect('coach_requests')
+
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -440,4 +493,3 @@ def manage_appointments(request):
     # TODO New url needed
 
     return render(request, 'CUFitness/manage_appointments.html', context)
-

@@ -85,7 +85,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
-# can also be used for messaging and contact us
 class Articles(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
     # idk if we want that cause maybe we want to keep articles even staff are fired
@@ -101,9 +100,10 @@ class Articles(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# what the admin sees on the article list page
     def __str__(self):
         return (
-            f" {self.created_at:%Y-%m-%d %H:%M} - {self.updated_at:%Y-%m-%d %H:%M} - {self.author} - {self.title} - {self.body} - {self.locked} - {self.description}"
+            f" {self.created_at:%Y-%m-%d %H:%M} - {self.updated_at:%Y-%m-%d %H:%M} - {self.author} - {self.title} - {self.locked} - {self.description}"
         )
 
 
@@ -202,10 +202,10 @@ class CoachAvailability(models.Model):
 
 class CoachAppointment(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-        ('refused', 'Refused'),
-        ('cancelled', 'Cancelled'),
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REFUSED', 'Refused'),
+        ('CANCELLED', 'Cancelled'),
     ]
     coach = models.ForeignKey(
         CustomUser,
@@ -228,7 +228,7 @@ class CoachAppointment(models.Model):
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     refusal_reason = models.TextField(blank=True, help_text='Reason if refused')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -240,12 +240,12 @@ class CoachAppointment(models.Model):
         if self.start_time >= self.end_time:
             raise ValidationError('End time must be after start time.')
         # Check coach is not double-booked (excluding pending? maybe only accepted)
-        if self.status == 'accepted':
+        if self.status == 'ACCEPTED':
             overlapping = CoachAppointment.objects.filter(
                 coach=self.coach,
                 start_time__lt=self.end_time,
                 end_time__gt=self.start_time,
-                status='accepted'
+                status='ACCEPTED'
             )
             if self.pk:
                 overlapping = overlapping.exclude(pk=self.pk)
@@ -258,6 +258,7 @@ class CoachAppointment(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()   # runs validators including clean()
         super().save(*args, **kwargs)
+
 
 # Placeholder for review and report
 

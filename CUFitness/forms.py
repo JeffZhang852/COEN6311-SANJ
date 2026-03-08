@@ -1,5 +1,3 @@
-
-
 from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -19,13 +17,6 @@ class CustomUserCreationForm(UserCreationForm):
             'membership': forms.Select(attrs={
                 'class': 'styled-select'})
         }
-
-# Replaced, unless needed otherwise
-# class CustomUserChangeForm(UserChangeForm):
-#
-#     class Meta:
-#         model = CustomUser
-#         fields = ("email",)
 
 
 class ArticleForm(forms.ModelForm):
@@ -57,6 +48,8 @@ class CoachRequestForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = []  # No need to send stuff. May add notification via email later if needed.
+
+
 
 class CoachAvailabilityForm(forms.ModelForm):
     class Meta:
@@ -102,7 +95,7 @@ class AppointmentResponseForm(forms.ModelForm):
     def clean(self):
         status = self.cleaned_data.get('status')
         reason = self.cleaned_data.get('refusal_reason')
-        if status == 'refused' and not reason:
+        if status == 'REFUSED' and not reason:
             raise forms.ValidationError("Please provide a reason for refusal.")
         return self.cleaned_data
 
@@ -110,3 +103,14 @@ class PrivacySettingsForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['workout_visibility']
+
+
+
+
+
+# Replaced, unless needed otherwise
+# class CustomUserChangeForm(UserChangeForm):
+#
+#     class Meta:
+#         model = CustomUser
+#         fields = ("email",)

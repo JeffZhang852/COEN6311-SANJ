@@ -3,7 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CUFitness/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CUFitness/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,7 +55,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "automated__tests",
+    "git-widget-placeholder": "coach__requests",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ"
   }
