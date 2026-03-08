@@ -19,6 +19,15 @@
     <!-- Title shows in browser tab -->
     <title> {% block title %} CUFitness {% endblock %}</title>
 
+    <style>
+        :root {
+            --color-primary: rgba(145, 35, 56, 1);
+            --color-accent:  rgba(200, 180, 105, 1);
+            --color-primary-hover: rgba(157, 37, 60, 1);
+            --color-accent-hover:  rgba(190, 170, 105, 1);
+        }
+    </style>
+
     <!-- Google Font Import (Poppins font family) -->
     <!-- This loads the font from Google's servers -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -37,7 +46,6 @@
 </head>
 
 <body>
-    <!-- Everything visible on the website goes inside the body -->
 <!-- display alert messages if any -->
     {% if messages %}
         {% for message in messages %}
@@ -51,7 +59,6 @@
     {% endif %}
 
     <!-- ================= HEADER ================= -->
-    <!-- Contains logo and navigation links -->
 <header>
     <h1>
         <a href="/">CUFitness</a>
@@ -126,6 +133,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- footer in a different html file -->
 {% include 'CUFitness/footer.html' %}

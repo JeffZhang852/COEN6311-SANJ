@@ -48,7 +48,7 @@ urlpatterns = [
 # path to article pages from staff-articles page
     path("staff/article/<int:id>/", views.article_details, name="article_details"),
 # path to edit article page from article_details page
-    path("staff/article/<int:id>/", views.article_details, name="article_details"),
+    path("staff/edit_article/<int:id>/", views.edit_article, name="edit_article"),
 
 # -----------   Coach Pages  -----------
 

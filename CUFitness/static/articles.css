@@ -25,14 +25,14 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 25px;
-    color white;
+    color: white;
 }
 
 .create-btn{
     display: inline-flex;
     gap: 6px; /* space between text and icon */
     text-decoration: none;
-    background-color: rgba(200,180,105,1);
+    background-color: var(--color-accent);
     color: black;
     padding: 10px 18px;
     border: 2px solid #ccc;
@@ -42,7 +42,7 @@
 }
 
 .create-btn:hover{
-    background: rgba(190,170,105,1);
+    background: var(--color-accent-hover);
 
 }
 
@@ -68,15 +68,15 @@
     text-decoration: none;
     position: relative;
     border-radius: 16px;
-    background-color: rgba(145,35,56,1);
+    background-color: var(--color-primary);
     transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
     transform: translateY(-8px);
-    background-color: rgba(157,37,60,1);
+    background-color: var(--color-primary-hover);
     border: 2px solid #ccc;
-    cursor pointer;
+    cursor: pointer;
 }
 
 .card h3 {
@@ -95,14 +95,14 @@
     padding: 10px 18px;
     border: none;
     border-radius: 8px;
-    background-color: rgba(200,180,105,1);
+    background-color: var(--color-accent);
     color: black;
     cursor: pointer;
     font-size: 16px;
 }
 
 .card button:hover {
-    background: rgba(190,170,105,1);
+    background: var(--color-accent-hover);
 
 }
 
