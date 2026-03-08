@@ -152,3 +152,117 @@
     .blog-title   { font-size: 28px; }
     .title-row    { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── Modal overlay ── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Modal box ── */
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 36px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.modal-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+}
+
+.modal-box p {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+/* ── Modal buttons ── */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-confirm-delete {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-confirm-delete:hover {
+    background: #b91c1c;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #333;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+/* ── Delete button (next to edit) ── */
+.delete-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+.delete-btn .material-icons {
+    font-size: 16px;
+}
+
+.delete-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+
+.delete-btn.disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.6;
+}
+
+.delete-btn.disabled:hover {
+    background: #9ca3af;
+    transform: none;
+}

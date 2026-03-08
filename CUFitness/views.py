@@ -225,17 +225,36 @@ def article_details(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def edit_article(request, id):
-    article_obj = get_object_or_404(Articles, id=id)
-    if request.method == "POST":
-        form = ArticleForm(request.POST, instance=article_obj)
+    article = get_object_or_404(Articles, id=id)
+    if request.user != article.author:
+        messages.error(request, 'You do not have permission to edit this article.')
+        return redirect('articles')
+    if request.method == 'POST':
+        form = ArticleForm(request.POST, instance=article)
         if form.is_valid():
             form.save()
-            return redirect('articles')
-        else:
-            return redirect('articles')
+            messages.success(request, 'Article updated successfully.')
+            return redirect('article_details', id=article.id)
     else:
-        form = ArticleForm(instance=article_obj)
-        return render(request, "CUFitness/staff_profile/edit_article.html", {})
+            form = ArticleForm(instance=article)
+    return render(request, 'CUFitness/staff_profile/edit_article.html', {'form': form, 'article': article})
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def delete_article(request, id):
+    article = get_object_or_404(Articles, id=id)
+
+    if request.user != article.author:
+        messages.error(request, 'You do not have permission to delete this article.')
+        return redirect('articles')
+
+    if request.method == 'POST':
+        article.delete()
+        messages.success(request, 'Article deleted successfully.')
+        return redirect('articles')
+
+    return redirect('article_details', id=id)
 
 # ------------------------------------------------------------------
 
