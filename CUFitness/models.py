@@ -85,7 +85,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
-# can also be used for messaging and contact us
 class Articles(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
     # idk if we want that cause maybe we want to keep articles even staff are fired
@@ -258,6 +257,7 @@ class CoachAppointment(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()   # runs validators including clean()
         super().save(*args, **kwargs)
+
 
 # Placeholder for review and report
 

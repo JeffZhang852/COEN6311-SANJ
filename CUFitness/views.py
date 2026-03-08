@@ -245,8 +245,6 @@ def staff_settings(request):
         'password_form': password_form,
     })
 
-
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def members(request):

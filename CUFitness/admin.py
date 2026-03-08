@@ -1,7 +1,4 @@
 
-###########
-#new user model
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -34,6 +31,8 @@ class CustomUserAdmin(UserAdmin):
     ordering = ("email",)
 
 
+# added to make the admin able to view the articles and CustomUser
+admin.site.register(Articles)
 admin.site.register(CustomUser, CustomUserAdmin)
 
 @admin.register(EquipmentList)
@@ -63,5 +62,3 @@ class AppointmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_time'
 
 
-# added to make the admin able to view the articles
-admin.site.register(Articles)

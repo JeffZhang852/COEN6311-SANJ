@@ -20,13 +20,6 @@ class CustomUserCreationForm(UserCreationForm):
                 'class': 'styled-select'})
         }
 
-# Replaced, unless needed otherwise
-# class CustomUserChangeForm(UserChangeForm):
-#
-#     class Meta:
-#         model = CustomUser
-#         fields = ("email",)
-
 
 class ArticleForm(forms.ModelForm):
     class Meta:
@@ -57,6 +50,8 @@ class CoachRequestForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = []  # No need to send stuff. May add notification via email later if needed.
+
+
 
 class CoachAvailabilityForm(forms.ModelForm):
     class Meta:
@@ -110,3 +105,14 @@ class PrivacySettingsForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['workout_visibility']
+
+
+
+
+
+# Replaced, unless needed otherwise
+# class CustomUserChangeForm(UserChangeForm):
+#
+#     class Meta:
+#         model = CustomUser
+#         fields = ("email",)
