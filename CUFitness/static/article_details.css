@@ -266,3 +266,15 @@
     background: #9ca3af;
     transform: none;
 }
+
+.edit-btn.disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+    text-decoration: none;
+}
+
+.edit-btn.disabled:hover {
+    background: #9ca3af;
+    transform: none;
+}

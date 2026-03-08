@@ -15,44 +15,29 @@
         <div class="blog-header">
             <div class="title-row">
                 <h1 class="blog-title">{{ article_obj.title }}</h1>
-                {% if user.role == "STAFF" %}
-                    <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
-                        <span class="material-icons edit">edit</span>
-                        <span>Edit Article</span>
-                    </a>
+                <div class="article-actions">
 
-                    <!-- Delete button triggers popup -->
                     {% if user == article_obj.author %}
+                        <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
+                            <span class="material-icons">edit</span>
+                            <span>Edit Article</span>
+                        </a>
                         <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
                             <span class="material-icons">delete</span>
                             <span>Delete Article</span>
                         </button>
                     {% else %}
+                        <button class="edit-btn disabled" disabled title="Only the author can edit this article">
+                            <span class="material-icons">edit</span>
+                            <span>Edit Article</span>
+                        </button>
                         <button class="delete-btn disabled" disabled title="Only the author can delete this article">
                             <span class="material-icons">delete</span>
                             <span>Delete Article</span>
                         </button>
                     {% endif %}
 
-                        <!-- Confirmation popup -->
-                        <div id="delete-modal" class="modal-overlay">
-                            <div class="modal-box">
-                                <h3>Delete Article</h3>
-                                <p>Are you sure you want to delete <strong>{{ article_obj.title }}</strong>? This cannot be undone.</p>
-                                <div class="modal-actions">
-                                    <form method="POST" action="{% url 'delete_article' article_obj.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-confirm-delete">Yes, Delete</button>
-                                    </form>
-                                    <button class="btn-cancel" onclick="document.getElementById('delete-modal').style.display='none'">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-
-                {% endif %}
+                </div>
             </div>
 
             <div class="blog-meta">
