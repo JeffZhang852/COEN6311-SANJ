@@ -19,7 +19,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "COEN6311.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from CUFitness.models import Articles
+from CUFitness.models import Article
 
 User = get_user_model()
 
@@ -43,17 +43,19 @@ def create_user(email, password, first_name, last_name,
     user.role       = role
     user.membership = membership
     user.is_staff   = is_staff_flag
+    if role == 'COACH':
+        user.coach_request_status = 'APPROVED'
     user.save()
     print(f"  [created] {role}: {email}")
     return user
 
 
 def create_article(author, title, description, body, locked):
-    if Articles.objects.filter(title=title).exists():
+    if Article.objects.filter(title=title).exists():
         print(f"  [skip] Article already exists: '{title}'")
-        return Articles.objects.get(title=title)
+        return Article.objects.get(title=title)
 
-    article = Articles.objects.create(
+    article = Article.objects.create(
         author=author,
         title=title,
         description=description,
@@ -245,7 +247,7 @@ create_article(
 print("\n" + "="*50)
 print("✅ Seed complete! Summary:")
 print(f"   Users  : {User.objects.count()} total")
-print(f"   Articles: {Articles.objects.count()} total")
+print(f"   Articles: {Article.objects.count()} total")
 print()
 print("Login credentials:")
 print("  Admin  : admin@cufitness.com   / Admin@1234")
