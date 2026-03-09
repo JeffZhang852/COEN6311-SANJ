@@ -2,7 +2,7 @@ from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking
-from .models import Articles
+from .models import Article
 
 from django.contrib.auth.forms import PasswordChangeForm
 
@@ -21,7 +21,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 class ArticleForm(forms.ModelForm):
     class Meta:
-        model = Articles
+        model = Article
         fields = ['title','description', 'body', 'locked']
         exclude = ["author"] # we set it manually
         widgets = {}

@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CoachRequestForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking,EquipmentList
 
-from .models import Articles
+from .models import Article
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -32,7 +32,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 # added to make the admin able to view the articles and CustomUser
-admin.site.register(Articles)
+admin.site.register(Article)
 admin.site.register(CustomUser, CustomUserAdmin)
 
 @admin.register(EquipmentList)

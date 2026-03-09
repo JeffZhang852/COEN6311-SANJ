@@ -85,11 +85,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
-class Articles(models.Model):
+class Article(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
     # idk if we want that cause maybe we want to keep articles even staff are fired
    # user = models.ForeignKey(CustomUser, related_name="article", on_delete=models.CASCADE)
-    author = models.ForeignKey(CustomUser, related_name="authors", on_delete=models.CASCADE)# links each article to unique user
+    author = models.ForeignKey(CustomUser, related_name="articles", on_delete=models.CASCADE)# links each article to unique user
     title = models.CharField(max_length=75)
 
     locked = models.BooleanField(default=False)
