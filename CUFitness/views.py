@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
 from django.urls import reverse_lazy, reverse
 from django.views import generic
+from django.http import HttpResponseNotAllowed
 
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
@@ -17,6 +18,8 @@ from .forms import UpdateEmailForm, UpdatePasswordForm
 # for calendar;
 from django.http import JsonResponse
 import json as _json
+
+from django.db import transaction
 
 
 User = get_user_model()
@@ -49,11 +52,6 @@ def home(request):
             role="COACH",
             is_active=True
         ).order_by("first_name")
-
-        context = {
-            "active_members": active_members,
-            "active_coaches": active_coaches,
-        }
 
         return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
     else:
@@ -518,6 +516,11 @@ def article_details(request, id):
     else:
         base = 'CUFitness/base.html'
 
+# make sure user can't enter the url manually to access the locked articles
+# An unauthenticated user can directly hit the URL for a locked/premium article and read it.
+    if article.locked and not request.user.is_authenticated:
+        return redirect('login')
+
     return render(request, 'CUFitness/staff_profile/article_details.html', {
         'article_obj': article,
         'base_template': base,
@@ -553,6 +556,9 @@ def delete_article(request, id):
         article.delete()
         messages.success(request, 'Article deleted successfully.')
         return redirect('articles')
+
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
 
     return redirect('article_details', id=id)
 
@@ -634,22 +640,35 @@ def delete_availability(request, slot_id):
 @user_passes_test(is_coach)
 def manage_appointments(request):
     """View pending appointments and respond."""
-    pending = CoachAppointment.objects.filter(coach=request.user, status='PENDING').order_by('start_time')
+    pending = (CoachAppointment.objects.filter
+               (coach=request.user,
+                status='PENDING'
+                ).order_by('start_time')).select_related('member') # Without this (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
+
     if request.method == 'POST':
         appointment_id = request.POST.get('appointment_id')
-        appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user)
-        form = AppointmentResponseForm(request.POST, instance=appointment)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Appointment {appointment.status}.')
+
+        try:
+            with transaction.atomic():
+                # lock this row until the request completes
+                appointment = CoachAppointment.objects.select_for_update().get_object_or_404(
+                    id=appointment_id,
+                    coach=request.user
+                )
+                form = AppointmentResponseForm(request.POST, instance=appointment)
+                if form.is_valid():
+                    form.save()  # clean() runs here, safely locked
+                    messages.success(request, f'Appointment {appointment.status}.')
+                    return redirect('manage_appointments')
+        except CoachAppointment.DoesNotExist:
+            messages.error(request, 'Appointment not found.')
             return redirect('manage_appointments')
+
     else:
         form = AppointmentResponseForm()
+
     context = {
         'pending_appointments': pending,
         'response_form': form,
     }
-
-    # TODO New url needed
-
     return render(request, 'CUFitness/manage_appointments.html', context)

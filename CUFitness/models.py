@@ -122,7 +122,7 @@ class EquipmentList(models.Model):
 
 class EquipmentBooking(models.Model):
     equipment = models.ForeignKey(EquipmentList, on_delete=models.CASCADE, related_name='bookings')
-    coach = models.ForeignKey('CustomUser', on_delete=models.CASCADE, limit_choices_to={'role': 'COACH'})
+    coach = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='coached_bookings', limit_choices_to={'role': 'COACH'})
     member = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='training_sessions', null=True,
                                blank=True, help_text="Paid user being trained (optional)")
     start_time = models.DateTimeField()
@@ -247,10 +247,13 @@ class CoachAppointment(models.Model):
                 end_time__gt=self.start_time,
                 status='ACCEPTED'
             )
-            if self.pk:
+            if self.pk: # exclude self when updating an existing record
                 overlapping = overlapping.exclude(pk=self.pk)
             if overlapping.exists():
-                raise ValidationError('Coach already has an accepted appointment during this time.')
+                raise ValidationError(
+                    f'Coach already has an accepted appointment between '
+                    f'{self.start_time} and {self.end_time}.'
+                )
 
     def __str__(self):
         return f"Appointment {self.member.email} with {self.coach.email} - {self.status}"
