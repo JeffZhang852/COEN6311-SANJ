@@ -35,6 +35,14 @@ Form validation tests — tests ArticleForm, CustomUserCreationForm, and Privacy
 Nutrition page tests — checks that free/locked articles are passed in the correct context variables
 Public pages tests — a simple smoke test that every public URL returns a 200. Quick to run and immediately catches broken URL configs or template errors.
 
+UpdateEmailFormTest — tests UpdateEmailForm directly: valid change, same email allowed, duplicate rejected, bad format rejected, empty rejected.
+
+EmailUpdateViewTest — tests the email_submit POST in user_settings: valid save + redirect, duplicate blocked with form error re-render, invalid format doesn't save, coach can update, unauthenticated blocked.
+
+UpdatePasswordFormTest — tests UpdatePasswordForm directly: valid change, wrong old password rejected, mismatched new passwords rejected, weak password rejected.
+
+PasswordUpdateViewTest — tests the password_submit POST in user_settings: valid save + redirect, session kept alive after change (update_session_auth_hash), wrong old password doesn't save + re-renders errors, mismatched passwords don't save, coach can update, unauthenticated blocked.
+
 CoachRequestSubmissionGuardTest:
     - tests the server-side guard you need to add to user_settings.
     - Verifies that PENDING and APPROVED members can't reset their status via a direct POST, while NONE and REJECTED members can submit normally.
@@ -51,6 +59,38 @@ HandleCoachRequestTest:
     - invalid action value does nothing, acting on a user with no request is blocked, 404 on nonexistent user,
     - re-approving a previously rejected request works, and any staff member can handle requests (not just a specific one).
 
+UpdateEmailFormTest:
+    - test_valid_email_change — valid new email passes form validation
+    - test_same_email_is_valid — submitting your own current email is not treated as a duplicate
+    - test_duplicate_email_rejected — using another user's email fails with a validation error
+    - test_invalid_email_format_rejected — malformed email address fails validation
+    - test_empty_email_rejected — empty email field fails validation
+
+EmailUpdateViewTest:
+    - test_valid_email_update_saves — valid email is saved to the database
+    - test_valid_email_update_redirects — successful update redirects back to settings
+    - test_duplicate_email_does_not_save — taken email leaves the user's email unchanged
+    - test_duplicate_email_re_renders_form_with_errors — duplicate email re-renders the page with the form error
+    - test_invalid_email_format_does_not_save — malformed email leaves the user's email unchanged
+    - test_coach_can_update_email — coaches share the same settings page and can update their email
+    - test_unauthenticated_cannot_update_email — unauthenticated POST is blocked
+
+UpdatePasswordFormTest:
+    - test_valid_password_change — correct old password and matching new passwords passes validation
+    - test_wrong_old_password_rejected — incorrect old password fails with an error on old_password field
+    - test_mismatched_new_passwords_rejected — new passwords that don't match fail with an error on new_password2
+    - test_weak_new_password_rejected — password that fails Django's strength validators is rejected
+
+PasswordUpdateViewTest:
+    - test_valid_password_change_saves — new password is saved to the database
+    - test_valid_password_change_redirects — successful change redirects back to settings
+    - test_user_stays_logged_in_after_password_change — update_session_auth_hash keeps the session alive after save
+    - test_wrong_old_password_does_not_save — wrong old password leaves the original password intact
+    - test_wrong_old_password_re_renders_form_with_errors — wrong old password re-renders the page with the form error
+    - test_mismatched_passwords_do_not_save — mismatched new passwords leave the original password intact
+    - test_coach_can_update_password — coaches share the same settings page and can update their password
+    - test_unauthenticated_cannot_update_password — unauthenticated POST is blocked
+
 """
 
 from django.test import TestCase, Client
@@ -60,7 +100,7 @@ from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, EquipmentBooking
-from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettingsForm
+from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettingsForm, UpdateEmailForm, UpdatePasswordForm
 
 
 
@@ -1093,3 +1133,261 @@ class PublicPageTest(TestCase):
 
     def test_register_page(self):
         self.assertEqual(self.client.get(reverse('register')).status_code, 200)
+
+# ══════════════════════════════════════════════════
+# EMAIL UPDATE FORM TESTS
+# ══════════════════════════════════════════════════
+
+class UpdateEmailFormTest(TestCase):
+
+    def setUp(self):
+        self.member = make_member()
+        self.other_member = make_member(email='other@test.com')
+
+    def test_valid_email_change(self):
+        form = UpdateEmailForm(instance=self.member, data={'email': 'newemail@test.com'})
+        self.assertTrue(form.is_valid())
+
+    def test_same_email_is_valid(self):
+        """Submitting your own current email should not be treated as a duplicate."""
+        form = UpdateEmailForm(instance=self.member, data={'email': 'member@test.com'})
+        self.assertTrue(form.is_valid())
+
+    def test_duplicate_email_rejected(self):
+        """Using another user's email address should fail validation."""
+        form = UpdateEmailForm(instance=self.member, data={'email': 'other@test.com'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+    def test_invalid_email_format_rejected(self):
+        form = UpdateEmailForm(instance=self.member, data={'email': 'not-an-email'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+    def test_empty_email_rejected(self):
+        form = UpdateEmailForm(instance=self.member, data={'email': ''})
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+
+# ══════════════════════════════════════════════════
+# EMAIL UPDATE VIEW TESTS
+# ══════════════════════════════════════════════════
+
+class EmailUpdateViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.member = make_member()
+        self.other_member = make_member(email='taken@test.com')
+
+    def test_valid_email_update_saves(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {
+            'email': 'updated@test.com',
+            'email_submit': '1',
+        })
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.email, 'updated@test.com')
+
+    def test_valid_email_update_redirects(self):
+        self.client.force_login(self.member)
+        response = self.client.post(reverse('settings'), {
+            'email': 'updated@test.com',
+            'email_submit': '1',
+        })
+        self.assertRedirects(response, reverse('settings'))
+
+    def test_duplicate_email_does_not_save(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {
+            'email': 'taken@test.com',
+            'email_submit': '1',
+        })
+        self.member.refresh_from_db()
+        self.assertNotEqual(self.member.email, 'taken@test.com')
+
+    def test_duplicate_email_re_renders_form_with_errors(self):
+        self.client.force_login(self.member)
+        response = self.client.post(reverse('settings'), {
+            'email': 'taken@test.com',
+            'email_submit': '1',
+        })
+        # Should stay on the settings page (no redirect) and show the form error
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response.context['email_form'], 'email', 'This email address is already in use.')
+
+    def test_invalid_email_format_does_not_save(self):
+        self.client.force_login(self.member)
+        original_email = self.member.email
+        self.client.post(reverse('settings'), {
+            'email': 'not-valid',
+            'email_submit': '1',
+        })
+        self.member.refresh_from_db()
+        self.assertEqual(self.member.email, original_email)
+
+    def test_coach_can_update_email(self):
+        """Coaches share the same settings page — verify email update works for them too."""
+        coach = make_coach()
+        self.client.force_login(coach)
+        self.client.post(reverse('settings'), {
+            'email': 'newcoach@test.com',
+            'email_submit': '1',
+        })
+        coach.refresh_from_db()
+        self.assertEqual(coach.email, 'newcoach@test.com')
+
+    def test_unauthenticated_cannot_update_email(self):
+        response = self.client.post(reverse('settings'), {
+            'email': 'hacker@test.com',
+            'email_submit': '1',
+        })
+        self.assertNotEqual(response.status_code, 200)
+
+
+# ══════════════════════════════════════════════════
+# PASSWORD UPDATE FORM TESTS
+# ══════════════════════════════════════════════════
+
+class UpdatePasswordFormTest(TestCase):
+
+    def setUp(self):
+        self.member = make_member()
+
+    def test_valid_password_change(self):
+        form = UpdatePasswordForm(user=self.member, data={
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+        })
+        self.assertTrue(form.is_valid())
+
+    def test_wrong_old_password_rejected(self):
+        form = UpdatePasswordForm(user=self.member, data={
+            'old_password': 'WrongPassword!',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('old_password', form.errors)
+
+    def test_mismatched_new_passwords_rejected(self):
+        form = UpdatePasswordForm(user=self.member, data={
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'DifferentPass@9999',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('new_password2', form.errors)
+
+    def test_weak_new_password_rejected(self):
+        """Django's built-in validators should block overly simple passwords."""
+        form = UpdatePasswordForm(user=self.member, data={
+            'old_password': 'Pass@1234',
+            'new_password1': '123',
+            'new_password2': '123',
+        })
+        self.assertFalse(form.is_valid())
+
+
+# ══════════════════════════════════════════════════
+# PASSWORD UPDATE VIEW TESTS
+# ══════════════════════════════════════════════════
+
+class PasswordUpdateViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.member = make_member()
+
+    def test_valid_password_change_saves(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+            'password_submit': '1',
+        })
+        self.member.refresh_from_db()
+        self.assertTrue(self.member.check_password('NewPass@9999'))
+
+    def test_valid_password_change_redirects(self):
+        self.client.force_login(self.member)
+        response = self.client.post(reverse('settings'), {
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+            'password_submit': '1',
+        })
+        self.assertRedirects(response, reverse('settings'))
+
+    def test_user_stays_logged_in_after_password_change(self):
+        """update_session_auth_hash should keep the session alive."""
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+            'password_submit': '1',
+        })
+        # If the session was invalidated the settings page would redirect to login
+        response = self.client.get(reverse('settings'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_wrong_old_password_does_not_save(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {
+            'old_password': 'WrongPassword!',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+            'password_submit': '1',
+        })
+        self.member.refresh_from_db()
+        self.assertFalse(self.member.check_password('NewPass@9999'))
+        self.assertTrue(self.member.check_password('Pass@1234'))
+
+    def test_wrong_old_password_re_renders_form_with_errors(self):
+        self.client.force_login(self.member)
+        response = self.client.post(reverse('settings'), {
+            'old_password': 'WrongPassword!',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+            'password_submit': '1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response.context['password_form'], 'old_password',
+                             'Your old password was entered incorrectly. Please enter it again.')
+
+    def test_mismatched_passwords_do_not_save(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('settings'), {
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'DifferentPass@9999',
+            'password_submit': '1',
+        })
+        self.member.refresh_from_db()
+        self.assertTrue(self.member.check_password('Pass@1234'))
+
+    def test_coach_can_update_password(self):
+        """Coaches share the same settings page — verify password update works for them too."""
+        coach = make_coach()
+        self.client.force_login(coach)
+        self.client.post(reverse('settings'), {
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewCoach@9999',
+            'new_password2': 'NewCoach@9999',
+            'password_submit': '1',
+        })
+        coach.refresh_from_db()
+        self.assertTrue(coach.check_password('NewCoach@9999'))
+
+    def test_unauthenticated_cannot_update_password(self):
+        response = self.client.post(reverse('settings'), {
+            'old_password': 'Pass@1234',
+            'new_password1': 'NewPass@9999',
+            'new_password2': 'NewPass@9999',
+            'password_submit': '1',
+        })
+        self.assertNotEqual(response.status_code, 200)
