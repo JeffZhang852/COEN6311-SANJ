@@ -3,16 +3,24 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
 from django.urls import reverse_lazy, reverse
 from django.views import generic
+from django.http import HttpResponseNotAllowed
 
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Articles
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Article
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 from .forms import CustomUserCreationForm, ArticleForm
 
 from django.contrib.auth import update_session_auth_hash
 from .forms import UpdateEmailForm, UpdatePasswordForm
+
+# for calendar;
+from django.http import JsonResponse
+import json as _json
+import json
+
+from django.db import transaction
 
 
 User = get_user_model()
@@ -46,11 +54,6 @@ def home(request):
             is_active=True
         ).order_by("first_name")
 
-        context = {
-            "active_members": active_members,
-            "active_coaches": active_coaches,
-        }
-
         return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
     else:
         return render(request, 'CUFitness/home.html')
@@ -66,8 +69,8 @@ def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
 
 def nutrition(request):
-    free_articles = Articles.objects.filter(locked=False)
-    locked_articles = Articles.objects.filter(locked=True)
+    free_articles = Article.objects.filter(locked=False)
+    locked_articles = Article.objects.filter(locked=True)
     return render(request, 'CUFitness/navbar/nutrition.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
 # -----------   Dropdown Menu Pages  -----------
@@ -181,6 +184,161 @@ def user_settings(request):
     }
     return render(request, 'CUFitness/user_profile/settings.html', context)
 
+@login_required(login_url='login')
+@user_passes_test(lambda user: is_member(user) or is_coach(user))
+def user_inbox(request):
+    return render(request, 'CUFitness/user_profile/user_inbox.html')
+
+@login_required(login_url='login')
+@user_passes_test(lambda user: is_member(user) or is_coach(user))
+def user_calendar(request):
+    """
+     Calendar page for members and coaches.
+
+     Members  → see their upcoming coach appointments (accepted & pending).
+     Coaches  → see their upcoming appointments *and* ALL their availability slots
+                (past + future) so the calendar can render them for editing.
+     """
+    now = timezone.now()
+
+    if is_member(request.user):
+        upcoming_appointments = CoachAppointment.objects.filter(
+            member=request.user,
+            start_time__gte=now,
+            status__in=['PENDING', 'ACCEPTED'],
+        ).select_related('coach').order_by('start_time')
+
+        past_appointments = CoachAppointment.objects.filter(
+            member=request.user,
+            start_time__lt=now,
+        ).select_related('coach').order_by('-start_time')[:10]
+
+        availabilities = []
+
+    else:  # COACH
+        upcoming_appointments = CoachAppointment.objects.filter(
+            coach=request.user,
+            start_time__gte=now,
+            status__in=['PENDING', 'ACCEPTED'],
+        ).select_related('member').order_by('start_time')
+
+        past_appointments = CoachAppointment.objects.filter(
+            coach=request.user,
+            start_time__lt=now,
+        ).select_related('member').order_by('-start_time')[:10]
+
+        # ALL slots (past + future) so coaches can see/edit their full history
+        availabilities = CoachAvailability.objects.filter(
+            coach=request.user,
+        ).order_by('start_time')
+
+    # ── Build calendar event JSON ──────────────────────────────────
+    calendar_events = []
+
+    for appt in upcoming_appointments:
+        label = (
+            f"Session with {appt.member.first_name} {appt.member.last_name}"
+            if is_coach(request.user)
+            else f"Session with Coach {appt.coach.first_name} {appt.coach.last_name}"
+        )
+        color = '#15803d' if appt.status == 'ACCEPTED' else '#b45309'
+        calendar_events.append({
+            'type': 'appointment',
+            'title': label,
+            'start': appt.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': appt.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'color': color,
+            'status': appt.status,
+        })
+
+    for slot in availabilities:
+        calendar_events.append({
+            'type': 'availability',
+            'id': slot.id,
+            'title': 'Open Slot' if not slot.is_booked else 'Booked Slot',
+            'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'color': '#1d4ed8' if not slot.is_booked else '#6b7280',
+            'status': 'AVAILABLE' if not slot.is_booked else 'BOOKED',
+            'is_booked': slot.is_booked,
+        })
+
+    # Upcoming open slots for the sidebar list
+    upcoming_availabilities = [s for s in availabilities if s.start_time >= now and not s.is_booked]
+
+    context = {
+        'upcoming_appointments': upcoming_appointments,
+        'past_appointments': past_appointments,
+        'availabilities': upcoming_availabilities,
+        'calendar_events_json': json.dumps(calendar_events),
+        'is_coach': is_coach(request.user),
+    }
+    return render(request, 'CUFitness/user_profile/user_calendar.html', context)
+
+# calendar
+# ── AJAX: add availability slot ───────────────────────────────────
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def ajax_add_availability(request):
+    """POST {start_time, end_time} → create slot, return JSON."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    data = _json.loads(request.body)
+    form = CoachAvailabilityForm(data)
+    if form.is_valid():
+        slot = form.save(commit=False)
+        slot.coach = request.user
+        try:
+            slot.save()
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({
+            'id':    slot.id,
+            'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end':   slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+    return JsonResponse({'error': form.errors.as_json()}, status=400)
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def ajax_edit_availability(request, slot_id):
+    """POST {start_time, end_time} → update slot, return JSON."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
+    if slot.is_booked:
+        return JsonResponse({'error': 'Cannot edit a booked slot.'}, status=400)
+
+    data = _json.loads(request.body)
+    form = CoachAvailabilityForm(data, instance=slot)
+    if form.is_valid():
+        try:
+            form.save()
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({
+            'id':    slot.id,
+            'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end':   slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+    return JsonResponse({'error': form.errors.as_json()}, status=400)
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def ajax_delete_availability(request, slot_id):
+    """POST → delete slot, return JSON."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
+    if slot.is_booked:
+        return JsonResponse({'error': 'Cannot delete a booked slot.'}, status=400)
+    slot.delete()
+    return JsonResponse({'deleted': slot_id})
 
 
 # -----------   Staff Pages  -----------
@@ -213,8 +371,6 @@ def staff_home(request):
         role="MEMBER",
         is_active=True
     ).order_by("first_name")
-
-    print(active_members)
 
     active_coaches = CustomUser.objects.filter(
         role="COACH",
@@ -332,7 +488,7 @@ def staff_user_detail(request, user_id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def articles(request):
-    articles = Articles.objects.all()
+    articles = Article.objects.all()
     return render(request, "CUFitness/staff_profile/articles.html", {"articles":articles})
 
 @login_required(login_url='staff_login')
@@ -351,12 +507,17 @@ def create_article(request):
 
 
 def article_details(request, id):
-    article = get_object_or_404(Articles, id=id)
+    article = get_object_or_404(Article, id=id)
 
     if request.user.is_authenticated:
         base = 'CUFitness/staff_profile/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
     else:
         base = 'CUFitness/base.html'
+
+# make sure user can't enter the url manually to access the locked articles
+# An unauthenticated user can directly hit the URL for a locked/premium article and read it.
+    if article.locked and not request.user.is_authenticated:
+        return redirect('login')
 
     return render(request, 'CUFitness/staff_profile/article_details.html', {
         'article_obj': article,
@@ -366,7 +527,7 @@ def article_details(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def edit_article(request, id):
-    article = get_object_or_404(Articles, id=id)
+    article = get_object_or_404(Article, id=id)
     if request.user != article.author:
         messages.error(request, 'You do not have permission to edit this article.')
         return redirect('articles')
@@ -383,7 +544,7 @@ def edit_article(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def delete_article(request, id):
-    article = get_object_or_404(Articles, id=id)
+    article = get_object_or_404(Article, id=id)
 
     if request.user != article.author:
         messages.error(request, 'You do not have permission to delete this article.')
@@ -393,6 +554,9 @@ def delete_article(request, id):
         article.delete()
         messages.success(request, 'Article deleted successfully.')
         return redirect('articles')
+
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
 
     return redirect('article_details', id=id)
 
@@ -474,22 +638,35 @@ def delete_availability(request, slot_id):
 @user_passes_test(is_coach)
 def manage_appointments(request):
     """View pending appointments and respond."""
-    pending = CoachAppointment.objects.filter(coach=request.user, status='PENDING').order_by('start_time')
+    pending = (CoachAppointment.objects.filter
+               (coach=request.user,
+                status='PENDING'
+                ).order_by('start_time')).select_related('member') # Without this (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
+
     if request.method == 'POST':
         appointment_id = request.POST.get('appointment_id')
-        appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user)
-        form = AppointmentResponseForm(request.POST, instance=appointment)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Appointment {appointment.status}.')
+
+        try:
+            with transaction.atomic():
+                # lock this row until the request completes
+                appointment = CoachAppointment.objects.select_for_update().get_object_or_404(
+                    id=appointment_id,
+                    coach=request.user
+                )
+                form = AppointmentResponseForm(request.POST, instance=appointment)
+                if form.is_valid():
+                    form.save()  # clean() runs here, safely locked
+                    messages.success(request, f'Appointment {appointment.status}.')
+                    return redirect('manage_appointments')
+        except CoachAppointment.DoesNotExist:
+            messages.error(request, 'Appointment not found.')
             return redirect('manage_appointments')
+
     else:
         form = AppointmentResponseForm()
+
     context = {
         'pending_appointments': pending,
         'response_form': form,
     }
-
-    # TODO New url needed
-
     return render(request, 'CUFitness/manage_appointments.html', context)

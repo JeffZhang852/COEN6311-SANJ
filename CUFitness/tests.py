@@ -59,7 +59,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.contrib.auth import get_user_model
-from CUFitness.models import CustomUser, Articles, CoachAvailability, CoachAppointment, EquipmentList, EquipmentBooking
+from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, EquipmentBooking
 from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettingsForm
 
 
@@ -67,6 +67,7 @@ from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettings
 # ══════════════════════════════════════════════════
 # HELPERS
 # ══════════════════════════════════════════════════
+User = get_user_model()
 User = get_user_model()
 def make_member(email='member@test.com', password='Pass@1234'):
     return User.objects.create_user(email=email, password=password, role='MEMBER',
@@ -81,7 +82,7 @@ def make_staff(email='staff@test.com', password='Pass@1234'):
                                     first_name='Alice', last_name='Admin', is_staff=True)
 
 def make_article(author, title='Test Article', locked=False):
-    return Articles.objects.create(
+    return Article.objects.create(
         author=author,
         title=title,
         description='A short description.',
@@ -287,7 +288,7 @@ class CoachAppointmentTest(TestCase):
                 status="ACCEPTED"
             )
 
-class ArticlesModelTest(TestCase):
+class ArticleModelTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -300,7 +301,7 @@ class ArticlesModelTest(TestCase):
             password="password123"
         )
 
-        self.article = Articles.objects.create(
+        self.article = Article.objects.create(
             #user=self.user,
             author=self.author,
             title="Test Article",
@@ -323,7 +324,7 @@ class ArticlesModelTest(TestCase):
         self.article.locked = True
         self.article.save()
 
-        article = Articles.objects.get(id=self.article.id)
+        article = Article.objects.get(id=self.article.id)
         self.assertTrue(article.locked)
 
     def test_str_method(self):
@@ -527,12 +528,12 @@ class ArticleViewTest(TestCase):
     def test_author_can_delete_article(self):
         self.client.force_login(self.staff)
         self.client.post(reverse('delete_article', args=[self.article.id]))
-        self.assertFalse(Articles.objects.filter(id=self.article.id).exists())
+        self.assertFalse(Article.objects.filter(id=self.article.id).exists())
 
     def test_non_author_cannot_delete_article(self):
         self.client.force_login(self.other_staff)
         self.client.post(reverse('delete_article', args=[self.article.id]))
-        self.assertTrue(Articles.objects.filter(id=self.article.id).exists())
+        self.assertTrue(Article.objects.filter(id=self.article.id).exists())
 
     def test_create_article_saves_author(self):
         """Author should be set to the logged-in staff user, not from the form."""
@@ -543,7 +544,7 @@ class ArticleViewTest(TestCase):
             'body': 'Some body.',
             'locked': False,
         })
-        article = Articles.objects.get(title='Brand New Article')
+        article = Article.objects.get(title='Brand New Article')
         self.assertEqual(article.author, self.staff)
 
     def test_nonexistent_article_returns_404(self):
