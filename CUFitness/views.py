@@ -8,7 +8,7 @@ from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Articles
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Article
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 from .forms import CustomUserCreationForm, ArticleForm
 
@@ -18,6 +18,7 @@ from .forms import UpdateEmailForm, UpdatePasswordForm
 # for calendar;
 from django.http import JsonResponse
 import json as _json
+import json
 
 from django.db import transaction
 
@@ -68,8 +69,8 @@ def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
 
 def nutrition(request):
-    free_articles = Articles.objects.filter(locked=False)
-    locked_articles = Articles.objects.filter(locked=True)
+    free_articles = Article.objects.filter(locked=False)
+    locked_articles = Article.objects.filter(locked=True)
     return render(request, 'CUFitness/navbar/nutrition.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
 # -----------   Dropdown Menu Pages  -----------
@@ -198,7 +199,6 @@ def user_calendar(request):
      Coaches  → see their upcoming appointments *and* ALL their availability slots
                 (past + future) so the calendar can render them for editing.
      """
-    import json
     now = timezone.now()
 
     if is_member(request.user):
@@ -372,8 +372,6 @@ def staff_home(request):
         is_active=True
     ).order_by("first_name")
 
-    print(active_members)
-
     active_coaches = CustomUser.objects.filter(
         role="COACH",
         is_active=True
@@ -490,7 +488,7 @@ def staff_user_detail(request, user_id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def articles(request):
-    articles = Articles.objects.all()
+    articles = Article.objects.all()
     return render(request, "CUFitness/staff_profile/articles.html", {"articles":articles})
 
 @login_required(login_url='staff_login')
@@ -509,7 +507,7 @@ def create_article(request):
 
 
 def article_details(request, id):
-    article = get_object_or_404(Articles, id=id)
+    article = get_object_or_404(Article, id=id)
 
     if request.user.is_authenticated:
         base = 'CUFitness/staff_profile/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
@@ -529,7 +527,7 @@ def article_details(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def edit_article(request, id):
-    article = get_object_or_404(Articles, id=id)
+    article = get_object_or_404(Article, id=id)
     if request.user != article.author:
         messages.error(request, 'You do not have permission to edit this article.')
         return redirect('articles')
@@ -546,7 +544,7 @@ def edit_article(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def delete_article(request, id):
-    article = get_object_or_404(Articles, id=id)
+    article = get_object_or_404(Article, id=id)
 
     if request.user != article.author:
         messages.error(request, 'You do not have permission to delete this article.')
