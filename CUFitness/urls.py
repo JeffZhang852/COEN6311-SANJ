@@ -30,6 +30,8 @@ urlpatterns = [
 # -----------   User Profile & Settings   -----------
     path('user_profile/', views.user_profile, name='user_profile'),
     path('user_settings/', views.user_settings, name='settings'),
+    path('user_inbox/', views.user_inbox, name='user_inbox'),
+    path('user_calendar/', views.user_calendar, name='user_calendar'),
 
 # -----------   Staff Pages  -----------
     path('staff_login/', views.staff_login, name='staff_login'),
@@ -53,9 +55,15 @@ urlpatterns = [
     path("staff/article/<int:id>/edit/", views.edit_article, name="edit_article"),
     path("staff/article/<int:id>/delete/", views.delete_article, name="delete_article"),
 
+
+# Calendar AJAX endpoints (availability add / edit / delete)
+    path('api/availability/add/',                   views.ajax_add_availability,    name='ajax_add_availability'),
+    path('api/availability/<int:slot_id>/edit/',    views.ajax_edit_availability,   name='ajax_edit_availability'),
+    path('api/availability/<int:slot_id>/delete/',  views.ajax_delete_availability, name='ajax_delete_availability'),
+
+
 # -----------   Coach Request Handling  -----------
     path("staff/coach-request/<int:user_id>/", views.handle_coach_request, name="handle_coach_request"),  # NEW
-
 
 # -----------   Coach Pages  -----------
 
