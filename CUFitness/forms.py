@@ -2,7 +2,8 @@ from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking
-from .models import Article
+from .models import Article, Recipe, RecipeIngredient
+from django.forms import inlineformset_factory
 
 from django.contrib.auth.forms import PasswordChangeForm
 
@@ -17,14 +18,6 @@ class CustomUserCreationForm(UserCreationForm):
             'membership': forms.Select(attrs={
                 'class': 'styled-select'})
         }
-
-
-class ArticleForm(forms.ModelForm):
-    class Meta:
-        model = Article
-        fields = ['title','description', 'body', 'locked']
-        exclude = ["author"] # we set it manually
-        widgets = {}
 
 class UpdateEmailForm(forms.ModelForm):
     class Meta:
@@ -42,13 +35,39 @@ class UpdatePasswordForm(PasswordChangeForm):
     # PasswordChangeForm already handles old/new/confirm password validation
     pass
 
-
-
 class CoachRequestForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = []  # No need to send stuff. May add notification via email later if needed.
 
+
+
+class ArticleForm(forms.ModelForm):
+    class Meta:
+        model = Article
+        fields = ['title','description', 'body', 'locked']
+        exclude = ["author"] # we set it manually
+        widgets = {}
+
+
+
+class RecipeForm(forms.ModelForm):
+    class Meta:
+        model = Recipe
+        fields = [
+            'title', 'description', 'difficulty',
+            'prep_time_minutes', 'cook_time_minutes',
+            'servings', 'calories_per_serving',
+            'dietary_restrictions', 'locked',
+        ]
+
+IngredientFormSet = inlineformset_factory(
+    parent_model=Recipe,
+    model=RecipeIngredient,
+    fields=['name', 'quantity', 'unit', 'notes'],
+    extra=3,        # show 3 empty ingredient rows by default
+    can_delete=True,
+)
 
 
 class CoachAvailabilityForm(forms.ModelForm):

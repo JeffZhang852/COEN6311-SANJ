@@ -21,7 +21,8 @@
 
             {% if user.is_authenticated and user.role == "STAFF" %}
             <div class="article-actions">
-                {% if user == article_obj.author %}
+                <!-- check if article author is not deleted then check that it's the same as the user -->
+                {% if article_obj.author and user == article_obj.author %}
                     <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
                         <span class="material-icons">edit</span>
                         <span>Edit Article</span>
@@ -46,9 +47,10 @@
         </div>
 
             <div class="blog-meta">
-                <div class="meta-avatar">{{ article_obj.author.first_name|first }}{{ article_obj.author.last_name|first }}</div>
+                <div class="meta-avatar">{{ article_obj.author.first_name|first|default:"Deleted User" }}{{ article_obj.author.last_name|first|default:"" }}
+                </div>
                 <div class="meta-info">
-                    <span class="meta-author">{{ article_obj.author.first_name }} {{ article_obj.author.last_name }}</span>
+                    <span class="meta-author">{{ article_obj.author.first_name|first|default:"Deleted User" }} {{ article_obj.author.last_name|first|default:"" }}</span>
                     <span class="meta-date">{{ article_obj.created_at|date:"F d, Y" }}</span>
                 </div>
             </div>

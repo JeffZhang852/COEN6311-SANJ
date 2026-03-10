@@ -10,7 +10,12 @@ urlpatterns = [
     path ("services/", views.services, name='services'),
     path ("memberships/", views.memberships, name='memberships'),
     path("trainers/", views.trainers, name='trainers'),
-    path ("nutrition/", views.nutrition, name='nutrition'),
+
+    path("resources/", views.resources, name='resources'),
+    path ("health_articles/", views.health_articles, name='health_articles'),
+    path("workout_plans/", views.workout_plans, name='workout_plans'),
+    path("recipes/", views.recipes, name='recipes'),
+
 
 # -----------   Dropdown Menu Pages  -----------
     path ("amenities/", views.amenities, name='amenities'),
@@ -32,6 +37,9 @@ urlpatterns = [
     path('user_settings/', views.user_settings, name='settings'),
     path('user_inbox/', views.user_inbox, name='user_inbox'),
     path('user_calendar/', views.user_calendar, name='user_calendar'),
+    path('user_recipes/', views.user_recipes, name='user_recipes'),
+    path('user_workouts/', views.user_workouts, name='user_workouts'),
+
 
 # -----------   Staff Pages  -----------
     path('staff_login/', views.staff_login, name='staff_login'),
@@ -44,22 +52,46 @@ urlpatterns = [
     path('staff_settings/', views.staff_settings, name='staff_settings'),
 
 # path to user profiles from staff_home page
-    path("staff/user/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
+    path("staff_user_detail/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
+
+
+    path("resource_management/", views.resource_management, name='resource_management'),
 
 # -----------   Article Pages  -----------
-    path('articles/', views.articles, name='articles'),
+    path('staff_articles/', views.staff_articles, name='staff_articles'),
     path('create_article/', views.create_article, name='create_article'),
     # path to article pages from staff-articles page
-    path("staff/article/<int:id>/", views.article_details, name="article_details"),
+    path("article_details/<int:id>/", views.article_details, name="article_details"),
     # path to edit article page from article_details page
-    path("staff/article/<int:id>/edit/", views.edit_article, name="edit_article"),
-    path("staff/article/<int:id>/delete/", views.delete_article, name="delete_article"),
+    path("edit_article/<int:id>/edit/", views.edit_article, name="edit_article"),
+    path("delete_article/<int:id>/delete/", views.delete_article, name="delete_article"),
+
+# -----------   Recipe Pages  -----------
+    path("staff_recipes/", views.staff_recipes, name='staff_recipes'),
+    path('create_recipe/', views.create_recipe, name='create_recipe'),
+    # path to article pages from staff-articles page
+    path("recipe_details/<int:id>/", views.recipe_details, name="recipe_details"),
+    # path to edit article page from article_details page
+    path("recipe/<int:id>/edit/", views.edit_recipe, name="edit_recipe"),
+    path("recipe/<int:id>/delete/", views.delete_recipe, name="delete_recipe"),
+
+# -----------   Workout Pages  -----------
+
+   #path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
+    #path('create_workouts/', views.create_workouts, name='create_workouts'),
+    # path to article pages from staff-articles page
+   # path("workout_details/<int:id>/", views.workout_details, name="workout_details"),
+    # path to edit article page from article_details page
+   # path("workout/<int:id>/edit/", views.edit_workout, name="edit_workout"),
+   # path("workout/<int:id>/delete/", views.delete_workout, name="delete_workout"),
+
+
 
 
 # Calendar AJAX endpoints (availability add / edit / delete)
-    path('api/availability/add/',                   views.ajax_add_availability,    name='ajax_add_availability'),
-    path('api/availability/<int:slot_id>/edit/',    views.ajax_edit_availability,   name='ajax_edit_availability'),
-    path('api/availability/<int:slot_id>/delete/',  views.ajax_delete_availability, name='ajax_delete_availability'),
+    path('api/availability/add/', views.ajax_add_availability, name='ajax_add_availability'),
+    path('api/availability/<int:slot_id>/edit/', views.ajax_edit_availability, name='ajax_edit_availability'),
+    path('api/availability/<int:slot_id>/delete/', views.ajax_delete_availability, name='ajax_delete_availability'),
 
 
 # -----------   Coach Request Handling  -----------

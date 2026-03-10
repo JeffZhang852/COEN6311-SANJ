@@ -91,6 +91,43 @@ PasswordUpdateViewTest:
     - test_coach_can_update_password — coaches share the same settings page and can update their password
     - test_unauthenticated_cannot_update_password — unauthenticated POST is blocked
 
+RecipeModelTest:
+    - test_recipe_creation — checks title, times, servings, difficulty, and locked field are saved correctly
+    - test_total_time_property — total_time_minutes equals prep + cook
+    - test_str_method — __str__ returns a string containing the recipe title
+    - test_timestamps_auto_populated — created_at and updated_at are set on creation
+    - test_author_set_null_on_user_delete — deleting the author nulls the field but keeps the recipe
+    - test_calories_optional — calories_per_serving defaults to None
+    - test_calories_can_be_set — calories_per_serving can be saved and retrieved
+    - test_locked_field_toggles — locked field can be toggled and persisted
+    - test_dietary_restrictions_stores_multiple — MultiSelectField stores and returns multiple dietary codes correctly
+    - test_scaled_ingredients — scaled_ingredients returns quantities multiplied by the given factor
+
+RecipeIngredientTest:
+    - test_add_ingredient — ingredient is created with correct name, quantity (Decimal), and empty notes
+    - test_ingredient_with_notes — notes appear in __str__ output
+    - test_str_without_notes — __str__ contains quantity and name but no empty parentheses
+    - test_ingredients_deleted_with_recipe — cascade delete removes ingredients when recipe is deleted
+    - test_multiple_ingredients_ordered_by_insertion — ingredients are returned in insertion order
+    - test_recipe_ingredient_count — ingredients.count() reflects all added ingredients
+    - test_scaled_quantity — scaled_quantity multiplies Decimal quantity correctly by factor
+
+RecipeViewTest:
+    - test_staff_recipes_page_loads — staff_recipes page returns 200 for staff users
+    - test_unauthenticated_cannot_access_staff_recipes — unauthenticated users are redirected away
+    - test_member_cannot_access_staff_recipes — members are blocked from the staff recipes list
+    - test_recipe_detail_page_loads — recipe_details returns 200 for an existing recipe
+    - test_recipe_detail_shows_title — recipe title appears in the rendered page
+    - test_nonexistent_recipe_returns_404 — requesting a non-existent recipe ID returns 404
+    - test_unauthenticated_cannot_access_locked_recipe — unauthenticated users are redirected away from locked recipes
+    - test_unauthenticated_can_access_unlocked_recipe — unauthenticated users can view free recipes
+    - test_create_recipe_saves_author — author is set to logged-in staff user, not from the form
+    - test_member_cannot_create_recipe — members are blocked from the create recipe page
+    - test_author_can_edit_recipe — the recipe author can update the title and fields successfully
+    - test_non_author_cannot_edit_recipe — a different staff member cannot overwrite another's recipe
+    - test_author_can_delete_recipe — the recipe author can delete their own recipe
+    - test_non_author_cannot_delete_recipe — a different staff member cannot delete another's recipe
+
 """
 
 from django.test import TestCase, Client
@@ -99,8 +136,9 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.contrib.auth import get_user_model
-from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, EquipmentBooking
+from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, EquipmentBooking, Recipe, RecipeIngredient
 from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettingsForm, UpdateEmailForm, UpdatePasswordForm
+from decimal import Decimal
 
 
 
@@ -478,7 +516,7 @@ class AccessControlTest(TestCase):
         self.assertNotEqual(response.status_code, 200)
 
     def test_unauthenticated_cannot_access_articles(self):
-        response = self.client.get(reverse('articles'))
+        response = self.client.get(reverse('staff_articles'))
         self.assertNotEqual(response.status_code, 200)
 
     def test_unauthenticated_cannot_access_staff_home(self):
@@ -494,7 +532,7 @@ class AccessControlTest(TestCase):
 
     def test_member_cannot_access_articles_list(self):
         self.client.force_login(self.member)
-        response = self.client.get(reverse('articles'))
+        response = self.client.get(reverse('staff_articles'))
         self.assertNotEqual(response.status_code, 200)
 
     def test_member_cannot_create_article(self):
@@ -506,7 +544,7 @@ class AccessControlTest(TestCase):
 
     def test_staff_can_access_articles_list(self):
         self.client.force_login(self.staff)
-        response = self.client.get(reverse('articles'))
+        response = self.client.get(reverse('staff_articles'))
         self.assertEqual(response.status_code, 200)
 
     def test_staff_can_access_create_article(self):
@@ -664,7 +702,7 @@ class ArticleFormTest(TestCase):
 
     def test_article_form_title_too_long(self):
         form = ArticleForm(data={
-            'title': 'x' * 76,  # max_length is 75
+            'title': 'x' * 101,  # max_length is 100
             'description': 'Desc.',
             'body': 'Body.',
             'locked': False,
@@ -763,20 +801,20 @@ class NutritionViewTest(TestCase):
         self.locked_article = make_article(self.staff, title='Locked Article', locked=True)
 
     def test_nutrition_page_loads(self):
-        response = self.client.get(reverse('nutrition'))
+        response = self.client.get(reverse('health_articles'))
         self.assertEqual(response.status_code, 200)
 
     def test_free_articles_shown_to_all(self):
-        response = self.client.get(reverse('nutrition'))
+        response = self.client.get(reverse('health_articles'))
         self.assertContains(response, 'Free Article')
 
     def test_locked_article_in_context(self):
-        response = self.client.get(reverse('nutrition'))
+        response = self.client.get(reverse('health_articles'))
         locked = list(response.context['locked_articles'])
         self.assertIn(self.locked_article, locked)
 
     def test_free_article_in_context(self):
-        response = self.client.get(reverse('nutrition'))
+        response = self.client.get(reverse('health_articles'))
         free = list(response.context['free_articles'])
         self.assertIn(self.free_article, free)
 
@@ -1111,7 +1149,7 @@ class PublicPageTest(TestCase):
         self.assertEqual(self.client.get(reverse('trainers')).status_code, 200)
 
     def test_nutrition_page(self):
-        self.assertEqual(self.client.get(reverse('nutrition')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('health_articles')).status_code, 200)
 
     def test_faq_page(self):
         self.assertEqual(self.client.get(reverse('faq')).status_code, 200)
@@ -1391,3 +1429,291 @@ class PasswordUpdateViewTest(TestCase):
             'password_submit': '1',
         })
         self.assertNotEqual(response.status_code, 200)
+
+# ══════════════════════════════════════════════════
+# RECIPE MODEL TESTS
+# ══════════════════════════════════════════════════
+
+def make_recipe(author, title='Protein Oats', locked=False):
+    return Recipe.objects.create(
+        author=author,
+        title=title,
+        description='A quick high-protein breakfast.',
+        instructions='1. Cook oats.\n2. Add protein powder.\n3. Enjoy.',
+        prep_time_minutes=5,
+        cook_time_minutes=10,
+        servings=2,
+        difficulty='EASY',
+        locked=locked,
+    )
+
+
+class RecipeModelTest(TestCase):
+
+    def setUp(self):
+        self.staff = make_staff()
+        self.recipe = make_recipe(author=self.staff)
+
+    def test_recipe_creation(self):
+        self.assertEqual(self.recipe.title, 'Protein Oats')
+        self.assertEqual(self.recipe.prep_time_minutes, 5)
+        self.assertEqual(self.recipe.cook_time_minutes, 10)
+        self.assertEqual(self.recipe.servings, 2)
+        self.assertEqual(self.recipe.difficulty, 'EASY')
+        self.assertFalse(self.recipe.locked)
+
+    def test_total_time_property(self):
+        """total_time_minutes should be prep + cook."""
+        self.assertEqual(self.recipe.total_time_minutes, 15)
+
+    def test_str_method(self):
+        self.assertIsInstance(str(self.recipe), str)
+        self.assertIn('Protein Oats', str(self.recipe))
+
+    def test_timestamps_auto_populated(self):
+        self.assertIsNotNone(self.recipe.created_at)
+        self.assertIsNotNone(self.recipe.updated_at)
+
+    def test_author_set_null_on_user_delete(self):
+        """Deleting the author should null the field, not delete the recipe."""
+        self.staff.delete()
+        self.recipe.refresh_from_db()
+        self.assertIsNone(self.recipe.author)
+        self.assertTrue(Recipe.objects.filter(id=self.recipe.id).exists())
+
+    def test_calories_optional(self):
+        """calories_per_serving should default to None."""
+        self.assertIsNone(self.recipe.calories_per_serving)
+
+    def test_calories_can_be_set(self):
+        self.recipe.calories_per_serving = 350
+        self.recipe.save()
+        self.recipe.refresh_from_db()
+        self.assertEqual(self.recipe.calories_per_serving, 350)
+
+    def test_locked_field_toggles(self):
+        self.recipe.locked = True
+        self.recipe.save()
+        self.recipe.refresh_from_db()
+        self.assertTrue(self.recipe.locked)
+
+    def test_dietary_restrictions_stores_multiple(self):
+        """MultiSelectField should store and return multiple values."""
+        self.recipe.dietary_restrictions = ['NO_GLUTEN', 'VEGAN']
+        self.recipe.save()
+        self.recipe.refresh_from_db()
+        self.assertIn('NO_GLUTEN', self.recipe.dietary_restrictions)
+        self.assertIn('VEGAN', self.recipe.dietary_restrictions)
+
+    def test_scaled_ingredients(self):
+        """scaled_ingredients should return quantities multiplied by the given factor."""
+        RecipeIngredient.objects.create(
+            recipe=self.recipe, name='Oats', quantity=Decimal('1.00'), unit='CUP'
+        )
+        scaled = self.recipe.scaled_ingredients(2)
+        self.assertEqual(scaled[0][1], Decimal('2.00'))
+
+
+class RecipeIngredientTest(TestCase):
+
+    def setUp(self):
+        self.staff = make_staff()
+        self.recipe = make_recipe(author=self.staff)
+
+    def test_add_ingredient(self):
+        ingredient = RecipeIngredient.objects.create(
+            recipe=self.recipe,
+            name='Rolled oats',
+            quantity=Decimal('1.00'),
+            unit='CUP',
+        )
+        self.assertEqual(ingredient.name, 'Rolled oats')
+        self.assertEqual(ingredient.quantity, Decimal('1.00'))
+        self.assertEqual(ingredient.notes, '')
+
+    def test_ingredient_with_notes(self):
+        ingredient = RecipeIngredient.objects.create(
+            recipe=self.recipe,
+            name='Banana',
+            quantity=Decimal('1.00'),
+            unit='WHOLE',
+            notes='sliced',
+        )
+        self.assertIn('sliced', str(ingredient))
+
+    def test_str_without_notes(self):
+        ingredient = RecipeIngredient.objects.create(
+            recipe=self.recipe,
+            name='Protein powder',
+            quantity=Decimal('30.00'),
+            unit='G',
+        )
+        result = str(ingredient)
+        self.assertIn('Protein powder', result)
+        self.assertNotIn('()', result)  # no empty parentheses
+
+    def test_ingredients_deleted_with_recipe(self):
+        """Cascade: deleting the recipe should remove its ingredients."""
+        RecipeIngredient.objects.create(
+            recipe=self.recipe, name='Oats', quantity=Decimal('1.00'), unit='CUP'
+        )
+        recipe_id = self.recipe.id
+        self.recipe.delete()
+        self.assertFalse(RecipeIngredient.objects.filter(recipe_id=recipe_id).exists())
+
+    def test_multiple_ingredients_ordered_by_insertion(self):
+        names = ['Oats', 'Milk', 'Honey', 'Cinnamon']
+        for name in names:
+            RecipeIngredient.objects.create(
+                recipe=self.recipe, name=name, quantity=Decimal('1.00'), unit='TSP'
+            )
+        stored = list(self.recipe.ingredients.values_list('name', flat=True))
+        self.assertEqual(stored, names)
+
+    def test_recipe_ingredient_count(self):
+        for i in range(4):
+            RecipeIngredient.objects.create(
+                recipe=self.recipe, name=f'Ingredient {i}', quantity=Decimal('1.00'), unit='G'
+            )
+        self.assertEqual(self.recipe.ingredients.count(), 4)
+
+    def test_scaled_quantity(self):
+        """scaled_quantity should multiply the Decimal quantity by the given factor."""
+        ingredient = RecipeIngredient.objects.create(
+            recipe=self.recipe, name='Oats', quantity=Decimal('1.50'), unit='CUP'
+        )
+        self.assertEqual(ingredient.scaled_quantity(2), Decimal('3.00'))
+
+# ══════════════════════════════════════════════════
+# RECIPE VIEW TESTS
+# ══════════════════════════════════════════════════
+
+class RecipeViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.staff = make_staff()
+        self.other_staff = make_staff(email='other@test.com')
+        self.member = make_member()
+        self.recipe = make_recipe(author=self.staff)
+
+    # --- staff_recipes page ---
+
+    def test_staff_recipes_page_loads(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('staff_recipes'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_unauthenticated_cannot_access_staff_recipes(self):
+        response = self.client.get(reverse('staff_recipes'))
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_member_cannot_access_staff_recipes(self):
+        self.client.force_login(self.member)
+        response = self.client.get(reverse('staff_recipes'))
+        self.assertNotEqual(response.status_code, 200)
+
+    # --- recipe_details page ---
+
+    def test_recipe_detail_page_loads(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('recipe_details', args=[self.recipe.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_recipe_detail_shows_title(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('recipe_details', args=[self.recipe.id]))
+        self.assertContains(response, self.recipe.title)
+
+    def test_nonexistent_recipe_returns_404(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('recipe_details', args=[99999]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_unauthenticated_cannot_access_locked_recipe(self):
+        locked = make_recipe(author=self.staff, title='Locked Recipe', locked=True)
+        response = self.client.get(reverse('recipe_details', args=[locked.id]))
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_unauthenticated_can_access_unlocked_recipe(self):
+        response = self.client.get(reverse('recipe_details', args=[self.recipe.id]))
+        self.assertEqual(response.status_code, 200)
+
+    # --- create_recipe ---
+
+    def test_create_recipe_saves_author(self):
+        """Author should be set to the logged-in staff user, not from the form."""
+        self.client.force_login(self.staff)
+        self.client.post(reverse('create_recipe'), {
+            'title': 'New Recipe',
+            'description': 'A test description.',
+            'difficulty': 'EASY',
+            'prep_time_minutes': 10,
+            'cook_time_minutes': 20,
+            'servings': 2,
+            'instructions': 'Step 1. Do something.',
+            'locked': False,
+            'ingredients-TOTAL_FORMS': '0',
+            'ingredients-INITIAL_FORMS': '0',
+            'ingredients-MIN_NUM_FORMS': '0',
+            'ingredients-MAX_NUM_FORMS': '1000',
+        })
+        recipe = Recipe.objects.get(title='New Recipe')
+        self.assertEqual(recipe.author, self.staff)
+
+    def test_member_cannot_create_recipe(self):
+        self.client.force_login(self.member)
+        response = self.client.get(reverse('create_recipe'))
+        self.assertNotEqual(response.status_code, 200)
+
+    # --- edit_recipe ---
+
+    def test_author_can_edit_recipe(self):
+        self.client.force_login(self.staff)
+        self.client.post(reverse('edit_recipe', args=[self.recipe.id]), {
+            'title': 'Updated Recipe',
+            'description': 'Updated description.',
+            'difficulty': 'HARD',
+            'prep_time_minutes': 10,
+            'cook_time_minutes': 20,
+            'servings': 4,
+            'instructions': 'Updated instructions.',
+            'locked': False,
+            'ingredients-TOTAL_FORMS': '0',
+            'ingredients-INITIAL_FORMS': '0',
+            'ingredients-MIN_NUM_FORMS': '0',
+            'ingredients-MAX_NUM_FORMS': '1000',
+        })
+        self.recipe.refresh_from_db()
+        self.assertEqual(self.recipe.title, 'Updated Recipe')
+
+    def test_non_author_cannot_edit_recipe(self):
+        self.client.force_login(self.other_staff)
+        self.client.post(reverse('edit_recipe', args=[self.recipe.id]), {
+            'title': 'Hacked Title',
+            'description': 'x',
+            'difficulty': 'EASY',
+            'prep_time_minutes': 1,
+            'cook_time_minutes': 1,
+            'servings': 1,
+            'instructions': 'x',
+            'locked': False,
+            'ingredients-TOTAL_FORMS': '0',
+            'ingredients-INITIAL_FORMS': '0',
+            'ingredients-MIN_NUM_FORMS': '0',
+            'ingredients-MAX_NUM_FORMS': '1000',
+        })
+        self.recipe.refresh_from_db()
+        self.assertNotEqual(self.recipe.title, 'Hacked Title')
+
+    # --- delete_recipe ---
+
+    def test_author_can_delete_recipe(self):
+        self.client.force_login(self.staff)
+        self.client.post(reverse('delete_recipe', args=[self.recipe.id]))
+        self.assertFalse(Recipe.objects.filter(id=self.recipe.id).exists())
+
+    def test_non_author_cannot_delete_recipe(self):
+        self.client.force_login(self.other_staff)
+        self.client.post(reverse('delete_recipe', args=[self.recipe.id]))
+        self.assertTrue(Recipe.objects.filter(id=self.recipe.id).exists())

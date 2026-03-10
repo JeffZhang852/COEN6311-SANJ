@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .managers import CustomUserManager
+from multiselectfield import MultiSelectField
+from decimal import Decimal
 
 
 
@@ -88,13 +90,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 class Article(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
     # idk if we want that cause maybe we want to keep articles even staff are fired
-   # user = models.ForeignKey(CustomUser, related_name="article", on_delete=models.CASCADE)
-    author = models.ForeignKey(CustomUser, related_name="articles", on_delete=models.CASCADE)# links each article to unique user
-    title = models.CharField(max_length=75)
+    # changed on_delete so that if the authro is deleted the article stays in database but has its authro as null
+    #now need to handle author is null in the templates
+    author = models.ForeignKey(
+        CustomUser, related_name="articles",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
-    locked = models.BooleanField(default=False)
+    title = models.CharField(max_length=100)
 
-    description = models.CharField(max_length = 250, help_text="Add description here")
+    locked = models.BooleanField(default=False, help_text='Premium content — requires login to view',)
+
+    description = models.CharField(max_length = 250, help_text='Brief summary of the recipe')
     body = models.TextField(help_text="Add body here")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -261,6 +270,119 @@ class CoachAppointment(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()   # runs validators including clean()
         super().save(*args, **kwargs)
+
+
+# -----------   Recipe Models   -----------
+
+class Recipe(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('EASY',   'Easy'),
+        ('MEDIUM', 'Medium'),
+        ('HARD',   'Hard'),
+    ]
+    DIETARY_CHOICES = [
+        ('NO_NUTS', 'No Nuts'),
+        ('NO_SEAFOOD', 'No Seafood'),
+        ('NO_DAIRY_LACTOSE', 'No Dairy Lactose'),
+        ('NO_RED_MEAT', 'No Red Meat'),
+        ('NO_PORK', 'No Pork'),
+        ('NO_ALCOHOL', 'No Alcohol'),
+        ('NO_SHELLFISH', 'No Shellfish'),
+        ('NO_GLUTEN', 'No Gluten'),
+        ('NO_SESAME', 'No Sesame'),
+        ('NO_MUSTARD', 'No Mustard'),
+        ('VEGAN', 'Vegan'),
+        ('VEGETARIAN', 'Vegetarian'),
+    ]
+
+    author = models.ForeignKey(
+        CustomUser,
+        related_name='recipes',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+    )
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=250, help_text='Brief summary of the recipe')
+    locked = models.BooleanField(
+        default=False,
+        help_text='Premium content — requires login to view',
+    )
+
+    # Recipe-specific fields
+    prep_time_minutes = models.PositiveIntegerField(help_text='Preparation time in minutes')
+    cook_time_minutes = models.PositiveIntegerField(help_text='Cooking time in minutes (0 if none)')
+    servings = models.PositiveIntegerField(default=1)
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='MEDIUM')
+    instructions = models.TextField(help_text='Step-by-step cooking instructions')
+    calories_per_serving = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='Approximate calories per serving (optional)',
+    )
+    dietary_restrictions = MultiSelectField(choices=DIETARY_CHOICES, blank=True, max_length=250, help_text='Dietary choices (optional)')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+# calls the scale ingredient function from here (helper method)
+# recipe.scaled_ingredients(2)  # returns [(ingredient, scaled_qty), ...]
+    def scaled_ingredients(self, factor):
+        return [
+            (ing, ing.scaled_quantity(factor))
+            for ing in self.ingredients.all()
+        ]
+
+    def __str__(self):
+        return f'{self.title} (serves {self.servings}) — {self.get_difficulty_display()}'
+
+    @property
+    def total_time_minutes(self):
+        return self.prep_time_minutes + self.cook_time_minutes
+
+
+
+
+class RecipeIngredient(models.Model):
+    UNIT_CHOICES = [
+        # Volume
+        ('TSP', 'tsp'),
+        ('TBSP', 'tbsp'),
+        ('CUP', 'cup'),
+        ('ML', 'ml'),
+        ('L', 'l'),
+        ('FL_OZ', 'fl oz'),
+        # Weight
+        ('G', 'g'),
+        ('KG', 'kg'),
+        ('OZ', 'oz'),
+        ('LB', 'lb'),
+        # Count
+        ('WHOLE', 'whole'),
+        ('PINCH', 'pinch'),
+        ('SLICE', 'slice'),
+        # Free text fallback
+        ('OTHER', 'other'),
+    ]
+    recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    quantity = models.DecimalField(max_digits=7, decimal_places=2, help_text='e.g. 1.5, 100, 0.25')
+    unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='OTHER')
+    unit_other = models.CharField(max_length=50, blank=True, help_text='Describe unit if "other" selected')
+
+    notes = models.CharField(max_length=100, blank=True, help_text='e.g. "finely chopped", "optional"')
+
+# this is used to scale the recipe to different serving sizes
+    def scaled_quantity(self, factor):
+        return self.quantity * Decimal(str(factor))
+
+    class Meta:
+        ordering = ['id']  # preserve the order ingredients were added
+
+    def __str__(self):
+        base = f'{self.quantity} {self.name}'
+        return f'{base} ({self.notes})' if self.notes else base
 
 
 # Placeholder for review and report

@@ -1,0 +1,57 @@
+{% extends 'CUFitness/base.html' %}
+{% load static %}
+{% block title %} Nutrition & Recipes {% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'recipes.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+    <section class="content-section">
+
+        <h2>Recipes</h2>
+
+        <div class="card-grid">
+            {% for free_recipes in free_recipes %}
+                <a href="{% url 'recipe_details' free_recipes.id %}">
+                    <div class="card">
+                        <h3>{{free_recipes.title}}</h3>
+                        <p>{{free_recipes.description}}</p>
+                        <button>Read More</button>
+                    </div>
+                </a>
+            {% empty %}
+                <p>No Recipes yet.</p>
+            {% endfor %}
+
+            {% if user.is_authenticated %}
+                {% for locked_recipes in locked_recipes %}
+                    <a href="{% url 'recipe_details' locked_recipes.id %}">
+                        <div class="card">
+                            <h3>{{locked_recipes.title}}</h3>
+                            <p>{{locked_recipes.description}}</p>
+                            <button>Read More</button>
+                        </div>
+                    </a>
+                {% endfor %}
+
+            {% else %}
+                {% for locked_recipes in locked_recipes %}
+                    <a href="/login">
+                        <div class="card locked">
+                            <h3>{{locked_recipes.title}}</h3>
+                            <p>{{locked_recipes.description}}</p>
+                            <div class="lock-overlay"></div>
+                            <span class="badge premium">Log In to View </span>
+                            <button>Read More</button>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+
+    </section>
+
+{% endblock %}
