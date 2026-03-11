@@ -7,6 +7,7 @@ What it creates:
   - 2 Staff users       (staff1@..., staff2@... / Staff@1234)
   - 3 Regular members   (member1@..., member2@..., member3@... / Member@1234)
   - 5 Articles          (3 unlocked, 2 locked), authored by the staff users
+  - 6 Recipes           (4 unlocked, 2 locked), with ingredients, authored by staff/coach
 
 All entries are idempotent — re-running won't duplicate data.
 """
@@ -19,7 +20,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "COEN6311.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from CUFitness.models import Article
+from CUFitness.models import Article, Recipe, RecipeIngredient
 
 User = get_user_model()
 
@@ -242,12 +243,239 @@ create_article(
 )
 
 # ─────────────────────────────────────────────
+# 6. Recipes (authored by staff & coach)
+# ─────────────────────────────────────────────
+
+def create_recipe(author, title, description, difficulty,
+                  prep, cook, servings, calories, dietary, locked, instructions, ingredients):
+    if Recipe.objects.filter(title=title).exists():
+        print(f"  [skip] Recipe already exists: '{title}'")
+        return Recipe.objects.get(title=title)
+
+    recipe = Recipe.objects.create(
+        author               = author,
+        title                = title,
+        description          = description,
+        difficulty           = difficulty,
+        prep_time_minutes    = prep,
+        cook_time_minutes    = cook,
+        servings             = servings,
+        calories_per_serving = calories,
+        dietary_restrictions      = dietary,
+        locked               = locked,
+        instructions         = instructions,
+    )
+
+    for ing in ingredients:
+        RecipeIngredient.objects.create(
+            recipe   = recipe,
+            name     = ing['name'],
+            quantity = ing['quantity'],
+            unit     = ing['unit'],
+            notes    = ing.get('notes', ''),
+        )
+
+    status = "🔒 locked" if locked else "🔓 unlocked"
+    print(f"  [created] Recipe ({status}): '{title}'")
+    return recipe
+
+
+print("\n── Creating Recipes ──")
+
+create_recipe(
+    author      = staff1,
+    title       = "High-Protein Chicken & Quinoa Bowl",
+    description = "A quick post-workout meal packed with lean protein and complex carbs.",
+    difficulty  = "EASY",
+    prep        = 10,
+    cook        = 20,
+    servings    = 2,
+    calories    = 480,
+    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked      = False,
+    instructions = (
+        "1. Rinse quinoa under cold water and cook in chicken broth (1:2 ratio) for 15 minutes.\n"
+        "2. Season chicken breast with salt, pepper, and garlic powder.\n"
+        "3. Heat olive oil in a pan over medium-high heat. Cook chicken 6–7 minutes per side until golden.\n"
+        "4. Rest chicken for 5 minutes then slice.\n"
+        "5. Divide quinoa between bowls, top with sliced chicken, cherry tomatoes, and cucumber.\n"
+        "6. Drizzle with lemon juice and serve."
+    ),
+    ingredients = [
+        {'name': 'chicken breast',    'quantity': '300', 'unit': 'G'},
+        {'name': 'quinoa',            'quantity': '1',   'unit': 'CUP'},
+        {'name': 'chicken broth',     'quantity': '2',   'unit': 'CUP'},
+        {'name': 'olive oil',         'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'cherry tomatoes',   'quantity': '100', 'unit': 'G',    'notes': 'halved'},
+        {'name': 'cucumber',          'quantity': '0.5', 'unit': 'WHOLE','notes': 'diced'},
+        {'name': 'lemon juice',       'quantity': '2',   'unit': 'TBSP'},
+        {'name': 'garlic powder',     'quantity': '1',   'unit': 'TSP'},
+    ],
+)
+
+create_recipe(
+    author      = staff2,
+    title       = "Overnight Oats with Berries",
+    description = "No-cook, prep-ahead breakfast loaded with fibre and antioxidants.",
+    difficulty  = "EASY",
+    prep        = 5,
+    cook        = 0,
+    servings    = 1,
+    calories    = 350,
+    dietary     = ['NO_NUTS', 'VEGETARIAN'],
+    locked      = False,
+    instructions = (
+        "1. Add oats, chia seeds, and milk to a jar or container with a lid.\n"
+        "2. Stir in honey and vanilla extract.\n"
+        "3. Seal and refrigerate overnight (at least 6 hours).\n"
+        "4. In the morning, top with Greek yogurt and mixed berries.\n"
+        "5. Stir and eat cold, or microwave for 90 seconds if you prefer it warm."
+    ),
+    ingredients = [
+        {'name': 'rolled oats',    'quantity': '0.5', 'unit': 'CUP'},
+        {'name': 'chia seeds',     'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'milk',           'quantity': '0.5', 'unit': 'CUP',  'notes': 'dairy or plant-based'},
+        {'name': 'Greek yogurt',   'quantity': '100', 'unit': 'G'},
+        {'name': 'mixed berries',  'quantity': '80',  'unit': 'G',    'notes': 'fresh or frozen'},
+        {'name': 'honey',          'quantity': '1',   'unit': 'TSP'},
+        {'name': 'vanilla extract','quantity': '0.5', 'unit': 'TSP'},
+    ],
+)
+
+create_recipe(
+    author      = coach,
+    title       = "Lean Turkey Meatballs with Zoodles",
+    description = "Low-carb, high-protein dinner that's easy to batch cook for the week.",
+    difficulty  = "MEDIUM",
+    prep        = 15,
+    cook        = 25,
+    servings    = 4,
+    calories    = 320,
+    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked      = False,
+    instructions = (
+        "1. Preheat oven to 200°C (400°F). Line a baking tray with parchment paper.\n"
+        "2. Mix turkey mince with egg, garlic, parsley, salt, and pepper. Roll into 16 equal balls.\n"
+        "3. Bake meatballs for 20–22 minutes until cooked through.\n"
+        "4. Meanwhile, spiralize zucchini into noodles. Sauté in olive oil for 2–3 minutes — don't overcook.\n"
+        "5. Warm marinara sauce in a saucepan.\n"
+        "6. Plate zoodles, top with meatballs, and spoon over sauce. Garnish with fresh basil."
+    ),
+    ingredients = [
+        {'name': 'turkey mince',    'quantity': '500', 'unit': 'G'},
+        {'name': 'egg',             'quantity': '1',   'unit': ''},
+        {'name': 'garlic',          'quantity': '2',   'unit': '',    'notes': 'cloves, minced'},
+        {'name': 'fresh parsley',   'quantity': '2',   'unit': 'TBSP','notes': 'chopped'},
+        {'name': 'zucchini',        'quantity': '3',   'unit': 'WHOLE','notes': 'spiralized'},
+        {'name': 'olive oil',       'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'marinara sauce',  'quantity': '1.5', 'unit': 'CUP', 'notes': 'store-bought or homemade'},
+        {'name': 'fresh basil',     'quantity': '1',   'unit': 'PINCH','notes': 'to garnish'},
+    ],
+)
+
+create_recipe(
+    author      = staff1,
+    title       = "Vegan Black Bean Tacos",
+    description = "Flavourful plant-based tacos ready in under 20 minutes.",
+    difficulty  = "EASY",
+    prep        = 10,
+    cook        = 10,
+    servings    = 2,
+    calories    = 410,
+    dietary     = ['VEGAN', 'NO_DAIRY_LACTOSE', 'NO_SEAFOOD'],
+    locked      = False,
+    instructions = (
+        "1. Drain and rinse black beans. Heat in a pan with cumin, smoked paprika, and a pinch of salt for 3–4 minutes.\n"
+        "2. Warm corn tortillas directly on a gas flame or dry pan for 30 seconds each side.\n"
+        "3. Mash avocado with lime juice and salt to make a quick guacamole.\n"
+        "4. Assemble tacos: spread guacamole, spoon over beans, top with salsa, red onion, and coriander.\n"
+        "5. Serve immediately with lime wedges."
+    ),
+    ingredients = [
+        {'name': 'black beans',     'quantity': '400', 'unit': 'G',    'notes': '1 can, drained'},
+        {'name': 'corn tortillas',  'quantity': '4',   'unit': ''},
+        {'name': 'avocado',         'quantity': '1',   'unit': 'WHOLE'},
+        {'name': 'lime',            'quantity': '1',   'unit': 'WHOLE','notes': 'juiced'},
+        {'name': 'salsa',           'quantity': '4',   'unit': 'TBSP'},
+        {'name': 'red onion',       'quantity': '0.25','unit': 'WHOLE','notes': 'finely diced'},
+        {'name': 'fresh coriander', 'quantity': '1',   'unit': 'PINCH'},
+        {'name': 'cumin',           'quantity': '1',   'unit': 'TSP'},
+        {'name': 'smoked paprika',  'quantity': '0.5', 'unit': 'TSP'},
+    ],
+)
+
+create_recipe(
+    author      = coach,
+    title       = "Athlete's Salmon & Sweet Potato Power Plate",
+    description = "Premium performance meal optimised for muscle recovery and sustained energy.",
+    difficulty  = "MEDIUM",
+    prep        = 10,
+    cook        = 30,
+    servings    = 2,
+    calories    = 620,
+    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked      = True,   # Premium content
+    instructions = (
+        "1. Preheat oven to 200°C (400°F). Cube sweet potatoes and toss with olive oil, salt, and paprika.\n"
+        "2. Roast sweet potatoes for 25–30 minutes, flipping halfway, until caramelised.\n"
+        "3. Pat salmon fillets dry. Season with salt, pepper, and garlic.\n"
+        "4. Heat a non-stick pan over high heat. Sear salmon skin-side up for 3 minutes, flip and cook 2 more minutes.\n"
+        "5. Steam broccoli for 4–5 minutes until just tender.\n"
+        "6. Plate sweet potato, broccoli, and salmon. Drizzle with tahini thinned with lemon juice and water."
+    ),
+    ingredients = [
+        {'name': 'salmon fillet',   'quantity': '300', 'unit': 'G',    'notes': '2 fillets, skin-on'},
+        {'name': 'sweet potato',    'quantity': '400', 'unit': 'G',    'notes': 'cubed'},
+        {'name': 'broccoli',        'quantity': '200', 'unit': 'G',    'notes': 'cut into florets'},
+        {'name': 'olive oil',       'quantity': '2',   'unit': 'TBSP'},
+        {'name': 'tahini',          'quantity': '2',   'unit': 'TBSP'},
+        {'name': 'lemon juice',     'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'garlic',          'quantity': '1',   'unit': '',     'notes': 'clove, minced'},
+        {'name': 'smoked paprika',  'quantity': '1',   'unit': 'TSP'},
+    ],
+)
+
+create_recipe(
+    author      = staff2,
+    title       = "Elite Bulking Beef & Rice Bowl",
+    description = "Premium high-calorie mass-gain meal for serious athletes in a caloric surplus.",
+    difficulty  = "MEDIUM",
+    prep        = 10,
+    cook        = 25,
+    servings    = 2,
+    calories    = 850,
+    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked      = True,   # Premium content
+    instructions = (
+        "1. Cook jasmine rice according to package instructions.\n"
+        "2. Brown beef mince in a hot pan over high heat — don't stir too often, let it get a crust.\n"
+        "3. Add soy sauce (use tamari for gluten-free), sesame oil, ginger, and garlic. Cook 2 minutes.\n"
+        "4. Stir in edamame and cook 1 more minute.\n"
+        "5. Fry eggs sunny-side up in a separate pan.\n"
+        "6. Serve beef mixture over rice, topped with a fried egg, sliced spring onion, and sesame seeds."
+    ),
+    ingredients = [
+        {'name': 'beef mince',      'quantity': '400', 'unit': 'G',    'notes': 'lean, 5% fat'},
+        {'name': 'jasmine rice',    'quantity': '1.5', 'unit': 'CUP'},
+        {'name': 'eggs',            'quantity': '2',   'unit': ''},
+        {'name': 'edamame',         'quantity': '100', 'unit': 'G',    'notes': 'shelled, frozen is fine'},
+        {'name': 'tamari soy sauce','quantity': '3',   'unit': 'TBSP'},
+        {'name': 'sesame oil',      'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'fresh ginger',    'quantity': '1',   'unit': 'TSP',  'notes': 'grated'},
+        {'name': 'garlic',          'quantity': '2',   'unit': '',     'notes': 'cloves, minced'},
+        {'name': 'spring onion',    'quantity': '2',   'unit': 'WHOLE','notes': 'sliced'},
+        {'name': 'sesame seeds',    'quantity': '1',   'unit': 'TSP'},
+    ],
+)
+
+# ─────────────────────────────────────────────
 # Summary
 # ─────────────────────────────────────────────
 print("\n" + "="*50)
 print("✅ Seed complete! Summary:")
-print(f"   Users  : {User.objects.count()} total")
+print(f"   Users   : {User.objects.count()} total")
 print(f"   Articles: {Article.objects.count()} total")
+print(f"   Recipes : {Recipe.objects.count()} total")
 print()
 print("Login credentials:")
 print("  Admin  : admin@cufitness.com   / Admin@1234")

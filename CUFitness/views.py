@@ -8,9 +8,9 @@ from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Article
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Article, Recipe, RecipeIngredient
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
-from .forms import CustomUserCreationForm, ArticleForm
+from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
 
 from django.contrib.auth import update_session_auth_hash
 from .forms import UpdateEmailForm, UpdatePasswordForm
@@ -19,9 +19,7 @@ from .forms import UpdateEmailForm, UpdatePasswordForm
 from django.http import JsonResponse
 import json as _json
 import json
-
 from django.db import transaction
-
 
 User = get_user_model()
 
@@ -35,7 +33,6 @@ def is_coach(user):
 def is_staff(user):
     return user.is_authenticated and user.role == 'STAFF'
 
-#Not used yet
 def is_admin(user):
     return user.is_authenticated and user.role == 'ADMIN'
 
@@ -65,13 +62,27 @@ def services(request):
 def memberships(request):
     return render(request, 'CUFitness/navbar/membership.html')
 
+
+#   TODO make it member only view, remove it from navbar options
 def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
 
-def nutrition(request):
+def resources(request):
+    return render(request, 'CUFitness/navbar/resources.html')
+
+def health_articles(request):
     free_articles = Article.objects.filter(locked=False)
     locked_articles = Article.objects.filter(locked=True)
-    return render(request, 'CUFitness/navbar/nutrition.html', {"free_articles": free_articles, "locked_articles": locked_articles})
+    return render(request, 'CUFitness/navbar/health_articles.html', {"free_articles": free_articles, "locked_articles": locked_articles})
+
+def workout_plans(request):
+    return render(request, 'CUFitness/navbar/workout_plans.html')
+
+def recipes(request):
+    free_recipes = Recipe.objects.filter(locked=False)
+    locked_recipes = Recipe.objects.filter(locked=True)
+    return render(request, "CUFitness/navbar/recipes.html", {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
+
 
 # -----------   Dropdown Menu Pages  -----------
 def amenities(request):
@@ -92,8 +103,6 @@ def faq(request):
 
 def policy(request):
     return render(request, 'CUFitness/policy.html')
-
-
 
 
 # -----------   User Authentication   -----------
@@ -125,7 +134,6 @@ def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out')
     return redirect('home')
-
 
 
 # -----------   User Profile & Account   -----------
@@ -275,6 +283,17 @@ def user_calendar(request):
     }
     return render(request, 'CUFitness/user_profile/user_calendar.html', context)
 
+@login_required(login_url='login')
+@user_passes_test(lambda user: is_member(user) or is_coach(user))
+def user_recipes(request):
+    return render(request, 'CUFitness/user_profile/user_recipes.html')
+
+@login_required(login_url='login')
+@user_passes_test(lambda user: is_member(user) or is_coach(user))
+def user_workouts(request):
+    return render(request, 'CUFitness/user_profile/user_workouts.html')
+
+
 # calendar
 # ── AJAX: add availability slot ───────────────────────────────────
 @login_required(login_url='login')
@@ -299,7 +318,6 @@ def ajax_add_availability(request):
             'end':   slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
         })
     return JsonResponse({'error': form.errors.as_json()}, status=400)
-
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -326,7 +344,6 @@ def ajax_edit_availability(request, slot_id):
         })
     return JsonResponse({'error': form.errors.as_json()}, status=400)
 
-
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def ajax_delete_availability(request, slot_id):
@@ -342,7 +359,6 @@ def ajax_delete_availability(request, slot_id):
 
 
 # -----------   Staff Pages  -----------
-
 
 def staff_login(request):
     if request.method == 'POST':
@@ -464,8 +480,6 @@ def handle_coach_request(request, user_id):
 
     return redirect('coach_requests')
 
-
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
 def reports(request):
@@ -487,9 +501,15 @@ def staff_user_detail(request, user_id):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
-def articles(request):
+def resource_management(request):
+    return render(request, 'CUFitness/staff_profile/resource_management.html')
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def staff_articles(request):
     articles = Article.objects.all()
-    return render(request, "CUFitness/staff_profile/articles.html", {"articles":articles})
+    return render(request, "CUFitness/staff_profile/articles/staff_articles.html", {"articles":articles})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -500,11 +520,10 @@ def create_article(request):
             article = form.save(commit=False) #dont immedietly save because we need to add more data to the form (user, author...)
             article.author = request.user
             article.save() # now save everything
-            return redirect('articles')
+            return redirect('staff_articles')
     else:
         form = ArticleForm()
-    return render(request, "CUFitness/staff_profile/create_article.html", {"form":form})
-
+    return render(request, "CUFitness/staff_profile/articles/create_article.html", {"form":form})
 
 def article_details(request, id):
     article = get_object_or_404(Article, id=id)
@@ -515,11 +534,11 @@ def article_details(request, id):
         base = 'CUFitness/base.html'
 
 # make sure user can't enter the url manually to access the locked articles
-# An unauthenticated user can directly hit the URL for a locked/premium article and read it.
+# An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
     if article.locked and not request.user.is_authenticated:
         return redirect('login')
 
-    return render(request, 'CUFitness/staff_profile/article_details.html', {
+    return render(request, 'CUFitness/staff_profile/articles/article_details.html', {
         'article_obj': article,
         'base_template': base,
     })
@@ -530,7 +549,7 @@ def edit_article(request, id):
     article = get_object_or_404(Article, id=id)
     if request.user != article.author:
         messages.error(request, 'You do not have permission to edit this article.')
-        return redirect('articles')
+        return redirect('staff_articles')
     if request.method == 'POST':
         form = ArticleForm(request.POST, instance=article)
         if form.is_valid():
@@ -538,8 +557,8 @@ def edit_article(request, id):
             messages.success(request, 'Article updated successfully.')
             return redirect('article_details', id=article.id)
     else:
-            form = ArticleForm(instance=article)
-    return render(request, 'CUFitness/staff_profile/edit_article.html', {'form': form, 'article': article})
+        form = ArticleForm(instance=article)
+    return render(request, 'CUFitness/staff_profile/staff_articles/edit_article.html', {'form': form, 'article': article})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff)
@@ -548,19 +567,122 @@ def delete_article(request, id):
 
     if request.user != article.author:
         messages.error(request, 'You do not have permission to delete this article.')
-        return redirect('articles')
+        return redirect('staff_articles')
 
     if request.method == 'POST':
         article.delete()
         messages.success(request, 'Article deleted successfully.')
-        return redirect('articles')
+        return redirect('staff_articles')
 
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
 
     return redirect('article_details', id=id)
 
+
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def staff_recipes(request):
+    recipes = Recipe.objects.all()
+    return render(request, "CUFitness/staff_profile/recipes/staff_recipes.html", {"recipes":recipes})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def create_recipe(request):
+    if request.method == 'POST':
+        form = RecipeForm(request.POST)
+        formset = IngredientFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            recipe = form.save(commit=False)
+            recipe.author = request.user
+            recipe.save()
+
+            formset.instance = recipe  # link ingredients to the recipe
+            formset.save()
+            return redirect('recipe_details', id=recipe.id)
+    else:
+        form = RecipeForm()
+        formset = IngredientFormSet()
+
+    return render(request, 'CUFitness/staff_profile/recipes/create_recipe.html', {'form': form, 'formset': formset})
+
+
+def recipe_details(request, id):
+    recipe = get_object_or_404(Recipe, id=id)
+    #the following is needed to get the "display" tags, since multiselectfield doesn't have that functionality by default unlike charfield
+    # Build a lookup dict from the choices and map the stored codes to labels
+    choices_dict = dict(Recipe.DIETARY_CHOICES)
+    dietary_display = [choices_dict.get(code, code) for code in recipe.dietary_restrictions]
+
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff_profile/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+    else:
+        base = 'CUFitness/base.html'
+
+        # make sure user can't enter the url manually to access the locked recipes
+        # An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
+    if recipe.locked and not request.user.is_authenticated:
+        return redirect('login')
+
+    return render(request, 'CUFitness/staff_profile/recipes/recipe_details.html', {
+        'recipe_obj': recipe,
+        'dietary_display': dietary_display,
+        'base_template': base,
+    })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def edit_recipe(request, id):
+    recipe = get_object_or_404(Recipe, id=id)
+
+    if request.user != recipe.author:
+        messages.error(request, 'You do not have permission to edit this recipe.')
+        return redirect('staff_recipes')
+
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, instance=recipe)
+        formset = IngredientFormSet(request.POST, instance=recipe)  # ✅ instance added
+
+        if form.is_valid() and formset.is_valid():           # ✅ both validated
+            form.save()
+            formset.save()
+            messages.success(request, 'Recipe updated successfully.')
+            return redirect('recipe_details', id=recipe.id)
+    else:
+        form = RecipeForm(instance=recipe)
+        formset = IngredientFormSet(instance=recipe)         # ✅ GET uses instance, not POST
+
+    return render(request, 'CUFitness/staff_profile/recipes/edit_recipe.html', {
+        'form': form,
+        'formset': formset,   # ✅ formset passed to template
+        'recipe': recipe,
+    })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff)
+def delete_recipe(request, id):
+    recipe = get_object_or_404(Recipe, id=id)
+
+    if request.user != recipe.author:
+        messages.error(request, 'You do not have permission to delete this recipe.')
+        return redirect('staff_recipes')
+
+    if request.method == 'POST':
+        recipe.delete()
+        messages.success(request, 'Recipe deleted successfully.')
+        return redirect('staff_recipes')
+
+    return HttpResponseNotAllowed(['POST'])
+
 # ------------------------------------------------------------------
+
+
+
+
+
 
 
 # --- Member Views ---
@@ -568,12 +690,9 @@ def delete_article(request, id):
 @login_required(login_url='login')
 @user_passes_test(is_member)
 def coach_list_view(request):
-    """List all approved coaches."""
     coaches = CustomUser.objects.filter(role='COACH', is_active=True)
 
-
     # TODO need a html page to display the list of coach. change url if necessary
-
     return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
 
 # --- Coach Views ---
@@ -641,7 +760,7 @@ def manage_appointments(request):
     pending = (CoachAppointment.objects.filter
                (coach=request.user,
                 status='PENDING'
-                ).order_by('start_time')).select_related('member') # Without this (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
+                ).order_by('start_time')).select_related('member') # Without (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
 
     if request.method == 'POST':
         appointment_id = request.POST.get('appointment_id')
@@ -649,7 +768,7 @@ def manage_appointments(request):
         try:
             with transaction.atomic():
                 # lock this row until the request completes
-                appointment = CoachAppointment.objects.select_for_update().get_object_or_404(
+                appointment = CoachAppointment.objects.select_for_update().get(
                     id=appointment_id,
                     coach=request.user
                 )

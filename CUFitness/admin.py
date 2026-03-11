@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CoachRequestForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking,EquipmentList
 
-from .models import Article
+from .models import Article, Recipe, RecipeIngredient
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -34,6 +34,20 @@ class CustomUserAdmin(UserAdmin):
 # added to make the admin able to view the articles and CustomUser
 admin.site.register(Article)
 admin.site.register(CustomUser, CustomUserAdmin)
+
+class RecipeIngredientInline(admin.TabularInline):
+    """Show ingredients directly on the Recipe admin page."""
+    model = RecipeIngredient
+    extra = 3  # three blank rows by default
+
+
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display  = ('title', 'author', 'difficulty', 'prep_time_minutes', 'cook_time_minutes', 'servings', 'locked', 'created_at')
+    list_filter   = ('difficulty', 'locked')
+    search_fields = ('title', 'author__email')
+    inlines       = [RecipeIngredientInline]
+
 
 @admin.register(EquipmentList)
 class EquipmentAdmin(admin.ModelAdmin):

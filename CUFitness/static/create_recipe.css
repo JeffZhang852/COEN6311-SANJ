@@ -1,0 +1,211 @@
+/* ── Page wrapper ── */
+.recipe-form-page {
+    width: 100%;
+    min-height: 100vh;
+    background: #f5f3ef;
+    padding: 60px 80px;
+}
+
+/* ── Card container ── */
+.recipe-form-container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 12px 40px rgba(0,0,0,0.05);
+    overflow: hidden;
+    padding: 52px 60px 60px;
+}
+
+/* ── Page title ── */
+.form-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0ede8;
+}
+
+/* ── Section blocks ── */
+.form-section {
+    margin-bottom: 44px;
+}
+
+.section-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0ede8;
+}
+
+/* ── Django as_p paragraphs ── */
+.recipe-form-container p {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 20px;
+}
+
+/* ── Labels ── */
+.recipe-form-container label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.02em;
+}
+
+/* ── Inputs, textareas, selects ── */
+.recipe-form-container input[type="text"],
+.recipe-form-container input[type="number"],
+.recipe-form-container textarea,
+.recipe-form-container select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 15px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.recipe-form-container input:focus,
+.recipe-form-container textarea:focus,
+.recipe-form-container select:focus {
+    border-color: #1a1a1a;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+    background: #fff;
+}
+
+/* ── Textarea ── */
+.recipe-form-container textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+/* ── Checkbox (locked field) ── */
+.recipe-form-container input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    transform: scale(1.2);
+    cursor: pointer;
+    accent-color: #1a1a1a;
+}
+
+/* ── MultiSelectField ── */
+.recipe-form-container select[multiple] {
+    min-height: 160px;
+    padding: 8px;
+}
+
+.recipe-form-container select[multiple] option {
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.recipe-form-container select[multiple] option:checked {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+/* ── Ingredient rows ── */
+.ingredient-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.ingredient-row {
+    padding: 20px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.ingredient-row:last-child {
+    border-bottom: none;
+}
+
+/* ── Help text ── */
+.recipe-form-container .helptext,
+.recipe-form-container span.helptext {
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* ── Error messages ── */
+.recipe-form-container .errorlist {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+}
+
+.recipe-form-container .errorlist li {
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* ── Form actions ── */
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f0ede8;
+    margin-top: 8px;
+}
+
+.btn-save {
+    padding: 12px 32px;
+    border-radius: 6px;
+    border: none;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.btn-save:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    padding: 12px 24px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #555;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #1a1a1a;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .recipe-form-page      { padding: 30px 20px; }
+    .recipe-form-container { padding: 36px 28px 44px; }
+    .form-title            { font-size: 26px; }
+    .form-actions          { flex-direction: column; align-items: stretch; }
+    .btn-save, .btn-cancel { text-align: center; }
+}

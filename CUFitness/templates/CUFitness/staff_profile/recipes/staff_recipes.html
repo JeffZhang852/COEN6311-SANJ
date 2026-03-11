@@ -1,0 +1,50 @@
+{% extends 'CUFitness/staff_profile/staff_base.html' %}
+{% load static %}
+{% block title %} CUFitness - Recipes {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'articles.css' %}"/> <!-- use the same .css file to make same visual -->
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated and user.role == "STAFF" %}
+
+<section class="content-section">
+
+    <div class="create">
+        <a href="{% url 'create_recipe' %}" class="create-btn">
+            Create Recipe
+            <span class="material-icons">add</span>
+        </a>
+    </div>
+
+    <div class="card-grid">
+        {% for recipe in recipes %}
+            <a href="{% url 'recipe_details' recipe.id %}">
+                <div class="card">
+                    <h3>{{ recipe.title }}</h3>
+                    <p>{{ recipe.description }}</p>
+                    <div class="card-meta">
+                        <span>{{ recipe.get_difficulty_display }}</span>
+                        <span>{{ recipe.total_time_minutes }} min</span>
+                        <span>Serves {{ recipe.servings }}</span>
+                    </div>
+                    {% if recipe.locked %}
+                        <span class="badge premium">Premium</span>
+                    {% endif %}
+                    <button>View Recipe</button>
+                </div>
+            </a>
+        {% empty %}
+            <p>No recipes yet.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+{% else %}
+
+<p>not a staff member</p>
+
+{% endif %}
+{% endblock %}
