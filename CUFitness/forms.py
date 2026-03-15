@@ -1,6 +1,6 @@
 from django import forms
 
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking
 from .models import Article, Recipe, RecipeIngredient
 from django.forms import inlineformset_factory
@@ -12,11 +12,12 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "first_name", "last_name", 'membership')
+        fields = ("email", "first_name", "last_name", 'phone_number', 'date_of_birth', 'address', 'membership')
         # dropdown membership selection
         widgets = {
             'membership': forms.Select(attrs={
-                'class': 'styled-select'})
+                'class': 'styled-select'}),
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
         }
 
 class UpdateEmailForm(forms.ModelForm):
@@ -41,14 +42,12 @@ class CoachRequestForm(forms.ModelForm):
         fields = []  # No need to send stuff. May add notification via email later if needed.
 
 
-
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         fields = ['title','description', 'body', 'locked']
         exclude = ["author"] # we set it manually
         widgets = {}
-
 
 
 class RecipeForm(forms.ModelForm):
@@ -58,6 +57,7 @@ class RecipeForm(forms.ModelForm):
             'title', 'description', 'difficulty',
             'prep_time_minutes', 'cook_time_minutes',
             'servings', 'calories_per_serving',
+            'instructions',
             'dietary_restrictions', 'locked',
         ]
 
@@ -122,8 +122,6 @@ class PrivacySettingsForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['workout_visibility']
-
-
 
 
 

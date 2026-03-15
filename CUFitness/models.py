@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .managers import CustomUserManager
 from multiselectfield import MultiSelectField
+
 from decimal import Decimal
 
 
@@ -37,6 +38,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(_("first name"), max_length=50, default='')
     last_name = models.CharField(_("last name"), max_length=50, default='')
     membership= models.CharField(_("membership"), max_length=50, choices=MEMBERSHIP_CHOICES,default='BASIC')
+
+    phone_number = models.CharField(max_length=20, default='', help_text='e.g. +1 514 555 0123')
+    date_of_birth = models.DateField(null=True, help_text='Format: YYYY-MM-DD')
+    address = models.CharField(max_length=255, default='', blank=True, help_text='Address here')
+
+
 
     # Coach appointment request
     REQUEST_STATUS_CHOICES = [
@@ -74,6 +81,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+# override save() to auto-sync is_staff from role.
+# when a user's role changes (coach promotion, staff assignment, etc.), is_staff is automatically kept correct
+    def save(self, *args, **kwargs):
+        # Keep Django's is_staff flag in sync with the role field
+        self.is_staff = self.role in ('STAFF', 'ADMIN')
+        super().save(*args, **kwargs)
     def __str__(self):
         return self.email
 
@@ -103,7 +116,7 @@ class Article(models.Model):
 
     locked = models.BooleanField(default=False, help_text='Premium content — requires login to view',)
 
-    description = models.CharField(max_length = 250, help_text='Brief summary of the recipe')
+    description = models.CharField(max_length = 250, help_text='Brief summary of the article')
     body = models.TextField(help_text="Add body here")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -328,6 +341,8 @@ class Recipe(models.Model):
 
 # calls the scale ingredient function from here (helper method)
 # recipe.scaled_ingredients(2)  # returns [(ingredient, scaled_qty), ...]
+# i dont think we need it tbh
+#just added work for no reason
     def scaled_ingredients(self, factor):
         return [
             (ing, ing.scaled_quantity(factor))
@@ -340,9 +355,6 @@ class Recipe(models.Model):
     @property
     def total_time_minutes(self):
         return self.prep_time_minutes + self.cook_time_minutes
-
-
-
 
 class RecipeIngredient(models.Model):
     UNIT_CHOICES = [
@@ -383,6 +395,102 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         base = f'{self.quantity} {self.name}'
         return f'{base} ({self.notes})' if self.notes else base
+
+
+# WorkoutPlan ──< WorkoutPlanExercise >── Exercise
+
+class Exercise(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('EASY',   'Easy'),
+        ('MEDIUM', 'Medium'),
+        ('HARD',   'Hard'),
+    ]
+    MUSCLE_CHOICES = [
+        ('CHEST', 'Chest'),
+        ('BACK', 'Back'),
+        ('LEGS', 'Legs'),
+        ('SHOULDERS', 'Shoulders'),
+        ('ARMS', 'Arms'),
+        ('CORE', 'Core'),
+        ('FULL_BODY', 'Full Body'),
+    ]
+    GOAL_CHOICES = [
+        ('', ''),
+        ('STRENGTH', 'Strength'),
+        ('CARDIO', 'Cardio'),
+        ('FLEXIBILITY', 'Flexible'),
+        ('WEIGHT_LOSS', 'Weight Loss'),
+        ('MUSCLE_GAIN', 'Muscle Gain'),
+    ]
+
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=250, help_text='Brief summary of the exercise')
+    instructions = models.TextField(help_text='Step-by-step instructions')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(CustomUser, related_name='exercises', on_delete=models.CASCADE)
+
+    muscle_group = models.CharField(choices=MUSCLE_CHOICES, max_length=30, blank=True, null=True)
+    difficulty = models.CharField(choices=DIFFICULTY_CHOICES, max_length=25, blank=True, null=True)
+    goal = models.CharField(max_length=15, choices=GOAL_CHOICES, default='')
+
+    equipment = models.ManyToManyField(EquipmentList , related_name='exercises', blank=True)
+    def __str__(self):
+        return self.title
+
+class WorkoutPlan(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('EASY',   'Easy'),
+        ('MEDIUM', 'Medium'),
+        ('HARD',   'Hard'),
+    ]
+    GOAL_CHOICES = [
+        ('', ''),
+        ('STRENGTH', 'Strength'),
+        ('CARDIO', 'Cardio'),
+        ('FLEXIBILITY', 'Flexible'),
+        ('WEIGHT_LOSS', 'Weight Loss'),
+        ('MUSCLE_GAIN', 'Muscle Gain'),
+    ]
+
+    author = models.ForeignKey(
+        CustomUser,
+        related_name='workouts',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+    )
+    title = models.CharField(max_length=100)
+
+    locked = models.BooleanField(default=False, help_text='Premium content — requires login to view', )
+
+    description = models.CharField(max_length=100, help_text='Brief summary of the workout plan')
+    body = models.TextField(help_text='Detailed overview of the plan')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='MEDIUM')
+    duration_minutes= models.PositiveIntegerField(default=0)
+    goal = models.CharField(max_length=15, choices=GOAL_CHOICES, default='')
+    def __str__(self):
+        return f'{self.title} — {self.get_goal_display()}'
+
+class WorkoutPlanExercise(models.Model):
+    workout = models.ForeignKey(WorkoutPlan, related_name='exercises', on_delete=models.CASCADE)
+    exercise = models.ForeignKey(Exercise, related_name='workout_plans', on_delete=models.CASCADE)
+    sets = models.PositiveIntegerField(default=0)
+    reps = models.CharField(max_length=20, default='0', help_text='e.g. "10" or "8-12"')
+    rest_seconds = models.PositiveIntegerField(default=60)
+    order = models.PositiveIntegerField(default=0)
+    notes = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'{self.exercise.title} in {self.workout.title}'
+
+
 
 
 # Placeholder for review and report

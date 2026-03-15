@@ -16,9 +16,9 @@
             <div class="footer-col">
                 <h3>Quick Links</h3>
                 <ul>
-                    <li><a href="/memberships">Memberships</a></li>
-                    <li><a href="/faq">Frequently Asked Questions (FAQs)</a></li>
-                    <li><a href="/policy">Privacy Policy</a></li>
+                    <li><a href="{% url 'memberships' %}">Memberships</a></li>
+                    <li><a href="{% url 'faq' %}">Frequently Asked Questions (FAQs)</a></li>
+                    <li><a href="{% url 'policy' %}">Privacy Policy</a></li>
                 </ul>
             </div>
 
@@ -26,8 +26,8 @@
             <div class="footer-col">
                 <h3>Services</h3>
                 <ul>
-                    <li><a href="/trainers">Personal Training</a></li>
-                    <li><a href="/nutrition">Nutrition Plans</a></li>
+                    <li><a href="{% url 'trainers' %}">Personal Training</a></li>
+                    <li><a href="{% url 'user_articles' %}">Health Articles</a></li>
                     <li><a href="#">Online Coaching</a></li>
                 </ul>
             </div>

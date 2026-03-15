@@ -9,20 +9,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
-- recipe, resources, workout_plans files
-- user specific (saved) recipe and workouts pages
-- this changelog file
-- "create_recipe" staff page
-- "edit_recipe" staff page
-- "staff_recipes" staff pages
-- "recipe_details" for everyone - with access control for locked recipes
-- 
+- exercise model
+- workoutplan model
+- workout model
+- views to different workout pages
+- views,urls, html,css content for exercises
+- changed staff resource_management(articles, recipes, etc.) to be drop down menu instead
+- changed user resources(articles, recipes, etc.) to be drop down menu instead
+- added working filter for recipe pages (allergies, servings, etc.)
+- added phone number, date of birth and address fields to the user model
+- updated seed_data file
+- updated test file
 
 ### Changed
-- nutrition to health_articles
-- if author account is deleted for article class, the article is kept and its author is switched to null
-- made sure all pages for article.author check for null values
-
+- complete overhaul of the recipe && article HTML and css files (for user && staff)
 ### Fixed
 -
 

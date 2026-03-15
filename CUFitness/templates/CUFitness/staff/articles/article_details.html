@@ -1,0 +1,84 @@
+
+<!-- passed from the view function in views.py based role of user (staff or not) -->
+{% extends base_template %}
+
+{% load static %}
+{% block title %} CUFitness - {{ article_obj.title }} {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'article_details.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+<div class="art-detail-page">
+
+  <div class="art-detail-container">
+
+    <!-- Header -->
+    <div class="art-detail-header">
+      <div class="art-detail-tag">Article</div>
+
+      <div class="title-row">
+        <h1 class="art-detail-title">{{ article_obj.title }}</h1>
+
+        {% if user.is_authenticated and user.role == "STAFF" %}
+        <div class="article-actions">
+          {% if article_obj.author and user == article_obj.author %}
+            <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
+              <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </a>
+            <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+              <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+          {% else %}
+            <button class="edit-btn disabled" disabled title="Only the author can edit">
+              <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </button>
+            <button class="delete-btn disabled" disabled title="Only the author can delete">
+              <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="art-detail-meta">
+        <div class="meta-avatar">
+          {{ article_obj.author.first_name|first|default:"?" }}{{ article_obj.author.last_name|first|default:"" }}
+        </div>
+        <div class="meta-info">
+          <span class="meta-author">
+            {% if article_obj.author %}{{ article_obj.author.first_name }} {{ article_obj.author.last_name }}{% else %}Deleted User{% endif %}
+          </span>
+          <span class="meta-date">{{ article_obj.created_at|date:"F d, Y" }}</span>
+        </div>
+      </div>
+
+      <p class="art-detail-desc">{{ article_obj.description }}</p>
+    </div>
+
+    <!-- Body -->
+    <div class="art-detail-body">
+      {{ article_obj.body|linebreaks }}
+    </div>
+
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+  <div class="modal-box">
+    <h3>Delete Article?</h3>
+    <p>This action is permanent and cannot be undone.</p>
+    <div class="modal-actions">
+      <form method="POST" action="{% url 'delete_article' article_obj.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-confirm-delete">Delete</button>
+      </form>
+      <button class="btn-cancel" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
