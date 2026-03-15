@@ -1,0 +1,53 @@
+{% extends 'CUFitness/staff_profile/staff_base.html' %}
+{% load static %}
+{% block title %} CUFitness {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'user_articles.css' %}"/>
+{% endblock %}
+{% block content %}
+
+
+{% if user.is_authenticated and user.role == "STAFF" %}
+    <div class="art-hero">
+        <div class="art-hero-label">Knowledge Hub</div>
+        <h1>Health &amp; Fitness<br><em>Articles</em></h1>
+        <p class="art-hero-sub">Expert-written guides on training, nutrition, recovery, and performance — from our experienced staff.</p>
+        <a href="/create_article" class="create-btn">
+            Create Article
+            <span class="material-icons">add</span>
+        </a>
+    </div>
+<!-- right now these filters do nothing, we will add them to the model later on -->
+    <div class="filter-bar">
+      <div class="filter-chip active">All</div>
+      <div class="filter-chip">Training</div>
+      <div class="filter-chip">Nutrition</div>
+      <div class="filter-chip">Recovery</div>
+      <div class="filter-chip">Mental Health</div>
+    </div>
+
+    <div class="art-grid">
+        {% for article in articles %}
+            <a href="{% url 'article_details' article.id %}" class="art-card">
+                <div class="art-card-index">{{ forloop.counter }}</div>
+                <div class="art-card-body">
+                    <div class="art-card-tag">Article</div>
+                    <h3>{{ article.title }}</h3>
+                    <p>{{ article.description }}</p>
+                    <span class="art-card-author">{{ article.author.first_name|default:"CUFitness" }} {{ article.author.last_name|default:"" }} · {{ article.created_at|date:"M d" }}</span>
+                </div>
+                <div class="art-card-arrow">→</div>
+            </a>
+        {% empty %}
+            <p style="padding:40px; color:var(--text-muted)">No articles yet.</p>
+        {% endfor %}
+
+    </div>
+
+
+{% else %}
+
+<p> not a staff member </p>
+
+{% endif %}
+{% endblock %}

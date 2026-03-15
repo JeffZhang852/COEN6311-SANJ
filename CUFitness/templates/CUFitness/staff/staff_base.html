@@ -68,36 +68,53 @@
 
 <nav>
 
-<a href="/members">Members</a>
-<a href="/coach_requests">Coach Requests</a>
-<a href="/reports">Reports</a>
-<a href="/messages">Messages</a>
-<a href="/resource_management">Resource Management</a>
+<a href="{% url 'members' %}">Members</a>
+<a href="{% url 'coach_requests' %}">Coach Requests</a>
+<a href="{% url 'staff_reports' %}">Reports</a>
+<a href="{% url 'staff_messages' %}">Messages</a>
+
+<div class="dropdown">
+    <button class="dropbtn">
+        Resource Management
+        <span class="material-icons">arrow_drop_down</span>
+    </button>
+
+    <div class="dropdown-content">
+        {% if user.is_authenticated %}
+            <a href="{% url 'staff_articles' %}">Articles
+            </a>
+            <a href="{% url 'staff_recipes' %}">Recipes
+            </a>
+            <a href="{% url 'staff_workouts' %}">Workout Plans
+            </a>
+            <a href="{% url 'staff_exercises' %}">Exercises
+            </a>
+        {% endif %}
+    </div>
+</div>
 
 <!-- Account Dropdown -->
 <div class="dropdown">
-<button class="dropbtn">
-    <span class="material-icons account-icon" >account_circle</span>
-    <span class="material-icons">arrow_drop_down</span>
-</button>
+    <button class="dropbtn">
+        <span class="material-icons account-icon" >account_circle</span>
+        <span class="material-icons">arrow_drop_down</span>
+    </button>
 
-<div class="dropdown-content account">
-    {% if user.is_authenticated %}
-        <a href="/staff_profile">Profile
-            <span class="material-icons">person</span>
-        </a>
-        <a href="/staff_settings">Settings
-            <span class="material-icons">manage_accounts</span>
-        </a>
-        <a href="/logout">Log Out
-            <span class="material-icons">logout</span>
-        </a>
-    {% else %}
-        <a href="/login">Login
-            <span class="material-icons">login</span>
-        </a>
-    {% endif %}
-</div>
+    <div class="dropdown-content account">
+        {% if user.is_authenticated %}
+            <a href="{% url 'staff_profile' %}">Profile
+            </a>
+            <a href="{% url 'staff_settings' %}">Settings
+            </a>
+            <a href="{% url 'logout' %}">Log Out
+                <span class="material-icons">logout</span>
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}">Login
+                <span class="material-icons">login</span>
+            </a>
+        {% endif %}
+    </div>
 </div>
 
 </nav>

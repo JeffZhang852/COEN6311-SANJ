@@ -149,15 +149,18 @@ User = get_user_model()
 User = get_user_model()
 def make_member(email='member@test.com', password='Pass@1234'):
     return User.objects.create_user(email=email, password=password, role='MEMBER',
-                                    first_name='Jane', last_name='Doe')
+                                    first_name='Jane', last_name='Doe',
+                                    date_of_birth='1995-06-15')
 
 def make_coach(email='coach@test.com', password='Pass@1234'):
     return User.objects.create_user(email=email, password=password, role='COACH',
-                                    first_name='Bob', last_name='Smith')
+                                    first_name='Bob', last_name='Smith',
+                                    date_of_birth='1990-03-22')
 
 def make_staff(email='staff@test.com', password='Pass@1234'):
     return User.objects.create_user(email=email, password=password, role='STAFF',
-                                    first_name='Alice', last_name='Admin', is_staff=True)
+                                    first_name='Alice', last_name='Admin', is_staff=True,
+                                    date_of_birth='1988-07-09')
 
 def make_article(author, title='Test Article', locked=False):
     return Article.objects.create(
@@ -512,7 +515,7 @@ class AccessControlTest(TestCase):
         self.assertNotEqual(response.status_code, 200)
 
     def test_unauthenticated_cannot_access_settings(self):
-        response = self.client.get(reverse('settings'))
+        response = self.client.get(reverse('user_settings'))
         self.assertNotEqual(response.status_code, 200)
 
     def test_unauthenticated_cannot_access_articles(self):
@@ -555,7 +558,7 @@ class AccessControlTest(TestCase):
     def test_staff_cannot_access_member_settings(self):
         """Staff should not be able to use the member settings page."""
         self.client.force_login(self.staff)
-        response = self.client.get(reverse('settings'))
+        response = self.client.get(reverse('user_settings'))
         self.assertNotEqual(response.status_code, 200)
 
 
@@ -643,12 +646,12 @@ class SettingsViewTest(TestCase):
 
     def test_settings_page_loads(self):
         self.client.force_login(self.member)
-        response = self.client.get(reverse('settings'))
+        response = self.client.get(reverse('user_settings'))
         self.assertEqual(response.status_code, 200)
 
     def test_privacy_setting_update(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'workout_visibility': 'PUBLIC',
             'privacy_submit': '1',
         })
@@ -657,7 +660,7 @@ class SettingsViewTest(TestCase):
 
     def test_coach_request_sets_pending(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'coach_request_submit': '1',
         })
         self.member.refresh_from_db()
@@ -668,7 +671,7 @@ class SettingsViewTest(TestCase):
         self.member.save()
         self.client.force_login(self.member)
         # submitting again shouldn't break anything
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'coach_request_submit': '1',
         })
         self.member.refresh_from_db()
@@ -733,6 +736,9 @@ class RegistrationFormTest(TestCase):
             'email': 'newuser@test.com',
             'first_name': 'New',
             'last_name': 'User',
+            'phone_number': '+1 514 555 0100',
+            'address': '123 Test Street, Montreal, QC',
+            'date_of_birth': '1995-06-15',
             'membership': 'BASIC',
             'password1': 'StrongPass@99',
             'password2': 'StrongPass@99',
@@ -744,6 +750,9 @@ class RegistrationFormTest(TestCase):
             'email': 'newuser@test.com',
             'first_name': 'New',
             'last_name': 'User',
+            'phone_number': '+1 514 555 0100',
+            'address': '123 Test Street, Montreal, QC',
+            'date_of_birth': '1995-06-15',
             'membership': 'BASIC',
             'password1': 'StrongPass@99',
             'password2': 'DifferentPass@99',
@@ -756,6 +765,9 @@ class RegistrationFormTest(TestCase):
             'email': 'existing@test.com',
             'first_name': 'Dup',
             'last_name': 'User',
+            'phone_number': '+1 514 555 0100',
+            'address': '123 Test Street, Montreal, QC',
+            'date_of_birth': '1995-06-15',
             'membership': 'BASIC',
             'password1': 'StrongPass@99',
             'password2': 'StrongPass@99',
@@ -801,20 +813,20 @@ class NutritionViewTest(TestCase):
         self.locked_article = make_article(self.staff, title='Locked Article', locked=True)
 
     def test_nutrition_page_loads(self):
-        response = self.client.get(reverse('health_articles'))
+        response = self.client.get(reverse('user_articles'))
         self.assertEqual(response.status_code, 200)
 
     def test_free_articles_shown_to_all(self):
-        response = self.client.get(reverse('health_articles'))
+        response = self.client.get(reverse('user_articles'))
         self.assertContains(response, 'Free Article')
 
     def test_locked_article_in_context(self):
-        response = self.client.get(reverse('health_articles'))
+        response = self.client.get(reverse('user_articles'))
         locked = list(response.context['locked_articles'])
         self.assertIn(self.locked_article, locked)
 
     def test_free_article_in_context(self):
-        response = self.client.get(reverse('health_articles'))
+        response = self.client.get(reverse('user_articles'))
         free = list(response.context['free_articles'])
         self.assertIn(self.free_article, free)
 
@@ -834,7 +846,7 @@ class CoachRequestTest(TestCase):
 
     def test_submitting_request_sets_pending(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.client.post(reverse('user_settings'), {'coach_request_submit': '1'})
         self.member.refresh_from_db()
         self.assertEqual(self.member.coach_request_status, 'PENDING')
 
@@ -858,7 +870,7 @@ class CoachRequestSubmissionGuardTest(TestCase):
         self.member.coach_request_status = 'PENDING'
         self.member.save()
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.client.post(reverse('user_settings'), {'coach_request_submit': '1'})
         self.member.refresh_from_db()
         # status should remain PENDING, not be reset
         self.assertEqual(self.member.coach_request_status, 'PENDING')
@@ -868,7 +880,7 @@ class CoachRequestSubmissionGuardTest(TestCase):
         self.member.coach_request_status = 'APPROVED'
         self.member.save()
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.client.post(reverse('user_settings'), {'coach_request_submit': '1'})
         self.member.refresh_from_db()
         self.assertEqual(self.member.coach_request_status, 'APPROVED')
 
@@ -877,7 +889,7 @@ class CoachRequestSubmissionGuardTest(TestCase):
         self.member.coach_request_status = 'REJECTED'
         self.member.save()
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.client.post(reverse('user_settings'), {'coach_request_submit': '1'})
         self.member.refresh_from_db()
         self.assertEqual(self.member.coach_request_status, 'PENDING')
 
@@ -885,7 +897,7 @@ class CoachRequestSubmissionGuardTest(TestCase):
         """A member with no prior request (NONE) should be able to submit."""
         self.assertEqual(self.member.coach_request_status, 'NONE')
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {'coach_request_submit': '1'})
+        self.client.post(reverse('user_settings'), {'coach_request_submit': '1'})
         self.member.refresh_from_db()
         self.assertEqual(self.member.coach_request_status, 'PENDING')
 
@@ -1149,7 +1161,7 @@ class PublicPageTest(TestCase):
         self.assertEqual(self.client.get(reverse('trainers')).status_code, 200)
 
     def test_nutrition_page(self):
-        self.assertEqual(self.client.get(reverse('health_articles')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('user_articles')).status_code, 200)
 
     def test_faq_page(self):
         self.assertEqual(self.client.get(reverse('faq')).status_code, 200)
@@ -1221,7 +1233,7 @@ class EmailUpdateViewTest(TestCase):
 
     def test_valid_email_update_saves(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'email': 'updated@test.com',
             'email_submit': '1',
         })
@@ -1230,15 +1242,15 @@ class EmailUpdateViewTest(TestCase):
 
     def test_valid_email_update_redirects(self):
         self.client.force_login(self.member)
-        response = self.client.post(reverse('settings'), {
+        response = self.client.post(reverse('user_settings'), {
             'email': 'updated@test.com',
             'email_submit': '1',
         })
-        self.assertRedirects(response, reverse('settings'))
+        self.assertRedirects(response, reverse('user_settings'))
 
     def test_duplicate_email_does_not_save(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'email': 'taken@test.com',
             'email_submit': '1',
         })
@@ -1247,7 +1259,7 @@ class EmailUpdateViewTest(TestCase):
 
     def test_duplicate_email_re_renders_form_with_errors(self):
         self.client.force_login(self.member)
-        response = self.client.post(reverse('settings'), {
+        response = self.client.post(reverse('user_settings'), {
             'email': 'taken@test.com',
             'email_submit': '1',
         })
@@ -1258,7 +1270,7 @@ class EmailUpdateViewTest(TestCase):
     def test_invalid_email_format_does_not_save(self):
         self.client.force_login(self.member)
         original_email = self.member.email
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'email': 'not-valid',
             'email_submit': '1',
         })
@@ -1269,7 +1281,7 @@ class EmailUpdateViewTest(TestCase):
         """Coaches share the same settings page — verify email update works for them too."""
         coach = make_coach()
         self.client.force_login(coach)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'email': 'newcoach@test.com',
             'email_submit': '1',
         })
@@ -1277,7 +1289,7 @@ class EmailUpdateViewTest(TestCase):
         self.assertEqual(coach.email, 'newcoach@test.com')
 
     def test_unauthenticated_cannot_update_email(self):
-        response = self.client.post(reverse('settings'), {
+        response = self.client.post(reverse('user_settings'), {
             'email': 'hacker@test.com',
             'email_submit': '1',
         })
@@ -1341,7 +1353,7 @@ class PasswordUpdateViewTest(TestCase):
 
     def test_valid_password_change_saves(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewPass@9999',
             'new_password2': 'NewPass@9999',
@@ -1352,30 +1364,30 @@ class PasswordUpdateViewTest(TestCase):
 
     def test_valid_password_change_redirects(self):
         self.client.force_login(self.member)
-        response = self.client.post(reverse('settings'), {
+        response = self.client.post(reverse('user_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewPass@9999',
             'new_password2': 'NewPass@9999',
             'password_submit': '1',
         })
-        self.assertRedirects(response, reverse('settings'))
+        self.assertRedirects(response, reverse('user_settings'))
 
     def test_user_stays_logged_in_after_password_change(self):
         """update_session_auth_hash should keep the session alive."""
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewPass@9999',
             'new_password2': 'NewPass@9999',
             'password_submit': '1',
         })
         # If the session was invalidated the settings page would redirect to login
-        response = self.client.get(reverse('settings'))
+        response = self.client.get(reverse('user_settings'))
         self.assertEqual(response.status_code, 200)
 
     def test_wrong_old_password_does_not_save(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'old_password': 'WrongPassword!',
             'new_password1': 'NewPass@9999',
             'new_password2': 'NewPass@9999',
@@ -1387,7 +1399,7 @@ class PasswordUpdateViewTest(TestCase):
 
     def test_wrong_old_password_re_renders_form_with_errors(self):
         self.client.force_login(self.member)
-        response = self.client.post(reverse('settings'), {
+        response = self.client.post(reverse('user_settings'), {
             'old_password': 'WrongPassword!',
             'new_password1': 'NewPass@9999',
             'new_password2': 'NewPass@9999',
@@ -1399,7 +1411,7 @@ class PasswordUpdateViewTest(TestCase):
 
     def test_mismatched_passwords_do_not_save(self):
         self.client.force_login(self.member)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewPass@9999',
             'new_password2': 'DifferentPass@9999',
@@ -1412,7 +1424,7 @@ class PasswordUpdateViewTest(TestCase):
         """Coaches share the same settings page — verify password update works for them too."""
         coach = make_coach()
         self.client.force_login(coach)
-        self.client.post(reverse('settings'), {
+        self.client.post(reverse('user_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewCoach@9999',
             'new_password2': 'NewCoach@9999',
@@ -1422,7 +1434,7 @@ class PasswordUpdateViewTest(TestCase):
         self.assertTrue(coach.check_password('NewCoach@9999'))
 
     def test_unauthenticated_cannot_update_password(self):
-        response = self.client.post(reverse('settings'), {
+        response = self.client.post(reverse('user_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewPass@9999',
             'new_password2': 'NewPass@9999',

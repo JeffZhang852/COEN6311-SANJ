@@ -30,10 +30,10 @@ def is_member(user):
 def is_coach(user):
     return user.is_authenticated and user.role == 'COACH'
 
-def is_staff(user):
-    return user.is_authenticated and user.role == 'STAFF'
+def is_staff_user(user):
+    return user.is_authenticated and user.is_staff
 
-def is_admin(user):
+def is_admin_user(user):
     return user.is_authenticated and user.role == 'ADMIN'
 
 
@@ -51,10 +51,11 @@ def home(request):
             is_active=True
         ).order_by("first_name")
 
-        return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
+        return render(request, "CUFitness/staff/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
     else:
         return render(request, 'CUFitness/home.html')
 
+# region all navbar pages
 # -----------   Navbar Pages  -----------
 def services(request):
     return render(request, 'CUFitness/navbar/services.html')
@@ -67,21 +68,19 @@ def memberships(request):
 def trainers(request):
     return render(request, 'CUFitness/navbar/trainers.html')
 
-def resources(request):
-    return render(request, 'CUFitness/navbar/resources.html')
 
-def health_articles(request):
+def user_articles(request):
     free_articles = Article.objects.filter(locked=False)
     locked_articles = Article.objects.filter(locked=True)
-    return render(request, 'CUFitness/navbar/health_articles.html', {"free_articles": free_articles, "locked_articles": locked_articles})
+    return render(request, 'CUFitness/navbar/user_articles.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
 def workout_plans(request):
     return render(request, 'CUFitness/navbar/workout_plans.html')
 
-def recipes(request):
+def user_recipes(request):
     free_recipes = Recipe.objects.filter(locked=False)
     locked_recipes = Recipe.objects.filter(locked=True)
-    return render(request, "CUFitness/navbar/recipes.html", {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
+    return render(request, "CUFitness/navbar/user_recipes.html", {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
 
 
 # -----------   Dropdown Menu Pages  -----------
@@ -103,6 +102,7 @@ def faq(request):
 
 def policy(request):
     return render(request, 'CUFitness/policy.html')
+# endregion
 
 
 # -----------   User Authentication   -----------
@@ -156,14 +156,14 @@ def user_settings(request):
             if privacy_form.is_valid():
                 privacy_form.save()
                 messages.success(request, 'Privacy settings updated.')
-                return redirect('settings')
+                return redirect('user_settings')
 
         elif 'email_submit' in request.POST:
             email_form = UpdateEmailForm(request.POST, instance=request.user)
             if email_form.is_valid():
                 email_form.save()
                 messages.success(request, 'Email address updated.')
-                return redirect('settings')
+                return redirect('user_settings')
 
         elif 'password_submit' in request.POST:
             password_form = UpdatePasswordForm(user=request.user, data=request.POST)
@@ -172,7 +172,7 @@ def user_settings(request):
                 # keeps the user logged in after a password change -- without that line, Django would log the user out immediately after saving the new password.
                 update_session_auth_hash(request, password_form.user)
                 messages.success(request, 'Password updated successfully.')
-                return redirect('settings')
+                return redirect('user_settings')
 
 # server-side check to prevent multiple submissions
         elif 'coach_request_submit' in request.POST:
@@ -182,7 +182,7 @@ def user_settings(request):
                 messages.success(request, 'Coach request submitted for approval.')
             else:
                 messages.error(request, 'You already have an active or approved request.')
-            return redirect('settings')
+            return redirect('user_settings')
 
     context = {
         'privacy_form': privacy_form,
@@ -285,13 +285,13 @@ def user_calendar(request):
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
-def user_recipes(request):
-    return render(request, 'CUFitness/user_profile/user_recipes.html')
+def user_saved_recipes(request):
+    return render(request, 'CUFitness/user_profile/user_saved_recipes.html')
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
-def user_workouts(request):
-    return render(request, 'CUFitness/user_profile/user_workouts.html')
+def user_saved_workouts(request):
+    return render(request, 'CUFitness/user_profile/user_saved_workouts.html')
 
 
 # calendar
@@ -376,12 +376,12 @@ def staff_login(request):
             messages.error(request, 'Invalid Account Email or Password')
             return redirect('staff_login')
     else:
-        return render(request, 'CUFitness/staff_profile/staff_login.html') # render the HTML template on first visit
+        return render(request, 'CUFitness/staff/staff_login.html') # render the HTML template on first visit
 
 # prob not needed at this point
 # everything is handled through home function
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def staff_home(request):
     active_members = CustomUser.objects.filter(
         role="MEMBER",
@@ -393,15 +393,15 @@ def staff_home(request):
         is_active=True
     ).order_by("first_name")
 
-    return render(request, "CUFitness/staff_profile/staff_home.html", {"active_members":active_members,"active_coaches":active_coaches})
+    return render(request, "CUFitness/staff/staff_home.html", {"active_members":active_members,"active_coaches":active_coaches})
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def staff_profile(request):
-    return render(request, 'CUFitness/staff_profile/staff_profile.html')
+    return render(request, 'CUFitness/staff/staff_profile.html')
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def staff_settings(request):
     """Settings page for staff — password only."""
     password_form = UpdatePasswordForm(user=request.user)
@@ -416,29 +416,29 @@ def staff_settings(request):
                 messages.success(request, 'Password updated successfully.')
                 return redirect('staff_settings')
 
-    return render(request, 'CUFitness/staff_profile/staff_settings.html', {
+    return render(request, 'CUFitness/staff/staff_settings.html', {
         'password_form': password_form,
     })
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def members(request):
-    return render(request, 'CUFitness/staff_profile/members.html')
+    return render(request, 'CUFitness/staff/members.html')
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def coach_requests(request):
     pending = CustomUser.objects.filter(coach_request_status='PENDING')
     approved = CustomUser.objects.filter(coach_request_status='APPROVED')
     rejected = CustomUser.objects.filter(coach_request_status='REJECTED')
-    return render(request, 'CUFitness/staff_profile/coach_requests.html', {
+    return render(request, 'CUFitness/staff/coach_requests.html', {
         'pending_requests': pending,
         'approved_requests': approved,
         'rejected_requests': rejected,
     })
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def handle_coach_request(request, user_id):
     """
     Staff-only. Approve or reject a member's coach request.
@@ -481,38 +481,34 @@ def handle_coach_request(request, user_id):
     return redirect('coach_requests')
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
-def reports(request):
-    return render(request, 'CUFitness/staff_profile/reports.html')
+@user_passes_test(is_staff_user)
+def staff_reports(request):
+    return render(request, 'CUFitness/staff/staff_reports.html')
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
-def private_messages(request):
-    return render(request, 'CUFitness/staff_profile/messages.html')
+@user_passes_test(is_staff_user)
+def staff_messages(request):
+    return render(request, 'CUFitness/staff/staff_messages.html')
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def staff_user_detail(request, user_id):
     user_obj = get_object_or_404(User, id=user_id)
 
-    return render(request, "CUFitness/staff_profile/user_detail.html", {
+    return render(request, "CUFitness/staff/user_detail.html", {
         "user_obj": user_obj
     })
 
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff)
-def resource_management(request):
-    return render(request, 'CUFitness/staff_profile/resource_management.html')
 
-
+# region Staff Articles
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def staff_articles(request):
     articles = Article.objects.all()
-    return render(request, "CUFitness/staff_profile/articles/staff_articles.html", {"articles":articles})
+    return render(request, "CUFitness/staff/articles/staff_articles.html", {"articles":articles})
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def create_article(request):
     if request.method == "POST":
         form = ArticleForm(request.POST)
@@ -523,13 +519,13 @@ def create_article(request):
             return redirect('staff_articles')
     else:
         form = ArticleForm()
-    return render(request, "CUFitness/staff_profile/articles/create_article.html", {"form":form})
+    return render(request, "CUFitness/staff/articles/create_article.html", {"form":form})
 
 def article_details(request, id):
     article = get_object_or_404(Article, id=id)
 
     if request.user.is_authenticated:
-        base = 'CUFitness/staff_profile/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
     else:
         base = 'CUFitness/base.html'
 
@@ -538,13 +534,13 @@ def article_details(request, id):
     if article.locked and not request.user.is_authenticated:
         return redirect('login')
 
-    return render(request, 'CUFitness/staff_profile/articles/article_details.html', {
+    return render(request, 'CUFitness/staff/articles/article_details.html', {
         'article_obj': article,
         'base_template': base,
     })
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def edit_article(request, id):
     article = get_object_or_404(Article, id=id)
     if request.user != article.author:
@@ -558,10 +554,10 @@ def edit_article(request, id):
             return redirect('article_details', id=article.id)
     else:
         form = ArticleForm(instance=article)
-    return render(request, 'CUFitness/staff_profile/staff_articles/edit_article.html', {'form': form, 'article': article})
+    return render(request, 'CUFitness/staff/articles/edit_article.html', {'form': form, 'article': article})
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def delete_article(request, id):
     article = get_object_or_404(Article, id=id)
 
@@ -578,18 +574,18 @@ def delete_article(request, id):
         return HttpResponseNotAllowed(['POST'])
 
     return redirect('article_details', id=id)
+# endregion
 
 
-
-
+# region Staff Recipes
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def staff_recipes(request):
     recipes = Recipe.objects.all()
-    return render(request, "CUFitness/staff_profile/recipes/staff_recipes.html", {"recipes":recipes})
+    return render(request, "CUFitness/staff/recipes/staff_recipes.html", {"recipes":recipes})
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def create_recipe(request):
     if request.method == 'POST':
         form = RecipeForm(request.POST)
@@ -607,8 +603,7 @@ def create_recipe(request):
         form = RecipeForm()
         formset = IngredientFormSet()
 
-    return render(request, 'CUFitness/staff_profile/recipes/create_recipe.html', {'form': form, 'formset': formset})
-
+    return render(request, 'CUFitness/staff/recipes/create_recipe.html', {'form': form, 'formset': formset})
 
 def recipe_details(request, id):
     recipe = get_object_or_404(Recipe, id=id)
@@ -618,7 +613,7 @@ def recipe_details(request, id):
     dietary_display = [choices_dict.get(code, code) for code in recipe.dietary_restrictions]
 
     if request.user.is_authenticated:
-        base = 'CUFitness/staff_profile/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
     else:
         base = 'CUFitness/base.html'
 
@@ -627,14 +622,14 @@ def recipe_details(request, id):
     if recipe.locked and not request.user.is_authenticated:
         return redirect('login')
 
-    return render(request, 'CUFitness/staff_profile/recipes/recipe_details.html', {
+    return render(request, 'CUFitness/staff/recipes/recipe_details.html', {
         'recipe_obj': recipe,
         'dietary_display': dietary_display,
         'base_template': base,
     })
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def edit_recipe(request, id):
     recipe = get_object_or_404(Recipe, id=id)
 
@@ -655,14 +650,14 @@ def edit_recipe(request, id):
         form = RecipeForm(instance=recipe)
         formset = IngredientFormSet(instance=recipe)         # ✅ GET uses instance, not POST
 
-    return render(request, 'CUFitness/staff_profile/recipes/edit_recipe.html', {
+    return render(request, 'CUFitness/staff/recipes/edit_recipe.html', {
         'form': form,
         'formset': formset,   # ✅ formset passed to template
         'recipe': recipe,
     })
 
 @login_required(login_url='staff_login')
-@user_passes_test(is_staff)
+@user_passes_test(is_staff_user)
 def delete_recipe(request, id):
     recipe = get_object_or_404(Recipe, id=id)
 
@@ -676,11 +671,62 @@ def delete_recipe(request, id):
         return redirect('staff_recipes')
 
     return HttpResponseNotAllowed(['POST'])
+# endregion
+
+
+# region Staff Workouts
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_workouts(request):
+    return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html')
+
+def workout_details(request, id):
+    return render(request, 'CUFitness/staff/workout_plans/workout_details.html')
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def create_workouts(request):
+    return render(request, 'CUFitness/staff/workout_plans/create_workouts.html')
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def edit_workout(request, id):
+    return render(request, 'CUFitness/staff/workout_plans/edit_workout.html')
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def delete_workout(request, id):
+    return render(request, 'CUFitness/staff/workout_plans/delete_workout.html')
+# endregion
+
+
+# region Staff Exercises
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_exercises(request):
+    return render(request, 'CUFitness/staff/exercises/staff_exercises.html')
+
+def exercise_details(request, id):
+    return render(request, 'CUFitness/staff/exercises/exercise_details.html')
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def create_exercises(request):
+    return render(request, 'CUFitness/staff/exercises/create_exercise.html')
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def edit_exercise(request, id):
+    return render(request, 'CUFitness/staff/exercises/edit_exercise.html')
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def delete_exercise(request, id):
+    return render(request, 'CUFitness/staff/exercises/delete_exercise.html')
+# endregion
+
+
+
 
 # ------------------------------------------------------------------
-
-
-
 
 
 

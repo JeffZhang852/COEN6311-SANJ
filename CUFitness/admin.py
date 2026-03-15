@@ -9,6 +9,7 @@ from .models import Article, Recipe, RecipeIngredient
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
+    # the following "form" is semantically wrong to put there — but it doesn't break anything because fieldsets takes over
     form = CoachRequestForm
     model = CustomUser
     list_display = ("email","role",  "is_staff", "is_active",)
@@ -32,8 +33,13 @@ class CustomUserAdmin(UserAdmin):
 
 
 # added to make the admin able to view the articles and CustomUser
-admin.site.register(Article)
 admin.site.register(CustomUser, CustomUserAdmin)
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display  = ('title', 'author', 'locked', 'created_at')
+    list_filter   = ('created_at', 'locked')
+    search_fields = ('title', 'author__email')
 
 class RecipeIngredientInline(admin.TabularInline):
     """Show ingredients directly on the Recipe admin page."""

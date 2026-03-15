@@ -11,10 +11,11 @@ urlpatterns = [
     path ("memberships/", views.memberships, name='memberships'),
     path("trainers/", views.trainers, name='trainers'),
 
-    path("resources/", views.resources, name='resources'),
-    path ("health_articles/", views.health_articles, name='health_articles'),
+    path ("user_articles/", views.user_articles, name='user_articles'),
     path("workout_plans/", views.workout_plans, name='workout_plans'),
-    path("recipes/", views.recipes, name='recipes'),
+    path("user_recipes/", views.user_recipes, name='user_recipes'),
+    #path("user_workouts/", views.user_workouts, name='user_workouts'),
+    #path("user_exercises/", views.user_exercises, name='user_exercises'),
 
 
 # -----------   Dropdown Menu Pages  -----------
@@ -34,11 +35,11 @@ urlpatterns = [
 
 # -----------   User Profile & Settings   -----------
     path('user_profile/', views.user_profile, name='user_profile'),
-    path('user_settings/', views.user_settings, name='settings'),
+    path('user_settings/', views.user_settings, name='user_settings'),
     path('user_inbox/', views.user_inbox, name='user_inbox'),
     path('user_calendar/', views.user_calendar, name='user_calendar'),
-    path('user_recipes/', views.user_recipes, name='user_recipes'),
-    path('user_workouts/', views.user_workouts, name='user_workouts'),
+    path('user_saved_recipes/', views.user_saved_recipes, name='user_saved_recipes'),
+    path('user_saved_workouts/', views.user_saved_workouts, name='user_saved_workouts'),
 
 
 # -----------   Staff Pages  -----------
@@ -47,15 +48,14 @@ urlpatterns = [
     path('staff_profile/', views.staff_profile, name='staff_profile'),
     path('members/', views.members, name='members'),
     path('coach_requests/', views.coach_requests, name='coach_requests'),
-    path('reports/', views.reports, name='reports'),
-    path('messages/', views.private_messages, name='messages'),
+    path('staff_reports/', views.staff_reports, name='staff_reports'),
+    path('staff_messages/', views.staff_messages, name='staff_messages'),
     path('staff_settings/', views.staff_settings, name='staff_settings'),
 
 # path to user profiles from staff_home page
     path("staff_user_detail/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
 
 
-    path("resource_management/", views.resource_management, name='resource_management'),
 
 # -----------   Article Pages  -----------
     path('staff_articles/', views.staff_articles, name='staff_articles'),
@@ -77,14 +77,23 @@ urlpatterns = [
 
 # -----------   Workout Pages  -----------
 
-   #path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
-    #path('create_workouts/', views.create_workouts, name='create_workouts'),
+    path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
+    path('create_workouts/', views.create_workouts, name='create_workouts'),
     # path to article pages from staff-articles page
-   # path("workout_details/<int:id>/", views.workout_details, name="workout_details"),
+    path("workout_details/<int:id>/", views.workout_details, name="workout_details"),
     # path to edit article page from article_details page
-   # path("workout/<int:id>/edit/", views.edit_workout, name="edit_workout"),
-   # path("workout/<int:id>/delete/", views.delete_workout, name="delete_workout"),
+    path("workout/<int:id>/edit/", views.edit_workout, name="edit_workout"),
+    path("workout/<int:id>/delete/", views.delete_workout, name="delete_workout"),
 
+# -----------   Exercise Pages  -----------
+
+    path("staff_exercises/", views.staff_exercises, name='staff_exercises'),
+    path('create_exercises/', views.create_exercises, name='create_exercises'),
+    # path to article pages from staff-articles page
+    path("exercise_details/<int:id>/", views.exercise_details, name="exercise_details"),
+    # path to edit article page from article_details page
+    path("exercise/<int:id>/edit/", views.edit_exercise, name="edit_exercise"),
+    path("exercise/<int:id>/delete/", views.delete_exercise, name="delete_exercise"),
 
 
 
@@ -100,6 +109,7 @@ urlpatterns = [
 # -----------   Coach Pages  -----------
 
 # Coach list
+    # we already have the 'trainer' page under navbar. just need to make it logged-in users only
     path('coaches/', views.coach_list_view, name='coach_list'),
 
 # Coach dashboard

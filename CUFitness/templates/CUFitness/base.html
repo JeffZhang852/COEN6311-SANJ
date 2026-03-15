@@ -66,10 +66,26 @@
 
     <nav>
 
-        <a href="/services">Services</a>
-        <a href="/memberships">Memberships</a>
-        <a href="/trainers">Certified Trainers</a>
-        <a href="/resources">Resources</a>
+        <a href="{% url 'services' %}">Services</a>
+        <a href="{% url 'memberships' %}">Memberships</a>
+        <a href="{% url 'trainers' %}">Certified Trainers</a>
+        <div class="dropdown">
+            <button class="dropbtn">
+                Resources
+                <span class="material-icons">arrow_drop_down</span>
+            </button>
+
+            <div class="dropdown-content account">
+                <a href="{% url 'user_articles' %}">Articles
+                </a>
+                <a href="{% url 'user_recipes' %}">Recipes
+                </a>
+                <a href="">Workout Plans
+                </a>
+                <a href="">Exercises
+                </a>
+            </div>
+        </div>
 
         <!-- More Info Dropdown -->
         <div class="dropdown">
@@ -79,10 +95,10 @@
             </button>
 
             <div class="dropdown-content">
-                <a href="/amenities">Amenities</a>
-                <a href="/schedule">Schedule</a>
-                <a href="/contact">Contact Us</a>
-                <a href="/about">About</a>
+                <a href="{% url 'amenities' %}">Amenities</a>
+                <a href="{% url 'schedule' %}">Gym Schedule</a> <!-- don't think we need this here tbh -->
+                <a href="{% url 'contact' %}">Contact Us</a>
+                <a href="{% url 'about' %}">About</a>
             </div>
         </div>
 
@@ -95,40 +111,40 @@
 
             <div class="dropdown-content account">
                 {% if user.is_authenticated %}
-                    <a href="/user_profile">Profile
+                    <a href="{% url 'user_profile' %}">Profile
                         <span class="material-icons">person</span>
                     </a>
 
-                    <a href="/user_inbox">Inbox
+                    <a href="{% url 'user_inbox' %}">Inbox
                         <span class="material-icons">mail</span>
                     </a>
-                    <a href="/user_calendar">Your Schedule
+                    <a href="{% url 'user_calendar' %}">Your Schedule
                         <span class="material-icons">calendar_month</span>
                     </a>
-                    <a href="/user_workouts">Your Workouts
+                    <a href="{% url 'user_saved_workouts' %}">Your Workouts
                         <span class="material-icons">fitness_center</span>
                     </a>
-                    <a href="/user_recipes">Your Recipes
+                    <a href="{% url 'user_saved_recipes' %}">Your Recipes
                         <span class="material-icons">restaurant</span>
                     </a>
 
-                    <a href="/user_settings">Settings
+                    <a href="{% url 'user_settings' %}">Settings
                         <span class="material-icons">manage_accounts</span>
                     </a>
 
-                    <a href="/logout">Log Out
+                    <a href="{% url 'logout' %}">Log Out
                         <span class="material-icons">logout</span>
                     </a>
                 {% else %}
-                    <a href="/login">Login
+                    <a href="{% url 'login' %}">Login
                         <span class="material-icons">login</span>
                     </a>
 
-                    <a href="/register">Create Account
+                    <a href="{% url 'register' %}">Create Account
                         <span class="material-icons">person_add</span>
                     </a>
 
-                    <a href="/staff_login">Staff Login
+                    <a href="{% url 'staff_login' %}">Staff Login
                         <span class="material-icons">login</span>
                     </a>
                 {% endif %}

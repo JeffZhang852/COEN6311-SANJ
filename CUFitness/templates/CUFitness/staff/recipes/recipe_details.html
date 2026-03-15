@@ -1,0 +1,139 @@
+<!-- passed from the view function in views.py based on role of user (staff or not) -->
+{% extends base_template %}
+
+{% load static %}
+{% block title %} CUFitness - {{ recipe_obj.title }} {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'recipe_details.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="rec-detail-page">
+
+  <div class="rec-detail-container">
+
+    <!-- Header -->
+    <div class="rec-detail-header">
+      <div class="rec-detail-label">{{ recipe_obj.get_difficulty_display }} · {{ recipe_obj.total_time_minutes }} min total</div>
+
+      <div class="title-row">
+        <h1 class="rec-detail-title">{{ recipe_obj.title }}</h1>
+
+        {% if user.is_authenticated and user.role == "STAFF" %}
+        <div class="recipe-actions">
+          {% if recipe_obj.author and user == recipe_obj.author %}
+            <a href="{% url 'edit_recipe' recipe_obj.id %}" class="edit-btn">
+              <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </a>
+            <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+              <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+          {% else %}
+            <button class="edit-btn disabled" disabled title="Only the author can edit">
+              <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </button>
+            <button class="delete-btn disabled" disabled title="Only the author can delete">
+              <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="rec-detail-meta">
+        <div class="meta-avatar">
+          {{ recipe_obj.author.first_name|first|default:"?" }}{{ recipe_obj.author.last_name|first|default:"" }}
+        </div>
+        <div class="meta-info">
+          <span class="meta-author">
+            {% if recipe_obj.author %}{{ recipe_obj.author.first_name }} {{ recipe_obj.author.last_name }}{% else %}Deleted User{% endif %}
+          </span>
+          <span class="meta-date">{{ recipe_obj.created_at|date:"F d, Y" }}</span>
+        </div>
+      </div>
+
+      <p class="rec-detail-desc">{{ recipe_obj.description }}</p>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="rec-stats-strip">
+      <div class="rec-stat-cell">
+        <div class="rec-stat-val">{{ recipe_obj.prep_time_minutes }}</div>
+        <div class="rec-stat-label">Prep (min)</div>
+      </div>
+      <div class="rec-stat-cell">
+        <div class="rec-stat-val">{{ recipe_obj.cook_time_minutes }}</div>
+        <div class="rec-stat-label">Cook (min)</div>
+      </div>
+      <div class="rec-stat-cell">
+        <div class="rec-stat-val">{{ recipe_obj.servings }}</div>
+        <div class="rec-stat-label">Servings</div>
+      </div>
+      <div class="rec-stat-cell">
+        <div class="rec-stat-val">{{ recipe_obj.get_difficulty_display }}</div>
+        <div class="rec-stat-label">Difficulty</div>
+      </div>
+      <div class="rec-stat-cell">
+        <div class="rec-stat-val">{% if recipe_obj.calories_per_serving %}{{ recipe_obj.calories_per_serving }}{% else %}—{% endif %}</div>
+        <div class="rec-stat-label">Kcal / serving</div>
+      </div>
+    </div>
+
+    <!-- Dietary badges -->
+    {% if recipe_obj.dietary_restrictions %}
+    <div class="rec-dietary">
+      {% for tag in dietary_display %}
+        <span class="rec-diet-pill">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Ingredients + Instructions -->
+    <div class="rec-detail-body">
+
+      <div class="rec-ingredients">
+        <div class="rec-section-heading">Ingredients</div>
+        {% for ingredient in recipe_obj.ingredients.all %}
+        <div class="ing-item">
+          <span class="ing-qty">{{ ingredient.quantity }} {{ ingredient.get_unit_display }}</span>
+          <span class="ing-name">{{ ingredient.name }}</span>
+          {% if ingredient.notes %}<span class="ing-note">— {{ ingredient.notes }}</span>{% endif %}
+        </div>
+        {% empty %}
+        <p style="color:var(--text-muted); font-size:14px">No ingredients listed.</p>
+        {% endfor %}
+      </div>
+
+      <div class="rec-instructions">
+        <div class="rec-section-heading">Instructions</div>
+        {% for line in recipe_obj.instructions.splitlines %}
+        {% if line %}
+        <div class="rec-step">
+          <span class="step-num">{{ forloop.counter }}</span>
+          <p class="step-text">{{ line }}</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+  <div class="modal-box">
+    <h3>Delete Recipe?</h3>
+    <p>This action is permanent and cannot be undone.</p>
+    <div class="modal-actions">
+      <form method="POST" action="{% url 'delete_recipe' recipe_obj.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-confirm-delete">Delete</button>
+      </form>
+      <button class="btn-cancel" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
