@@ -27,3 +27,4 @@ Werkzeug==3.1.6
 
 # new lib, change format later 
 pip install transformers torch torchvision torchaudio
+pip install accelerate
