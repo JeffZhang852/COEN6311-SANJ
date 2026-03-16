@@ -1,15 +1,14 @@
 from django import forms
 
-from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking
-from .models import Article, Recipe, RecipeIngredient
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from .models import CustomUser,CoachAppointment,CoachAvailability
+from .models import Article, Recipe, RecipeIngredient, GymInfo, Message
 from django.forms import inlineformset_factory
-
-from django.contrib.auth.forms import PasswordChangeForm
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 
 
 class CustomUserCreationForm(UserCreationForm):
-
     class Meta:
         model = CustomUser
         fields = ("email", "first_name", "last_name", 'phone_number', 'date_of_birth', 'address', 'membership')
@@ -73,11 +72,34 @@ IngredientFormSet = inlineformset_factory(
 class CoachAvailabilityForm(forms.ModelForm):
     class Meta:
         model = CoachAvailability
-        fields = ['start_time', 'end_time']
-        widgets = {
-            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-        }
+        fields = ['start_time', 'end_time', 'is_recurring']
+
+    def __init__(self, *args, **kwargs):
+        self.coach = kwargs.pop('coach', None)
+        self.selected_date = kwargs.pop('selected_date', None)  # date object
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start_time')
+        end = cleaned.get('end_time')
+        if start and end:
+            # Must be same day and exactly one hour
+            if start.date() != end.date():
+                raise ValidationError("Start and end must be on the same day.")
+            if (end - start) != timedelta(hours=1):
+                raise ValidationError("Slot must be exactly one hour.")
+            # Check against gym hours
+            weekday = start.weekday()
+            try:
+                gym_day = GymInfo.objects.get(day=weekday)
+                if not gym_day.is_open:
+                    raise ValidationError("Gym is closed on this day.")
+                if start.time() < gym_day.open_time or end.time() > gym_day.close_time:
+                    raise ValidationError("Slot must be within gym operating hours.")
+            except GymInfo.DoesNotExist:
+                raise ValidationError("Gym hours not configured for this day.")
+        return cleaned
 
 class AppointmentRequestForm(forms.ModelForm):
     class Meta:
@@ -123,11 +145,10 @@ class PrivacySettingsForm(forms.ModelForm):
         model = CustomUser
         fields = ['workout_visibility']
 
-
-
-# Replaced, unless needed otherwise
-# class CustomUserChangeForm(UserChangeForm):
-#
-#     class Meta:
-#         model = CustomUser
-#         fields = ("email",)
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['subject', 'body']
+        widgets = {
+            'body': forms.Textarea(attrs={'rows': 5, 'maxlength': 5000}),
+        }

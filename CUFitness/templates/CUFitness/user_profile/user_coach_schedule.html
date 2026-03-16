@@ -1,0 +1,697 @@
+{% extends 'CUFitness/base.html' %}
+{% block title %}Coach Schedule{% endblock %}
+{% load static %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'user_calendar.css' %}"/>
+    <style>
+        /* Additional styles for coach sections */
+        .section-block { margin-top: 2rem; }
+        .appt-card .btn-icon { background: none; border: none; cursor: pointer; color: #666; }
+        .appt-card .btn-icon:hover { color: #dc3545; }
+        .badge { background: #e2e3e5; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color: #212529; }
+        .modal-body select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; color: #212529; }
+        .modal-body small { display: block; margin-top: 5px; color: #666; }
+        .cal-cell.disabled { background-color: #f5f5f5; color: #aaa; pointer-events: none; }
+        .cal-cell.clickable:not(.disabled) { cursor: pointer; }
+        #hour-checkboxes { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
+        #hour-checkboxes div { min-width: 120px; }
+        .recurrence-options { margin-top: 15px; }
+        .recurrence-options label { display: block; margin-bottom: 5px; color: #212529; }
+
+        /* Dark text for all major elements */
+        .cal-day-num,
+        .appt-name,
+        .appt-time,
+        .appt-notes,
+        .modal-card,
+        .modal-card label,
+        .modal-card input,
+        .modal-card select,
+        .cal-hint,
+        .empty-state,
+        .section-title,
+        .appt-card .appt-info,
+        .appt-card .appt-badge {
+            color: #212529;
+        }
+
+        /* Placeholder text in modal inputs */
+        .modal-card input::placeholder,
+        .modal-card select::placeholder {
+            color: #6c757d;
+        }
+
+        /* Highlight today's cell */
+        .cal-cell.today {
+            background-color: #e6f7ff;
+            border-radius: 4px;
+        }
+        .cal-cell.today .cal-day-num {
+            color: #0056b3;
+            font-weight: bold;
+        }
+
+        /* Keep toast text white */
+        .toast {
+            color: #fff;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<section class="calendar-page">
+
+    <!-- ── Page Header ── -->
+    <div class="cal-header">
+        <div class="cal-header-text">
+            <h1 class="cal-title">Coach Schedule</h1>
+            <p class="cal-subtitle">
+                Manage your appointments and availability
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Legend ── -->
+    <div class="cal-legend">
+        <span class="legend-dot accepted"></span><span>Accepted</span>
+        <span class="legend-dot pending"></span><span>Pending</span>
+        <span class="legend-dot available"></span><span>Open Slot</span>
+    </div>
+
+    <!-- ── Confirmed Appointments ── -->
+    <div class="section-block">
+        <h2 class="section-title">
+            <span class="material-icons">event_available</span>
+            Confirmed Appointments
+        </h2>
+        {% if confirmed %}
+            <div class="appt-list">
+                {% for appt in confirmed %}
+                <div class="appt-card status-accepted">
+                    <div class="appt-date-col">
+                        <span class="appt-day">{{ appt.start_time|date:"d" }}</span>
+                        <span class="appt-month">{{ appt.start_time|date:"M" }}</span>
+                    </div>
+                    <div class="appt-info">
+                        <p class="appt-name">
+                            <span class="material-icons">person</span>
+                            {{ appt.member.first_name }} {{ appt.member.last_name }}
+                        </p>
+                        <p class="appt-time">
+                            <span class="material-icons">schedule</span>
+                            {{ appt.start_time|date:"g:i A" }} – {{ appt.end_time|date:"g:i A" }}
+                        </p>
+                        <p class="appt-notes"><em>Workout description placeholder</em></p>
+                    </div>
+                    <span class="appt-badge accepted">{{ appt.status }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <span class="material-icons empty-icon">event_busy</span>
+                <p>No confirmed appointments.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Incoming Requests ── -->
+    <div class="section-block">
+        <h2 class="section-title">
+            <span class="material-icons">pending_actions</span>
+            Incoming Requests
+        </h2>
+        {% if pending %}
+            <div class="appt-list">
+                {% for req in pending %}
+                <div class="appt-card status-pending" id="req-{{ req.id }}">
+                    <div class="appt-date-col">
+                        <span class="appt-day">{{ req.start_time|date:"d" }}</span>
+                        <span class="appt-month">{{ req.start_time|date:"M" }}</span>
+                    </div>
+                    <div class="appt-info">
+                        <p class="appt-name">
+                            <span class="material-icons">person</span>
+                            {{ req.member.first_name }} {{ req.member.last_name }}
+                        </p>
+                        <p class="appt-time">
+                            <span class="material-icons">schedule</span>
+                            {{ req.start_time|date:"g:i A" }} – {{ req.end_time|date:"g:i A" }}
+                        </p>
+                    </div>
+                    <div class="appt-actions">
+                        <button class="btn-icon" onclick="acceptRequest({{ req.id }})" title="Accept">
+                            <span class="material-icons">check_circle</span>
+                        </button>
+                        <button class="btn-icon" onclick="rejectRequest({{ req.id }})" title="Reject">
+                            <span class="material-icons">cancel</span>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <span class="material-icons empty-icon">inbox</span>
+                <p>No pending requests.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Upcoming Availability (next 14 days) ── -->
+    <div class="section-block">
+        <h2 class="section-title">
+            <span class="material-icons">lock_open</span>
+            Your Open Availability Slots
+        </h2>
+        <div id="upcoming-avail-list">
+            {% if upcoming_avail %}
+                <div class="appt-list">
+                    {% for slot in upcoming_avail %}
+                    <div class="appt-card status-available" id="slot-{{ slot.id }}">
+                        <div class="appt-date-col">
+                            <span class="appt-day">{{ slot.start_time|date:"d" }}</span>
+                            <span class="appt-month">{{ slot.start_time|date:"M" }}</span>
+                        </div>
+                        <div class="appt-info">
+                            <p class="appt-name">
+                                <span class="material-icons">schedule</span>
+                                {{ slot.start_time|date:"g:i A" }} – {{ slot.end_time|date:"g:i A" }}
+                            </p>
+                            {% if slot.is_recurring %}
+                                <span class="badge">Recurring weekly</span>
+                            {% endif %}
+                        </div>
+                        <div class="appt-actions">
+                            <button class="btn-icon" onclick="openEditModal({{ slot.id }})" title="Edit">
+                                <span class="material-icons">edit</span>
+                            </button>
+                            <button class="btn-icon" onclick="deleteSlot({{ slot.id }})" title="Delete">
+                                <span class="material-icons">delete</span>
+                            </button>
+                            {% if slot.is_recurring %}
+                                <button class="btn-icon" onclick="cancelSeries('{{ slot.recurrence_group }}')" title="Cancel all future in series">
+                                    <span class="material-icons">event_busy</span>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <span class="material-icons empty-icon">calendar_today</span>
+                    <p>No upcoming availability. Add some using the calendar below.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── Calendar for adding availability ── -->
+    <div class="section-block">
+        <h2 class="section-title">
+            <span class="material-icons">date_range</span>
+            Add Availability
+        </h2>
+        <div class="cal-grid-wrapper">
+            <div class="cal-nav">
+                <button id="prev-month" class="cal-nav-btn" aria-label="Previous month">
+                    <span class="material-icons">chevron_left</span>
+                </button>
+                <span id="cal-month-label" class="cal-month-label"></span>
+                <button id="next-month" class="cal-nav-btn" aria-label="Next month">
+                    <span class="material-icons">chevron_right</span>
+                </button>
+            </div>
+
+            <div class="cal-day-names">
+                <span>Sun</span><span>Mon</span><span>Tue</span>
+                <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+
+            <div id="cal-grid" class="cal-grid"></div>
+            <p class="cal-hint">
+                <span class="material-icons" style="font-size:14px;vertical-align:middle;">info</span>
+                Click a future open day to add availability slots
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ── Availability Modal (coach) ── -->
+<div id="avail-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modal-heading" class="modal-title">Add Availability</h2>
+            <button class="modal-close" id="modal-close-btn" aria-label="Close">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div id="modal-error" class="modal-error" style="display:none"></div>
+        <div class="modal-body">
+            <!-- Hour checkboxes -->
+            <div class="form-row">
+                <label class="field-label">Select hours (check all that apply)</label>
+                <div id="hour-checkboxes"></div>
+            </div>
+
+            <!-- Recurrence options -->
+            <div class="form-row recurrence-options">
+                <label>Repeat</label>
+                <label><input type="radio" name="recurrence" value="none" checked> No repeat</label>
+                <label><input type="radio" name="recurrence" value="weeks"> Repeat weekly for
+                    <input type="number" id="recurrence-weeks" value="4" min="1" max="52" style="width:60px;"> weeks
+                </label>
+                <label><input type="radio" name="recurrence" value="indefinite"> Repeat weekly until cancelled</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="modal-delete-btn" class="btn-modal-delete" style="display:none">
+                <span class="material-icons">delete_outline</span>Delete
+            </button>
+            <div class="modal-footer-right">
+                <button class="btn-modal-cancel" id="modal-cancel-btn">Cancel</button>
+                <button class="btn-modal-save" id="modal-save-btn">
+                    <span class="material-icons">save</span>Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Toast notification ── -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+// Data passed from Django
+const IS_COACH = true;
+const CSRF = '{{ csrf_token }}';
+const GYM_SETTINGS = {{ gym_settings|safe }};
+let EVENTS = {{ calendar_events_json|safe }};
+
+// URLs for AJAX
+const URL_ADD = "{% url 'ajax_add_availability' %}";
+const URL_EDIT = "{% url 'ajax_edit_availability' 0 %}".replace('/0/', '/{id}/');
+const URL_DEL = "{% url 'ajax_delete_availability' 0 %}".replace('/0/', '/{id}/');
+const URL_CANCEL_SERIES = "{% url 'ajax_cancel_series' '00000000-0000-0000-0000-000000000000' %}".replace('/00000000-0000-0000-0000-000000000000/', '/{group_id}/');
+const URL_ACCEPT = "/api/appointment/{id}/accept/";
+const URL_REJECT = "/api/appointment/{id}/reject/";
+
+// Calendar state
+let currentDate = new Date();
+let selectedDate = null;
+let editingId = null;
+
+function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+// Render calendar
+function renderCalendar(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    document.getElementById('cal-month-label').textContent =
+        date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const eventMap = {};
+    EVENTS.forEach(ev => {
+        const d = new Date(ev.start);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+            const day = d.getDate();
+            if (!eventMap[day]) eventMap[day] = [];
+            eventMap[day].push(ev);
+        }
+    });
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'cal-cell empty';
+        grid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cellDate = new Date(year, month, day);
+        cellDate.setHours(0,0,0,0);
+        const cellDateStr = formatDate(cellDate);
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell';
+
+        if (cellDate < today) {
+            cell.classList.add('disabled');
+        } else {
+            const gym = GYM_SETTINGS[cellDateStr];
+            if (gym && gym.is_open) {
+                cell.classList.add('clickable');
+                cell.addEventListener('click', () => openAddModal(cellDate));
+            } else {
+                cell.classList.add('disabled');
+            }
+        }
+
+        if (cellDate.getTime() === today.getTime()) cell.classList.add('today');
+
+        const num = document.createElement('span');
+        num.className = 'cal-day-num';
+        num.textContent = day;
+        cell.appendChild(num);
+
+        const dayEvents = eventMap[day] || [];
+        dayEvents.slice(0, 3).forEach(ev => {
+            if (ev.type === 'appointment') {
+                const dot = document.createElement('span');
+                dot.className = 'cal-event-dot';
+                dot.style.background = ev.color;
+                dot.title = ev.title;
+                cell.appendChild(dot);
+            } else {
+                const pill = document.createElement('button');
+                pill.className = 'cal-event-pill';
+                pill.style.background = ev.color;
+                pill.textContent = 'Open';
+                pill.addEventListener('click', e => {
+                    e.stopPropagation();
+                    openEditModal(ev.id);
+                });
+                cell.appendChild(pill);
+            }
+        });
+
+        if (dayEvents.length > 3) {
+            const more = document.createElement('span');
+            more.className = 'cal-more';
+            more.textContent = `+${dayEvents.length - 3}`;
+            cell.appendChild(more);
+        }
+
+        if (dayEvents.length) cell.classList.add('has-events');
+        grid.appendChild(cell);
+    }
+}
+
+function populateHourCheckboxes(selectedDate) {
+    const container = document.getElementById('hour-checkboxes');
+    container.innerHTML = '';
+    const dateStr = formatDate(selectedDate);
+    const gym = GYM_SETTINGS[dateStr];
+    if (!gym || !gym.is_open) {
+        container.innerHTML = '<p>Gym closed on this day</p>';
+        return;
+    }
+    const openTime = gym.open_time;
+    const closeTime = gym.close_time;
+    if (!openTime || !closeTime) {
+        container.innerHTML = '<p>Hours not set</p>';
+        return;
+    }
+    const startHour = parseInt(openTime.split(':')[0]);
+    const endHour = parseInt(closeTime.split(':')[0]);
+    for (let h = startHour; h < endHour; h++) {
+        const start = new Date(selectedDate);
+        start.setHours(h, 0, 0, 0);
+        const end = new Date(selectedDate);
+        end.setHours(h+1, 0, 0, 0);
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <input type="checkbox" id="hour-${h}" value='${JSON.stringify({start: start.toISOString(), end: end.toISOString()})}'>
+            <label for="hour-${h}">${h.toString().padStart(2,'0')}:00 – ${(h+1).toString().padStart(2,'0')}:00</label>
+        `;
+        container.appendChild(div);
+    }
+}
+
+function openAddModal(date) {
+    editingId = null;
+    selectedDate = date;
+    document.getElementById('modal-heading').textContent = 'Add Availability';
+    document.getElementById('modal-delete-btn').style.display = 'none';
+    document.querySelector('input[name="recurrence"][value="none"]').checked = true;
+    populateHourCheckboxes(date);
+    document.getElementById('avail-modal').classList.add('open');
+}
+
+function openEditModal(slotId) {
+    const ev = EVENTS.find(e => e.type === 'availability' && e.id === slotId);
+    if (!ev) return;
+    if (ev.is_booked) {
+        showToast('This slot is already booked and cannot be changed.', 'warn');
+        return;
+    }
+    editingId = slotId;
+    selectedDate = new Date(ev.start);
+    document.getElementById('modal-heading').textContent = 'Edit Availability';
+    document.getElementById('modal-delete-btn').style.display = 'flex';
+    populateHourCheckboxes(selectedDate);
+    const targetStart = new Date(ev.start).getTime();
+    const checkboxes = document.querySelectorAll('#hour-checkboxes input');
+    checkboxes.forEach(cb => {
+        const slot = JSON.parse(cb.value);
+        if (new Date(slot.start).getTime() === targetStart) {
+            cb.checked = true;
+        } else {
+            cb.disabled = true;
+        }
+    });
+    if (ev.is_recurring) {
+        document.querySelector('input[name="recurrence"][value="indefinite"]').checked = true;
+    } else {
+        document.querySelector('input[name="recurrence"][value="none"]').checked = true;
+    }
+    document.querySelectorAll('input[name="recurrence"]').forEach(r => r.disabled = true);
+    document.getElementById('avail-modal').classList.add('open');
+}
+
+function hideModal() {
+    document.getElementById('avail-modal').classList.remove('open');
+    document.getElementById('modal-error').style.display = 'none';
+    document.querySelectorAll('input[name="recurrence"]').forEach(r => r.disabled = false);
+    editingId = null;
+    selectedDate = null;
+}
+
+async function saveAvailability() {
+    const checkboxes = document.querySelectorAll('#hour-checkboxes input:checked');
+    if (checkboxes.length === 0) {
+        showModalError('Select at least one hour.');
+        return;
+    }
+    const slots = [];
+    checkboxes.forEach(cb => slots.push(JSON.parse(cb.value)));
+
+    const recurrenceType = document.querySelector('input[name="recurrence"]:checked').value;
+    let recurrenceWeeks = 0;
+    if (recurrenceType === 'weeks') {
+        recurrenceWeeks = parseInt(document.getElementById('recurrence-weeks').value) || 4;
+    } else if (recurrenceType === 'indefinite') {
+        recurrenceWeeks = -1;
+    }
+
+    const url = editingId ? URL_EDIT.replace('{id}', editingId) : URL_ADD;
+    const body = JSON.stringify({
+        slots: slots,
+        recurrence: recurrenceType,
+        recurrence_weeks: recurrenceWeeks
+    });
+
+    document.getElementById('modal-save-btn').disabled = true;
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body,
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showModalError(data.error || 'Error saving slots');
+        } else {
+            if (editingId) {
+                const idx = EVENTS.findIndex(e => e.type === 'availability' && e.id === editingId);
+                if (idx !== -1) {
+                    EVENTS[idx].start = slots[0].start;
+                    EVENTS[idx].end = slots[0].end;
+                }
+                updateSidebarCard(editingId, slots[0].start, slots[0].end, recurrenceType !== 'none', data.recurrence_group);
+                showToast('Slot updated', 'success');
+            } else {
+                showToast(`Created ${data.created || slots.length} slots`, 'success');
+                setTimeout(() => location.reload(), 1500);
+                return;
+            }
+            hideModal();
+            renderCalendar(currentDate);
+        }
+    } catch (err) {
+        showModalError('Network error');
+    } finally {
+        document.getElementById('modal-save-btn').disabled = false;
+    }
+}
+
+async function deleteSlot(slotId) {
+    if (!confirm('Delete this availability slot?')) return;
+    try {
+        const res = await fetch(URL_DEL.replace('{id}', slotId), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.error || 'Error deleting', 'error');
+        } else {
+            EVENTS = EVENTS.filter(e => !(e.type === 'availability' && e.id === slotId));
+            document.getElementById(`slot-${slotId}`)?.remove();
+            renderCalendar(currentDate);
+            showToast('Slot deleted', 'success');
+        }
+    } catch {
+        showToast('Network error', 'error');
+    }
+}
+
+async function cancelSeries(groupId) {
+    if (!confirm('Cancel all future unbooked slots in this series?')) return;
+    try {
+        const res = await fetch(URL_CANCEL_SERIES.replace('{group_id}', groupId), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.error || 'Error cancelling series', 'error');
+        } else {
+            showToast(`Cancelled ${data.deleted_count} slots`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+    } catch {
+        showToast('Network error', 'error');
+    }
+}
+
+function updateSidebarCard(id, start, end, isRecurring, groupId) {
+    const card = document.getElementById(`slot-${id}`);
+    if (!card) return;
+    const startDate = new Date(start);
+    card.querySelector('.appt-day').textContent = startDate.getDate();
+    card.querySelector('.appt-month').textContent = startDate.toLocaleString('default', { month: 'short' });
+    const timeSpan = card.querySelector('.appt-time');
+    timeSpan.innerHTML = `<span class="material-icons">schedule</span> ${startDate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} – ${new Date(end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+    const badge = card.querySelector('.badge');
+    if (isRecurring && !badge) {
+        card.querySelector('.appt-info').insertAdjacentHTML('beforeend', '<span class="badge">Recurring weekly</span>');
+    } else if (!isRecurring && badge) {
+        badge.remove();
+    }
+    let seriesBtn = card.querySelector('.btn-icon[onclick*="cancelSeries"]');
+    if (isRecurring && !seriesBtn) {
+        const actions = card.querySelector('.appt-actions');
+        actions.insertAdjacentHTML('beforeend', `<button class="btn-icon" onclick="cancelSeries('${groupId}')" title="Cancel all future in series"><span class="material-icons">event_busy</span></button>`);
+    } else if (!isRecurring && seriesBtn) {
+        seriesBtn.remove();
+    }
+}
+
+function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type || ''}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function showModalError(msg) {
+    const errDiv = document.getElementById('modal-error');
+    errDiv.textContent = msg;
+    errDiv.style.display = 'block';
+}
+
+// Accept/Reject functions
+async function acceptRequest(reqId) {
+    if (!confirm('Accept this appointment request?')) return;
+    try {
+        const res = await fetch(`/api/appointment/${reqId}/accept/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Appointment accepted', 'success');
+            document.getElementById(`req-${reqId}`)?.remove();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Error accepting appointment', 'error');
+        }
+    } catch {
+        showToast('Network error', 'error');
+    }
+}
+
+async function rejectRequest(reqId) {
+    if (!confirm('Reject this appointment request?')) return;
+    try {
+        const res = await fetch(`/api/appointment/${reqId}/reject/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Appointment rejected', 'success');
+            document.getElementById(`req-${reqId}`)?.remove();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Error rejecting appointment', 'error');
+        }
+    } catch {
+        showToast('Network error', 'error');
+    }
+}
+
+// Modal event listeners
+document.getElementById('modal-close-btn').addEventListener('click', hideModal);
+document.getElementById('modal-cancel-btn').addEventListener('click', hideModal);
+document.getElementById('avail-modal').addEventListener('click', e => { if (e.target === this) hideModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hideModal(); });
+document.getElementById('modal-save-btn').addEventListener('click', saveAvailability);
+document.getElementById('modal-delete-btn').addEventListener('click', function() {
+    if (editingId) deleteSlot(editingId);
+});
+
+// Month navigation
+document.getElementById('prev-month').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar(currentDate);
+});
+document.getElementById('next-month').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar(currentDate);
+});
+
+// Expose functions globally for inline onclick
+window.openEditModal = openEditModal;
+window.deleteSlot = deleteSlot;
+window.cancelSeries = cancelSeries;
+window.acceptRequest = acceptRequest;
+window.rejectRequest = rejectRequest;
+
+// Initial render
+renderCalendar(currentDate);
+</script>
+
+{% else %}
+    <p style="padding:60px;text-align:center;">
+        Please <a href="{% url 'login' %}">log in</a> to view your schedule.
+    </p>
+{% endif %}
+{% endblock %}
