@@ -28,6 +28,14 @@
             </span>
         </div>
         <div class="detail-row">
+            <span class="detail-label">Membership</span>
+            <span class="detail-value">
+                <span class="membership-badge {{ user_obj.membership|lower }}">
+                    {{ user_obj.membership }}
+                </span>
+            </span>
+        </div>
+        <div class="detail-row">
             <span class="detail-label">Date Joined</span>
             <span class="detail-value">{{ user_obj.date_joined }}</span>
         </div>
@@ -36,8 +44,76 @@
             <span class="detail-value">{{ user_obj.last_login }}</span>
         </div>
     </div>
-    <a href= "/" class="back-link">
-    ← Back to Dashboard
+
+    <div class="detail-section">
+        <h2>Personal Information</h2>
+
+        <div class="detail-row">
+            <span class="detail-label">Email ID</span>
+            <span class="detail-value">{{ user_obj.email }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">{{ user_obj.phone_number }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Date of Birth</span>
+            <span class="detail-value">{{ user_obj.date_of_birth }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Address</span>
+            <span class="detail-value">{{ user_obj.address }}</span>
+        </div>
+    </div>
+
+    <div class="detail-section">
+        <h2>Actions</h2>
+
+        <div class="action-container">
+
+            <!-- Upgrade Membership -->
+            <select class="action-select">
+                <option>Upgrade Membership</option>
+                <option value="BASIC">Basic</option>
+                <option value="STANDARD">Standard</option>
+                <option value="PLATINUM">Platinum</option>
+            </select>
+
+            <button class="btn action-btn"
+                    onclick="alert('Upgrade/Downgrade coming soon')">
+                Update
+            </button>
+
+            <!-- Promote -->
+            {% if user_obj.role != "COACH" %}
+            <button class="btn promote-btn"
+                    onclick="alert('Promote coming soon')">
+                Promote to Coach
+            </button>
+            {% endif %}
+
+            <!-- Ban -->
+            {% if user_obj.is_active %}
+            <button class="btn ban-btn"
+                    onclick="alert('Ban coming soon')">
+                Ban User
+            </button>
+            {% else %}
+            <button class="btn unban-btn"
+                    onclick="alert('Unban coming soon')">
+                Unban User
+            </button>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <a href= "javascript:history.back()" class="back-link"
+        onclick="if(history.length <= 1) window.location.href='/'">
+    ← Back
     </a>
 </div>
 {% else %}

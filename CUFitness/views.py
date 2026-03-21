@@ -423,7 +423,10 @@ def staff_settings(request):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def members(request):
-    return render(request, 'CUFitness/staff/members.html')
+    members = CustomUser.objects.filter(role='MEMBER')
+    return render(request, 'CUFitness/staff/members.html', {
+        'members': members
+    })
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
