@@ -24,7 +24,3 @@ types-PyYAML==6.0.12.20250915
 typing_extensions==4.15.0
 tzdata==2025.3
 Werkzeug==3.1.6
-
-# new lib, change format later 
-pip install transformers torch torchvision torchaudio
-pip install accelerate
