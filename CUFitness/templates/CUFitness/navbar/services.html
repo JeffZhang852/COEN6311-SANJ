@@ -4,52 +4,100 @@
 {% block title %} Services Page {% endblock %}
 
 {% block extra_styles %}
-
     <link rel="stylesheet" href="{% static 'services.css' %}"/>
-
+    <!-- Temporary styles for equipment grid – move to services.css later -->
+    <style>
+        .equipment-section {
+            padding: 4rem 2rem;
+            background: #f9f9f9;
+            text-align: center;
+        }
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .equipment-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .equipment-card:hover {
+            transform: translateY(-5px);
+        }
+        .equipment-card h3 {
+            margin: 0 0 0.5rem;
+            color: #333;
+        }
+        .equipment-card .quantity {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0.5rem 0;
+        }
+        .equipment-card .description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
 
-    <!-- ================= HERO SECTION ================= -->
+<!-- ================= HERO SECTION ================= -->
 <section class="services-hero">
     <h2>Our Training Services</h2>
     <p>Designed to help you reach peak performance.</p>
 </section>
 
+<!-- ================= EQUIPMENT SECTION (NEW) ================= -->
+<section class="equipment-section">
+    <h2 class="section-title">Our Equipment</h2>
+    <p>We have <strong>{{ total_equipment_items }}</strong> pieces of equipment available for you:</p>
+    <div class="equipment-grid">
+        {% for item in equipment_list %}
+        <div class="equipment-card">
+            <h3>{{ item.name }}</h3>
+            <p class="quantity">{{ item.quantity }} unit{{ item.quantity|pluralize }}</p>
+            {% if item.description %}
+                <p class="description">{{ item.description }}</p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>No equipment listed at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
 <!-- ================= SERVICES GRID ================= -->
 <section class="services-grid">
-
     <div class="service-card">
         <h3>Personal Training</h3>
         <p>Customized workout plans and 1-on-1 coaching.</p>
     </div>
-
     <div class="service-card">
         <h3>Group Fitness Classes</h3>
         <p>High-energy sessions including HIIT, yoga, and strength.</p>
     </div>
-
     <div class="service-card">
         <h3>Nutrition Coaching</h3>
         <p>Meal plans tailored to your fitness goals.</p>
     </div>
-
     <div class="service-card">
         <h3>Strength Programs</h3>
         <p>Build muscle and improve endurance effectively.</p>
     </div>
-
     <div class="service-card">
         <h3>Online Coaching</h3>
         <p>Train remotely with expert guidance and tracking.</p>
     </div>
-
     <div class="service-card">
         <h3>Rehabilitation Training</h3>
         <p>Safe recovery programs supervised by professionals.</p>
     </div>
-
 </section>
 
 <!-- ================= FEATURE SECTION ================= -->
@@ -66,7 +114,6 @@
 <!-- ================= COMPARISON TABLE ================= -->
 <section class="services-table">
     <h2 class="section-title">Service Comparison</h2>
-
     <table>
         <tr>
             <th>Service</th>
@@ -98,30 +145,20 @@
 <!-- ================= CTA ================= -->
 <section class="services-cta">
     <h2>Ready to Get Started?</h2>
-    <a href="/register"> <button class="btn">Join Now </button> </a>
+    <a href="/register"><button class="btn">Join Now</button></a>
 </section>
 
 <script>
     /* ================= SCROLL REVEAL ANIMATION ================= */
-
     const cards = document.querySelectorAll('.service-card');
-
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('show');
             }
         });
-    }, {
-        threshold: 0.2
-    });
-
-    cards.forEach(card => {
-        observer.observe(card);
-    });
+    }, { threshold: 0.2 });
+    cards.forEach(card => observer.observe(card));
 </script>
 
-
 {% endblock %}
-
-

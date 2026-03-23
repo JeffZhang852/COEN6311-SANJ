@@ -1,11 +1,9 @@
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .forms import CustomUserCreationForm, CoachRequestForm
-from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentBooking,EquipmentList
-
-from .models import Article, Recipe, RecipeIngredient
+from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentList
+from .models import Article, Recipe, RecipeIngredient, GymInfo
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -61,13 +59,6 @@ class EquipmentAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('name',)
 
-@admin.register(EquipmentBooking)
-class BookingAdmin(admin.ModelAdmin):
-    list_display = ('equipment', 'coach', 'start_time', 'end_time', 'is_cancelled')
-    list_filter = ('is_cancelled', 'coach')
-    search_fields = ('EquipmentBooking_name', 'coach__email')
-    date_hierarchy = 'start_time'
-
 @admin.register(CoachAvailability)
 class CoachAvailabilityAdmin(admin.ModelAdmin):
     list_display = ('coach', 'start_time', 'end_time', 'is_booked')
@@ -81,4 +72,9 @@ class AppointmentAdmin(admin.ModelAdmin):
     search_fields = ('member__email', 'coach__email')
     date_hierarchy = 'start_time'
 
+@admin.register(GymInfo)
+class GymInfoAdmin(admin.ModelAdmin):
+    list_display = ('day', 'is_open', 'open_time', 'close_time')
+    list_editable = ('is_open', 'open_time', 'close_time')
+    ordering = ('day',)
 

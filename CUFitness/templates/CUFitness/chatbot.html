@@ -1,0 +1,143 @@
+{% extends 'CUFitness/base.html' %}
+{% load static %}
+
+{% block title %}Chatbot{% endblock %}
+
+{% block content %}
+<!-- Centered container that scales with browser width -->
+<div class="chatbot-container">
+    <h2 class="text-dark">Chatbot</h2>
+    <div class="card chatbot-card">
+        <!-- Chat messages display area -->
+        <div class="card-body chat-display" id="chat-display">
+            <!-- Messages appear here -->
+        </div>
+
+        <!-- Input form -->
+        <div class="card-footer chat-footer">
+            <form id="chat-form" method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="message" id="message-input" class="form-control" placeholder="Type your message..." autocomplete="off">
+                    <button class="btn btn-primary" type="submit">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Container scales with browser width and stays centered */
+    .chatbot-container {
+        width: 80%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    /* Chat display area – height scales with viewport, light background */
+    .chat-display {
+        height: 60vh;
+        min-height: 300px;
+        overflow-y: auto;
+        background-color: #ffffff !important;
+        color: #212529 !important;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 15px;
+    }
+
+    /* Message bubbles – ensure dark text */
+    .chat-display .text-start .bg-light,
+    .chat-display .text-end .bg-light {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+    }
+
+
+    /* Footer area */
+    .chat-footer {
+        background-color: #f8f9fa !important;
+        border-top: 1px solid #dee2e6;
+    }
+
+    /* Input field */
+    #message-input {
+        color: #212529 !important;
+        background-color: #ffffff !important;
+    }
+    #message-input::placeholder {
+        color: #6c757d !important;
+    }
+</style>
+
+<script>
+document.getElementById('chat-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    if (!message) return;
+
+    // Disable input and button while waiting
+    input.disabled = true;
+    document.querySelector('#chat-form button').disabled = true;
+
+    // Show user message immediately
+    appendMessage('user', message);
+    input.value = '';
+    scrollToBottom();
+
+    // Send AJAX request
+    fetch('{% url "chatbot" %}', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ 'message': message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        appendMessage('bot', data.reply);
+        scrollToBottom();
+    })
+    .catch(error => {
+        appendMessage('bot', 'Sorry, an error occurred.');
+        console.error(error);
+    })
+    .finally(() => {
+        input.disabled = false;
+        document.querySelector('#chat-form button').disabled = false;
+        input.focus();
+    });
+});
+
+function appendMessage(sender, text) {
+    const display = document.getElementById('chat-display');
+    const div = document.createElement('div');
+    div.className = sender === 'user' ? 'text-end mb-2' : 'text-start mb-2';
+    div.innerHTML = `
+        <span class="badge ${sender === 'user' ? 'bg-primary' : 'bg-success'}">${sender === 'user' ? 'You' : 'Bot'}</span>
+        <div class="mt-1 p-2 bg-light rounded">${escapeHtml(text)}</div>
+    `;
+    display.appendChild(div);
+}
+
+function escapeHtml(unsafe) {
+    return unsafe.replace(/[&<>"']/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        if (m === '"') return '&quot;';
+        if (m === "'") return '&#039;';
+        return m;
+    });
+}
+
+function scrollToBottom() {
+    const display = document.getElementById('chat-display');
+    display.scrollTop = display.scrollHeight;
+}
+</script>
+{% endblock %}

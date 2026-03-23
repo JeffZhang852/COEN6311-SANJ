@@ -1,10 +1,137 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/base.html' %}
+{% block title %}Inbox{% endblock %}
+{% load static %}
 
-</body>
-</html>
+{% block extra_styles %}
+<style>
+    .inbox-container { display: flex; gap: 20px; padding: 20px; }
+    .member-compose { flex: 1; background: #f9f9f9; padding: 20px; border-radius: 8px; }
+    .message-list { flex: 2; }
+    .message-item { background: white; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 6px; }
+    .message-item.unread { background: #e3f2fd; border-left: 4px solid #2196F3; }
+    .coach-search { margin-bottom: 15px; }
+    .coach-search input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .coach-results { max-height: 200px; overflow-y: auto; border: 1px solid #ccc; border-radius: 4px; padding: 5px; }
+    .coach-result-item { padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; }
+    .coach-result-item:hover { background: #f0f0f0; }
+    .selected-coach { background: #d1e7dd; padding: 8px; border-radius: 4px; margin: 10px 0; }
+    .reply-form { margin-top: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inbox-container">
+    {% if is_member %}
+    <!-- Member compose section -->
+    <div class="member-compose">
+        <h2>Send a Message to a Coach</h2>
+        <div class="coach-search">
+            <input type="text" id="coach-search" placeholder="Search coaches by name...">
+            <div id="coach-results" class="coach-results"></div>
+        </div>
+        <div id="selected-coach" class="selected-coach" style="display: none;">
+            Recipient: <span id="recipient-name"></span>
+            <input type="hidden" id="recipient-id">
+        </div>
+        <form method="post" action="{% url 'send_message' %}">
+            {% csrf_token %}
+            <input type="hidden" name="recipient_id" id="form-recipient-id">
+            <div>
+                <label>Subject</label>
+                <input type="text" name="subject" required maxlength="200" style="width:100%;">
+            </div>
+            <div>
+                <label>Message (max 1000 words)</label>
+                <textarea name="body" rows="5" required maxlength="5000" style="width:100%;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Message list (common for both roles) -->
+    <div class="message-list">
+        <h2>{% if is_member %}Your Conversations{% else %}Inbox{% endif %}</h2>
+        {% for msg in messages %}
+            <div class="message-item {% if not msg.is_read and msg.recipient == user %}unread{% endif %}" id="msg-{{ msg.id }}">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>
+                        {% if msg.sender == user %}
+                            To: {{ msg.recipient.get_full_name|default:msg.recipient.email }}
+                        {% else %}
+                            From: {{ msg.sender.get_full_name|default:msg.sender.email }}
+                        {% endif %}
+                    </strong>
+                    <small>{{ msg.timestamp|date:"M d, Y H:i" }}</small>
+                </div>
+                <div><strong>{{ msg.subject }}</strong></div>
+                <div>{{ msg.body|linebreaksbr|truncatewords:50 }}</div>
+                {% if not is_member and msg.recipient == user and msg.sender.role == 'MEMBER' %}
+                    <!-- Coach reply button -->
+                    <a href="{% url 'reply_message' msg.id %}" class="btn btn-sm btn-outline-primary">Reply</a>
+                {% endif %}
+                {% if msg.recipient == user and not msg.is_read %}
+                    <button class="btn btn-sm btn-outline-secondary mark-read" data-id="{{ msg.id }}">Mark read</button>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No messages yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Coach search for members
+    const searchInput = document.getElementById('coach-search');
+    const resultsDiv = document.getElementById('coach-results');
+    const selectedDiv = document.getElementById('selected-coach');
+    const recipientNameSpan = document.getElementById('recipient-name');
+    const recipientIdHidden = document.getElementById('recipient-id');
+    const formRecipientId = document.getElementById('form-recipient-id');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            fetch(`/api/coaches/search/?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(coaches => {
+                    resultsDiv.innerHTML = coaches.map(c =>
+                        `<div class="coach-result-item" data-id="${c.id}" data-name="${c.first_name} ${c.last_name}">${c.first_name} ${c.last_name} (${c.email})</div>`
+                    ).join('');
+                    document.querySelectorAll('.coach-result-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const id = this.dataset.id;
+                            const name = this.dataset.name;
+                            recipientIdHidden.value = id;
+                            formRecipientId.value = id;
+                            recipientNameSpan.textContent = name;
+                            selectedDiv.style.display = 'block';
+                            resultsDiv.innerHTML = '';
+                            searchInput.value = '';
+                        });
+                    });
+                });
+        });
+    }
+
+    // Mark as read (AJAX)
+    document.querySelectorAll('.mark-read').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const msgId = this.dataset.id;
+            fetch(`/mark_read/${msgId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            }).then(res => res.json()).then(data => {
+                if (data.status === 'ok') {
+                    document.getElementById(`msg-${msgId}`).classList.remove('unread');
+                    this.remove();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

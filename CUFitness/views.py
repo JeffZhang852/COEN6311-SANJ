@@ -8,7 +8,7 @@ from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentBooking, Article, Recipe, RecipeIngredient
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
 from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
 
@@ -20,6 +20,25 @@ from django.http import JsonResponse
 import json as _json
 import json
 from django.db import transaction
+
+# Chatbot
+import torch
+from django.shortcuts import render
+from django.views.decorators.csrf import ensure_csrf_cookie
+from .apps import CUFitnessConfig
+
+# Appointment Making
+import uuid
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from datetime import datetime, timedelta
+
+# Messaging
+from django.db.models import Q
+from .models import Message
+from .forms import MessageForm
+
+
 
 User = get_user_model()
 
@@ -35,8 +54,6 @@ def is_staff_user(user):
 
 def is_admin_user(user):
     return user.is_authenticated and user.role == 'ADMIN'
-
-
 
 def home(request):
     if request.user.is_authenticated and request.user.role == 'STAFF':
@@ -58,7 +75,13 @@ def home(request):
 # region all navbar pages
 # -----------   Navbar Pages  -----------
 def services(request):
-    return render(request, 'CUFitness/navbar/services.html')
+    equipment = EquipmentList.objects.filter(is_active=True).order_by('name')
+    total_items = sum(e.quantity for e in equipment)  # total number of equipment units
+    context = {
+        'equipment_list': equipment,
+        'total_equipment_items': total_items,
+    }
+    return render(request, 'CUFitness/navbar/services.html', context)
 
 def memberships(request):
     return render(request, 'CUFitness/navbar/membership.html')
@@ -197,58 +220,123 @@ def user_settings(request):
 def user_inbox(request):
     return render(request, 'CUFitness/user_profile/user_inbox.html')
 
+# @login_required(login_url='login')
+# @user_passes_test(lambda user: is_member(user) or is_coach(user))
+# def user_calendar(request):
+#     """
+#      Calendar page for members and coaches.
+#
+#      Members  → see their upcoming coach appointments (accepted & pending).
+#      Coaches  → see their upcoming appointments *and* ALL their availability slots
+#                 (past + future) so the calendar can render them for editing.
+#      """
+#     now = timezone.now()
+#
+#     if is_member(request.user):
+#         upcoming_appointments = CoachAppointment.objects.filter(
+#             member=request.user,
+#             start_time__gte=now,
+#             status__in=['PENDING', 'ACCEPTED'],
+#         ).select_related('coach').order_by('start_time')
+#
+#         past_appointments = CoachAppointment.objects.filter(
+#             member=request.user,
+#             start_time__lt=now,
+#         ).select_related('coach').order_by('-start_time')[:10]
+#
+#         availabilities = []
+#
+#     else:  # COACH
+#         upcoming_appointments = CoachAppointment.objects.filter(
+#             coach=request.user,
+#             start_time__gte=now,
+#             status__in=['PENDING', 'ACCEPTED'],
+#         ).select_related('member').order_by('start_time')
+#
+#         past_appointments = CoachAppointment.objects.filter(
+#             coach=request.user,
+#             start_time__lt=now,
+#         ).select_related('member').order_by('-start_time')[:10]
+#
+#         # ALL slots (past + future) so coaches can see/edit their full history
+#         availabilities = CoachAvailability.objects.filter(
+#             coach=request.user,
+#         ).order_by('start_time')
+#
+#     # ── Build calendar event JSON ──────────────────────────────────
+#     calendar_events = []
+#
+#     for appt in upcoming_appointments:
+#         label = (
+#             f"Session with {appt.member.first_name} {appt.member.last_name}"
+#             if is_coach(request.user)
+#             else f"Session with Coach {appt.coach.first_name} {appt.coach.last_name}"
+#         )
+#         color = '#15803d' if appt.status == 'ACCEPTED' else '#b45309'
+#         calendar_events.append({
+#             'type': 'appointment',
+#             'title': label,
+#             'start': appt.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'end': appt.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'color': color,
+#             'status': appt.status,
+#         })
+#
+#     for slot in availabilities:
+#         calendar_events.append({
+#             'type': 'availability',
+#             'id': slot.id,
+#             'title': 'Open Slot' if not slot.is_booked else 'Booked Slot',
+#             'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'end': slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'color': '#1d4ed8' if not slot.is_booked else '#6b7280',
+#             'status': 'AVAILABLE' if not slot.is_booked else 'BOOKED',
+#             'is_booked': slot.is_booked,
+#         })
+#
+#     # Upcoming open slots for the sidebar list
+#     upcoming_availabilities = [s for s in availabilities if s.start_time >= now and not s.is_booked]
+#
+#     context = {
+#         'upcoming_appointments': upcoming_appointments,
+#         'past_appointments': past_appointments,
+#         'availabilities': upcoming_availabilities,
+#         'calendar_events_json': json.dumps(calendar_events),
+#         'is_coach': is_coach(request.user),
+#     }
+#     return render(request, 'CUFitness/user_profile/user_calendar.html', context)
+
 @login_required(login_url='login')
-@user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_calendar(request):
     """
-     Calendar page for members and coaches.
+    Calendar page for members and coaches.
 
-     Members  → see their upcoming coach appointments (accepted & pending).
-     Coaches  → see their upcoming appointments *and* ALL their availability slots
-                (past + future) so the calendar can render them for editing.
-     """
+    Members  → see their upcoming coach appointments (accepted & pending).
+    Coaches  → now redirected to user_coach_schedule.
+    """
+    if is_coach(request.user):
+        return redirect('user_coach_schedule')
+
     now = timezone.now()
 
-    if is_member(request.user):
-        upcoming_appointments = CoachAppointment.objects.filter(
-            member=request.user,
-            start_time__gte=now,
-            status__in=['PENDING', 'ACCEPTED'],
-        ).select_related('coach').order_by('start_time')
+    # Member view
+    upcoming_appointments = CoachAppointment.objects.filter(
+        member=request.user,
+        start_time__gte=now,
+        status__in=['PENDING', 'ACCEPTED'],
+    ).select_related('coach').order_by('start_time')
 
-        past_appointments = CoachAppointment.objects.filter(
-            member=request.user,
-            start_time__lt=now,
-        ).select_related('coach').order_by('-start_time')[:10]
+    past_appointments = CoachAppointment.objects.filter(
+        member=request.user,
+        start_time__lt=now,
+    ).select_related('coach').order_by('-start_time')[:10]
 
-        availabilities = []
+    availabilities = []  # not used for members
 
-    else:  # COACH
-        upcoming_appointments = CoachAppointment.objects.filter(
-            coach=request.user,
-            start_time__gte=now,
-            status__in=['PENDING', 'ACCEPTED'],
-        ).select_related('member').order_by('start_time')
-
-        past_appointments = CoachAppointment.objects.filter(
-            coach=request.user,
-            start_time__lt=now,
-        ).select_related('member').order_by('-start_time')[:10]
-
-        # ALL slots (past + future) so coaches can see/edit their full history
-        availabilities = CoachAvailability.objects.filter(
-            coach=request.user,
-        ).order_by('start_time')
-
-    # ── Build calendar event JSON ──────────────────────────────────
+    # Build calendar event JSON
     calendar_events = []
-
     for appt in upcoming_appointments:
-        label = (
-            f"Session with {appt.member.first_name} {appt.member.last_name}"
-            if is_coach(request.user)
-            else f"Session with Coach {appt.coach.first_name} {appt.coach.last_name}"
-        )
+        label = f"Session with Coach {appt.coach.first_name} {appt.coach.last_name}"
         color = '#15803d' if appt.status == 'ACCEPTED' else '#b45309'
         calendar_events.append({
             'type': 'appointment',
@@ -259,29 +347,92 @@ def user_calendar(request):
             'status': appt.status,
         })
 
-    for slot in availabilities:
-        calendar_events.append({
-            'type': 'availability',
-            'id': slot.id,
-            'title': 'Open Slot' if not slot.is_booked else 'Booked Slot',
-            'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
-            'color': '#1d4ed8' if not slot.is_booked else '#6b7280',
-            'status': 'AVAILABLE' if not slot.is_booked else 'BOOKED',
-            'is_booked': slot.is_booked,
-        })
-
-    # Upcoming open slots for the sidebar list
-    upcoming_availabilities = [s for s in availabilities if s.start_time >= now and not s.is_booked]
-
     context = {
         'upcoming_appointments': upcoming_appointments,
         'past_appointments': past_appointments,
-        'availabilities': upcoming_availabilities,
+        'availabilities': [],  # not used by member template
         'calendar_events_json': json.dumps(calendar_events),
-        'is_coach': is_coach(request.user),
+        'is_coach': False,
     }
     return render(request, 'CUFitness/user_profile/user_calendar.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def user_coach_schedule(request):
+    now = timezone.now()
+
+    # Confirmed appointments (accepted)
+    confirmed = CoachAppointment.objects.filter(
+        coach=request.user,
+        start_time__gte=now,
+        status='ACCEPTED'
+    ).select_related('member').order_by('start_time')
+
+    # Pending requests
+    pending = CoachAppointment.objects.filter(
+        coach=request.user,
+        status='PENDING'
+    ).select_related('member').order_by('start_time')
+
+    # Auto-accept setting (must be added to CustomUser model)
+    auto_accept = request.user.auto_accept_appointments
+
+    # Upcoming availability (next 14 days, unbooked)
+    upcoming_avail = CoachAvailability.objects.filter(
+        coach=request.user,
+        start_time__gte=now,
+        start_time__lte=now + timedelta(days=14),
+        is_booked=False
+    ).order_by('start_time')
+
+    # Gym info for the next 14 days (used to disable closed days in calendar)
+    gym_info = {}
+    for i in range(14):
+        day = (now + timedelta(days=i)).date()
+        weekday = day.weekday()
+        try:
+            g = GymInfo.objects.get(day=weekday)
+            gym_info[day.isoformat()] = {
+                'is_open': g.is_open,
+                'open_time': g.open_time.isoformat() if g.open_time else None,
+                'close_time': g.close_time.isoformat() if g.close_time else None,
+            }
+        except GymInfo.DoesNotExist:
+            gym_info[day.isoformat()] = {'is_open': False}
+
+    # Build calendar events for FullCalendar
+    calendar_events = []
+    for appt in confirmed:
+        calendar_events.append({
+            'type': 'appointment',
+            'title': f"Session with {appt.member.first_name}",
+            'start': appt.start_time.isoformat(),
+            'end': appt.end_time.isoformat(),
+            'color': '#15803d',
+            'status': 'ACCEPTED',
+        })
+    for slot in upcoming_avail:
+        calendar_events.append({
+            'type': 'availability',
+            'id': slot.id,
+            'title': 'Open Slot',
+            'start': slot.start_time.isoformat(),
+            'end': slot.end_time.isoformat(),
+            'color': '#1d4ed8',
+            'is_booked': False,
+            'is_recurring': slot.is_recurring,
+            'recurrence_group': str(slot.recurrence_group) if slot.recurrence_group else None,
+        })
+
+    context = {
+        'confirmed': confirmed,
+        'pending': pending,
+        'auto_accept': auto_accept,
+        'upcoming_avail': upcoming_avail,
+        'calendar_events_json': json.dumps(calendar_events),
+        'gym_settings': json.dumps(gym_info),   # template expects this name
+    }
+    return render(request, 'CUFitness/user_profile/user_coach_schedule.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
@@ -298,64 +449,241 @@ def user_saved_workouts(request):
 # ── AJAX: add availability slot ───────────────────────────────────
 @login_required(login_url='login')
 @user_passes_test(is_coach)
+@require_POST
+@ensure_csrf_cookie
 def ajax_add_availability(request):
-    """POST {start_time, end_time} → create slot, return JSON."""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST required'}, status=405)
+    """
+    Create one or more availability slots for the logged-in coach.
+    Expected JSON body:
+    {
+        "slots": [{"start": "ISO datetime", "end": "ISO datetime"}, ...],
+        "recurrence": "none" | "weeks" | "indefinite",
+        "recurrence_weeks": int (required if recurrence=="weeks")
+    }
+    Returns:
+        {"created": count} or {"error": message}
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-    data = _json.loads(request.body)
-    form = CoachAvailabilityForm(data)
-    if form.is_valid():
-        slot = form.save(commit=False)
-        slot.coach = request.user
+    slots_data = data.get('slots', [])
+    recurrence = data.get('recurrence', 'none')
+    recurrence_weeks = data.get('recurrence_weeks', 0)
+
+    if not slots_data:
+        return JsonResponse({'error': 'No slots provided'}, status=400)
+
+    if recurrence not in ('none', 'weeks', 'indefinite'):
+        return JsonResponse({'error': 'Invalid recurrence value'}, status=400)
+
+    if recurrence == 'weeks' and (not isinstance(recurrence_weeks, int) or recurrence_weeks < 1):
+        return JsonResponse({'error': 'recurrence_weeks must be a positive integer'}, status=400)
+
+    created_slots = []
+    recurrence_group = None
+    if recurrence != 'none':
+        recurrence_group = uuid.uuid4()
+
+    # Determine number of weeks to generate
+    max_weeks = 0
+    if recurrence == 'weeks':
+        max_weeks = recurrence_weeks
+    elif recurrence == 'indefinite':
+        max_weeks = 52  # generate a year's worth; can be adjusted
+
+    now = timezone.now()
+
+    # Pre-fetch gym settings for weekdays to avoid repeated DB hits
+    gym_info_cache = {}
+    for i in range(7):
         try:
+            gym_info_cache[i] = GymInfo.objects.get(day=i)
+        except GymInfo.DoesNotExist:
+            gym_info_cache[i] = None
+
+    for slot_info in slots_data:
+        start_str = slot_info.get('start')
+        end_str = slot_info.get('end')
+        if not start_str or not end_str:
+            return JsonResponse({'error': 'Missing start or end in slot'}, status=400)
+
+        try:
+            start_dt = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
+            end_dt = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
+            if timezone.is_naive(start_dt):
+                start_dt = timezone.make_aware(start_dt)
+            if timezone.is_naive(end_dt):
+                end_dt = timezone.make_aware(end_dt)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid datetime format in slot'}, status=400)
+
+        # Validate each slot: not in past, exactly one hour, within gym hours
+        if start_dt < now:
+            return JsonResponse({'error': f'Slot {start_dt} is in the past'}, status=400)
+        if (end_dt - start_dt) != timedelta(hours=1):
+            return JsonResponse({'error': 'Each slot must be exactly one hour'}, status=400)
+
+        weekday = start_dt.weekday()
+        gym = gym_info_cache.get(weekday)
+        if not gym or not gym.is_open:
+            return JsonResponse({'error': f'Gym closed on {start_dt.strftime("%A")}'}, status=400)
+        if start_dt.time() < gym.open_time or end_dt.time() > gym.close_time:
+            return JsonResponse({'error': f'Slot {start_dt.time()} outside gym hours'}, status=400)
+
+        # For non‑recurring, create single slot
+        if recurrence == 'none':
+            # Check overlapping
+            overlapping = CoachAvailability.objects.filter(
+                coach=request.user,
+                start_time__lt=end_dt,
+                end_time__gt=start_dt,
+                is_booked=False
+            )
+            if overlapping.exists():
+                return JsonResponse({'error': f'Slot {start_dt} overlaps existing availability'}, status=400)
+
+            slot = CoachAvailability(
+                coach=request.user,
+                start_time=start_dt,
+                end_time=end_dt,
+                is_recurring=False
+            )
             slot.save()
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-        return JsonResponse({
-            'id':    slot.id,
-            'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end':   slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
-        })
-    return JsonResponse({'error': form.errors.as_json()}, status=400)
+            created_slots.append(slot)
+        else:
+            # Recurring: generate for each week up to max_weeks
+            for week in range(max_weeks):
+                slot_start = start_dt + timedelta(weeks=week)
+                slot_end = end_dt + timedelta(weeks=week)
+
+                # Skip if already exists (should not, but safety)
+                if CoachAvailability.objects.filter(
+                    coach=request.user,
+                    start_time=slot_start,
+                    end_time=slot_end
+                ).exists():
+                    continue
+
+                # Check overlapping for each generated slot
+                overlapping = CoachAvailability.objects.filter(
+                    coach=request.user,
+                    start_time__lt=slot_end,
+                    end_time__gt=slot_start,
+                    is_booked=False
+                )
+                if overlapping.exists():
+                    # If overlapping, skip this week? Or abort? We'll skip to be safe.
+                    continue
+
+                slot = CoachAvailability(
+                    coach=request.user,
+                    start_time=slot_start,
+                    end_time=slot_end,
+                    is_recurring=True,
+                    recurrence_group=recurrence_group
+                )
+                slot.save()
+                created_slots.append(slot)
+
+    return JsonResponse({
+        'created': len(created_slots),
+        'recurrence_group': str(recurrence_group) if recurrence_group else None
+    })
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def ajax_edit_availability(request, slot_id):
-    """POST {start_time, end_time} → update slot, return JSON."""
+    """Edit a single slot (only if unbooked)."""
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
     slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
     if slot.is_booked:
-        return JsonResponse({'error': 'Cannot edit a booked slot.'}, status=400)
+        return JsonResponse({'error': 'Cannot edit a booked slot'}, status=400)
 
-    data = _json.loads(request.body)
-    form = CoachAvailabilityForm(data, instance=slot)
-    if form.is_valid():
-        try:
-            form.save()
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-        return JsonResponse({
-            'id':    slot.id,
-            'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end':   slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
-        })
-    return JsonResponse({'error': form.errors.as_json()}, status=400)
+    data = json.loads(request.body)
+    start_str = data.get('start_time')
+    end_str = data.get('end_time')
+    if not start_str or not end_str:
+        return JsonResponse({'error': 'Missing times'}, status=400)
+
+    try:
+        start_dt = datetime.fromisoformat(start_str)
+        end_dt = datetime.fromisoformat(end_str)
+        if timezone.is_naive(start_dt):
+            start_dt = timezone.make_aware(start_dt)
+        if timezone.is_naive(end_dt):
+            end_dt = timezone.make_aware(end_dt)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid datetime'}, status=400)
+
+    # Same validations as add
+    if start_dt < timezone.now():
+        return JsonResponse({'error': 'Cannot set slot in the past'}, status=400)
+    if (end_dt - start_dt) != timedelta(hours=1):
+        return JsonResponse({'error': 'Slot must be exactly one hour'}, status=400)
+
+    weekday = start_dt.weekday()
+    try:
+        gym = GymInfo.objects.get(day=weekday)
+        if not gym.is_open:
+            return JsonResponse({'error': 'Gym closed on this day'}, status=400)
+        if start_dt.time() < gym.open_time or end_dt.time() > gym.close_time:
+            return JsonResponse({'error': 'Slot outside gym hours'}, status=400)
+    except GymInfo.DoesNotExist:
+        return JsonResponse({'error': 'Gym hours not configured'}, status=400)
+
+    # Check overlapping excluding self
+    overlapping = CoachAvailability.objects.filter(
+        coach=request.user,
+        start_time__lt=end_dt,
+        end_time__gt=start_dt,
+        is_booked=False
+    ).exclude(pk=slot.pk)
+    if overlapping.exists():
+        return JsonResponse({'error': 'Overlaps with existing availability'}, status=400)
+
+    slot.start_time = start_dt
+    slot.end_time = end_dt
+    slot.save()
+    return JsonResponse({
+        'id': slot.id,
+        'start': slot.start_time.isoformat(),
+        'end': slot.end_time.isoformat(),
+    })
+
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def ajax_delete_availability(request, slot_id):
-    """POST → delete slot, return JSON."""
+    """Delete a single slot (only if unbooked)."""
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
     slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
     if slot.is_booked:
-        return JsonResponse({'error': 'Cannot delete a booked slot.'}, status=400)
+        return JsonResponse({'error': 'Cannot delete a booked slot'}, status=400)
     slot.delete()
     return JsonResponse({'deleted': slot_id})
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def ajax_cancel_series(request, group_id):
+    """Cancel all future unbooked slots in a recurring series."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    slots = CoachAvailability.objects.filter(
+        coach=request.user,
+        recurrence_group=group_id,
+        start_time__gte=timezone.now(),
+        is_booked=False
+    )
+    count = slots.count()
+    slots.delete()
+    return JsonResponse({'deleted_count': count})
 
 
 # -----------   Staff Pages  -----------
@@ -835,3 +1163,294 @@ def manage_appointments(request):
         'response_form': form,
     }
     return render(request, 'CUFitness/manage_appointments.html', context)
+
+# ======== Chatbot ===========
+
+@ensure_csrf_cookie
+def chatbot(request):
+    if request.method == 'POST':
+        user_message = request.POST.get('message', '').strip()
+        if not user_message:
+            return JsonResponse({'error': 'Empty message'}, status=400)
+
+        tokenizer = CUFitnessConfig.tokenizer
+        model = CUFitnessConfig.model
+
+        # Format the message using the model's chat template
+        # TinyLlama chat expects messages in a list of dicts with "role" and "content"
+        messages = [
+            {"role": "user", "content": user_message}
+        ]
+        # Apply the chat template to get the full prompt
+        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+        # Tokenize
+        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+        # Generate
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=100, # Response length limiter
+                temperature=0.7,
+                do_sample=True,
+                top_p=0.9,
+                repetition_penalty=1.1
+            )
+
+        # Decode only the new tokens (skip the input prompt)
+        new_tokens = outputs[0][inputs['input_ids'].shape[1]:]
+        reply = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+
+        # If reply is empty, provide a fallback
+        if not reply:
+            reply = "I'm not sure how to answer that."
+
+        return JsonResponse({'reply': reply})
+
+    # GET request – just render the empty chat page
+    return render(request, 'CUFitness/chatbot.html')
+
+# ==========Appointment API ========
+
+@login_required
+def api_coaches(request):
+    """Return list of active coaches as JSON."""
+    coaches = CustomUser.objects.filter(role='COACH', is_active=True).values('id', 'first_name', 'last_name')
+    return JsonResponse(list(coaches), safe=False)
+
+
+@login_required
+def api_coach_availability(request):
+    """Return available slots for a specific coach between start and end dates."""
+    coach_id = request.GET.get('coach_id')
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    if not coach_id or not start_date or not end_date:
+        return JsonResponse({'error': 'Missing parameters'}, status=400)
+
+    try:
+        coach = CustomUser.objects.get(id=coach_id, role='COACH')
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'error': 'Coach not found'}, status=404)
+
+    slots = CoachAvailability.objects.filter(
+        coach=coach,
+        start_time__date__gte=start_date,
+        start_time__date__lte=end_date,
+        is_booked=False
+    ).order_by('start_time').values('id', 'start_time', 'end_time')
+
+    # Convert datetimes to ISO strings for JSON
+    slot_list = []
+    for slot in slots:
+        slot_list.append({
+            'id': slot['id'],
+            'start_time': slot['start_time'].isoformat(),
+            'end_time': slot['end_time'].isoformat(),
+        })
+
+    return JsonResponse(slot_list, safe=False)
+
+
+@login_required
+def api_all_availability(request):
+    """Return all unbooked slots for a given date, with coach info."""
+    date_str = request.GET.get('date')
+    if not date_str:
+        return JsonResponse({'error': 'Missing date'}, status=400)
+
+    slots = CoachAvailability.objects.filter(
+        start_time__date=date_str,
+        is_booked=False
+    ).select_related('coach').order_by('start_time')
+
+    data = []
+    for slot in slots:
+        data.append({
+            'id': slot.id,
+            'coach_id': slot.coach.id,
+            'coach_name': f"{slot.coach.first_name} {slot.coach.last_name}",
+            'start_time': slot.start_time.isoformat(),
+            'end_time': slot.end_time.isoformat(),
+        })
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+@require_POST
+@ensure_csrf_cookie
+def api_request_appointment(request):
+    """Create a new appointment request from a member."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    coach_id = data.get('coach_id')
+    start_time_str = data.get('start_time')
+    end_time_str = data.get('end_time')
+
+    if not coach_id or not start_time_str or not end_time_str:
+        return JsonResponse({'error': 'Missing fields'}, status=400)
+
+    # Parse datetimes
+    try:
+        start_dt = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
+        end_dt = datetime.fromisoformat(end_time_str.replace('Z', '+00:00'))
+        if timezone.is_naive(start_dt):
+            start_dt = timezone.make_aware(start_dt)
+        if timezone.is_naive(end_dt):
+            end_dt = timezone.make_aware(end_dt)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid datetime format'}, status=400)
+
+    # Check that the slot exists and is not booked
+    try:
+        availability = CoachAvailability.objects.get(
+            coach_id=coach_id,
+            start_time=start_dt,
+            end_time=end_dt,
+            is_booked=False
+        )
+    except CoachAvailability.DoesNotExist:
+        return JsonResponse({'error': 'This time slot is no longer available'}, status=400)
+
+    # Create the appointment
+    appointment = CoachAppointment.objects.create(
+        coach_id=coach_id,
+        member=request.user,
+        start_time=start_dt,
+        end_time=end_dt,
+        status='PENDING',
+        availability=availability
+    )
+
+    # Mark the availability as booked
+    availability.is_booked = True
+    availability.save()
+
+    return JsonResponse({'success': True, 'appointment_id': appointment.id})
+
+
+@login_required(login_url='login')
+def user_inbox(request):
+    """Show inbox for the logged-in user (member or coach)."""
+    user = request.user
+    # Get messages where user is sender or recipient
+    messages = Message.objects.filter(
+        Q(sender=user) | Q(recipient=user)
+    ).select_related('sender', 'recipient').order_by('-timestamp')
+
+    if is_member(user):
+        # For members: also provide list of coaches for sending new messages
+        coaches = CustomUser.objects.filter(role='COACH', is_active=True).order_by('first_name')
+        context = {
+            'messages': messages,
+            'coaches': coaches,
+            'is_member': True,
+        }
+    else:
+        # For coaches: only show messages, no coach list
+        context = {
+            'messages': messages,
+            'is_member': False,
+        }
+    return render(request, 'CUFitness/user_profile/user_inbox.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_member)
+def api_coach_search(request):
+    """JSON endpoint for member to search coaches by name."""
+    query = request.GET.get('q', '')
+    coaches = CustomUser.objects.filter(
+        role='COACH', is_active=True
+    ).filter(
+        Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query)
+    ).values('id', 'first_name', 'last_name', 'email')[:20]
+    return JsonResponse(list(coaches), safe=False)
+
+@login_required(login_url='login')
+def send_message(request):
+    """Handle sending a new message (member to coach)."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    recipient_id = request.POST.get('recipient_id')
+    subject = request.POST.get('subject')
+    body = request.POST.get('body')
+
+    if not recipient_id or not subject or not body:
+        messages.error(request, 'All fields are required.')
+        return redirect('user_inbox')
+
+    try:
+        recipient = CustomUser.objects.get(id=recipient_id, role='COACH')
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Invalid recipient.')
+        return redirect('user_inbox')
+
+    # Create message
+    Message.objects.create(
+        sender=request.user,
+        recipient=recipient,
+        subject=subject,
+        body=body
+    )
+    messages.success(request, 'Message sent.')
+    return redirect('user_inbox')
+
+@login_required(login_url='login')
+def reply_message(request, message_id):
+    """Coach replies to a message they received."""
+    original = get_object_or_404(Message, id=message_id, recipient=request.user)
+    if request.method == 'POST':
+        body = request.POST.get('body')
+        if not body:
+            messages.error(request, 'Message body cannot be empty.')
+            return redirect('user_inbox')
+
+        # Create reply (swap sender/recipient)
+        Message.objects.create(
+            sender=request.user,
+            recipient=original.sender,
+            subject=f"Re: {original.subject}",
+            body=body
+        )
+        messages.success(request, 'Reply sent.')
+        return redirect('user_inbox')
+    else:
+        # Show a simple form with original message quoted
+        return render(request, 'CUFitness/user_profile/user_coach_reply.html', {
+            'original': original
+        })
+
+@login_required(login_url='login')
+def mark_read(request, message_id):
+    """Mark a message as read (AJAX)."""
+    if request.method == 'POST':
+        msg = get_object_or_404(Message, id=message_id, recipient=request.user)
+        msg.is_read = True
+        msg.save()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+@require_POST
+def ajax_accept_appointment(request, appointment_id):
+    appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user, status='PENDING')
+    appointment.status = 'ACCEPTED'
+    appointment.save()
+    return JsonResponse({'success': True})
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+@require_POST
+def ajax_reject_appointment(request, appointment_id):
+    appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user, status='PENDING')
+    # Optionally read a reason from POST data, but for simplicity we just reject
+    appointment.status = 'REFUSED'
+    appointment.save()
+    return JsonResponse({'success': True})

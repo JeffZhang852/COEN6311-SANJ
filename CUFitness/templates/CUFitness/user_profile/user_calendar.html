@@ -15,11 +15,7 @@
         <div class="cal-header-text">
             <h1 class="cal-title">Your Schedule</h1>
             <p class="cal-subtitle">
-                {% if is_coach %}
-                    Click any day to add an availability slot &mdash; click an event to edit or delete it
-                {% else %}
-                    View and track your upcoming training sessions
-                {% endif %}
+                View and track your upcoming training sessions
             </p>
         </div>
     </div>
@@ -28,10 +24,6 @@
     <div class="cal-legend">
         <span class="legend-dot accepted"></span><span>Accepted</span>
         <span class="legend-dot pending"></span><span>Pending</span>
-        {% if is_coach %}
-        <span class="legend-dot available"></span><span>Open Slot</span>
-        <span class="legend-dot booked-dot"></span><span>Booked Slot</span>
-        {% endif %}
     </div>
 
     <!-- ── Calendar ── -->
@@ -52,21 +44,21 @@
         </div>
 
         <div id="cal-grid" class="cal-grid"></div>
-
-        {% if is_coach %}
-        <p class="cal-hint">
-            <span class="material-icons" style="font-size:14px;vertical-align:middle;">info</span>
-            Click a day to add an availability slot &mdash; click an existing slot to edit or delete it
-        </p>
-        {% endif %}
     </div>
 
-    <!-- ── Upcoming Appointments ── -->
+    <!-- ── Upcoming Appointments (member) ── -->
     <div class="section-block">
         <h2 class="section-title">
             <span class="material-icons">event</span>
             Upcoming Appointments
         </h2>
+
+        <div class="make-appointment-wrapper">
+            <button class="btn btn-primary" id="make-appointment-btn" onclick="openAppointmentModal()">
+                <span class="material-icons">add</span> Make an Appointment
+            </button>
+            <p class="appointment-hint">Click to request a session with a coach</p>
+        </div>
 
         {% if upcoming_appointments %}
             <div class="appt-list">
@@ -77,17 +69,10 @@
                         <span class="appt-month">{{ appt.start_time|date:"M" }}</span>
                     </div>
                     <div class="appt-info">
-                        {% if is_coach %}
-                            <p class="appt-name">
-                                <span class="material-icons">person</span>
-                                {{ appt.member.first_name }} {{ appt.member.last_name }}
-                            </p>
-                        {% else %}
-                            <p class="appt-name">
-                                <span class="material-icons">fitness_center</span>
-                                Coach {{ appt.coach.first_name }} {{ appt.coach.last_name }}
-                            </p>
-                        {% endif %}
+                        <p class="appt-name">
+                            <span class="material-icons">fitness_center</span>
+                            Coach {{ appt.coach.first_name }} {{ appt.coach.last_name }}
+                        </p>
                         <p class="appt-time">
                             <span class="material-icons">schedule</span>
                             {{ appt.start_time|date:"g:i A" }} – {{ appt.end_time|date:"g:i A" }}
@@ -101,55 +86,9 @@
             <div class="empty-state">
                 <span class="material-icons empty-icon">event_available</span>
                 <p>No upcoming appointments.</p>
-                {% if not is_coach %}
-                    <a href="{% url 'coach_list' %}" class="btn-link">Browse Coaches →</a>
-                {% endif %}
             </div>
         {% endif %}
     </div>
-
-    <!-- ── Coach: Open Availability Slots ── -->
-    {% if is_coach %}
-    <div class="section-block">
-        <h2 class="section-title">
-            <span class="material-icons">pending_actions</span>
-            Open Availability Slots
-        </h2>
-
-        <div id="avail-list-sidebar">
-        {% if availabilities %}
-            <div class="appt-list" id="avail-sidebar-inner">
-                {% for slot in availabilities %}
-                <div class="appt-card status-available" id="sidebar-slot-{{ slot.id }}">
-                    <div class="appt-date-col">
-                        <span class="appt-day">{{ slot.start_time|date:"d" }}</span>
-                        <span class="appt-month">{{ slot.start_time|date:"M" }}</span>
-                    </div>
-                    <div class="appt-info">
-                        <p class="appt-name">
-                            <span class="material-icons">lock_open</span>
-                            Open Slot
-                        </p>
-                        <p class="appt-time">
-                            <span class="material-icons">schedule</span>
-                            {{ slot.start_time|date:"g:i A" }} – {{ slot.end_time|date:"g:i A" }}
-                        </p>
-                    </div>
-                    <button class="btn-edit-sidebar" onclick="openEditModal({{ slot.id }})" title="Edit slot">
-                        <span class="material-icons">edit</span>
-                    </button>
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state" id="avail-empty-state">
-                <span class="material-icons empty-icon">calendar_today</span>
-                <p>No open availability slots. Click a day on the calendar to add one.</p>
-            </div>
-        {% endif %}
-        </div>
-    </div>
-    {% endif %}
 
     <!-- ── Past Appointments ── -->
     <div class="section-block">
@@ -167,17 +106,10 @@
                         <span class="appt-month">{{ appt.start_time|date:"M" }}</span>
                     </div>
                     <div class="appt-info">
-                        {% if is_coach %}
-                            <p class="appt-name">
-                                <span class="material-icons">person</span>
-                                {{ appt.member.first_name }} {{ appt.member.last_name }}
-                            </p>
-                        {% else %}
-                            <p class="appt-name">
-                                <span class="material-icons">fitness_center</span>
-                                Coach {{ appt.coach.first_name }} {{ appt.coach.last_name }}
-                            </p>
-                        {% endif %}
+                        <p class="appt-name">
+                            <span class="material-icons">fitness_center</span>
+                            Coach {{ appt.coach.first_name }} {{ appt.coach.last_name }}
+                        </p>
                         <p class="appt-time">
                             <span class="material-icons">schedule</span>
                             {{ appt.start_time|date:"N j, Y" }} &nbsp;·&nbsp; {{ appt.start_time|date:"g:i A" }}
@@ -198,72 +130,92 @@
 </section>
 
 <!-- ════════════════════════════════════════
-     AVAILABILITY MODAL (coaches only)
+     APPOINTMENT REQUEST MODAL (members)
      ════════════════════════════════════════ -->
-{% if is_coach %}
-<div id="avail-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
-    <div class="modal-card">
-
+<div id="appointment-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="width: 700px; max-width: 95%;">
         <div class="modal-header">
-            <h2 id="modal-heading" class="modal-title">Add Availability</h2>
-            <button class="modal-close" id="modal-close-btn" aria-label="Close">
+            <h2 class="modal-title">Request an Appointment</h2>
+            <button class="modal-close" id="appointment-modal-close" aria-label="Close">
                 <span class="material-icons">close</span>
             </button>
         </div>
 
-        <div id="modal-error" class="modal-error" style="display:none"></div>
-
         <div class="modal-body">
-            <div class="form-row">
-                <label class="field-label" for="modal-start">Start time</label>
-                <input type="datetime-local" id="modal-start" class="field-input" />
+            <!-- Mode selection -->
+            <div class="mode-selector" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="appt-mode" value="coach" checked> By Coach
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="appt-mode" value="time"> By Time
+                </label>
             </div>
-            <div class="form-row">
-                <label class="field-label" for="modal-end">End time</label>
-                <input type="datetime-local" id="modal-end" class="field-input" />
+
+            <!-- ========== BY COACH PANEL ========== -->
+            <div id="coach-panel" class="mode-panel">
+                <h3>1. Choose a coach</h3>
+                <div id="coach-list" class="coach-list" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;"></div>
+
+                <div id="coach-availability" style="display: none;">
+                    <h3>2. Select a day</h3>
+                    <div id="coach-days" class="day-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
+
+                    <div id="coach-slots" style="display: none;">
+                        <h3>3. Choose a time slot (1 hour)</h3>
+                        <div id="slot-list" class="slot-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                    </div>
+                </div>
             </div>
+
+            <!-- ========== BY TIME PANEL ========== -->
+            <div id="time-panel" class="mode-panel" style="display: none;">
+                <h3>1. Pick a day (next 14 days)</h3>
+                <div id="time-calendar" class="calendar-mini" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
+
+                <div id="time-slots" style="display: none;">
+                    <h3>2. Choose a starting hour</h3>
+                    <div id="time-slot-list" class="slot-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+
+                <div id="time-coaches" style="display: none;">
+                    <h3>3. Select a coach</h3>
+                    <div id="coach-for-time" class="coach-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div id="appt-modal-error" class="modal-error" style="display: none; color: #dc3545; margin-top: 10px;"></div>
         </div>
 
         <div class="modal-footer">
-            <button id="modal-delete-btn" class="btn-modal-delete" style="display:none">
-                <span class="material-icons">delete_outline</span>Delete
+            <button class="btn-modal-cancel" id="appt-modal-cancel">Cancel</button>
+            <button class="btn-modal-save" id="send-request-btn" disabled>
+                <span class="material-icons">send</span> Send Request
             </button>
-            <div class="modal-footer-right">
-                <button class="btn-modal-cancel" id="modal-cancel-btn">Cancel</button>
-                <button class="btn-modal-save" id="modal-save-btn">
-                    <span class="material-icons">save</span>Save
-                </button>
-            </div>
         </div>
-
     </div>
 </div>
-{% endif %}
 
 <!-- ── Toast notification ── -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <!-- ════════════════════════════════════════
-     JAVASCRIPT
+     JAVASCRIPT (member only)
      ════════════════════════════════════════ -->
 <script>
-const IS_COACH  = {{ is_coach|yesno:"true,false" }};
-const CSRF      = '{{ csrf_token }}';
-const URL_ADD   = '{% if is_coach %}{% url "ajax_add_availability" %}{% endif %}';
-const URL_EDIT  = '{% if is_coach %}/api/availability/{id}/edit/{% endif %}';
-const URL_DEL   = '{% if is_coach %}/api/availability/{id}/delete/{% endif %}';
+const IS_COACH = false;  // always false for this page
+const CSRF = '{{ csrf_token }}';
 
-// ── Live event store (mutated by AJAX) ───────────────────────────
+// ── Live event store (appointments only) ───────────────────────────
 let EVENTS = {{ calendar_events_json|safe }};
 
 // ── Calendar state ────────────────────────────────────────────────
 let currentDate = new Date();
 
 const STATUS_COLOR = {
-    ACCEPTED:  '#15803d',
-    PENDING:   '#b45309',
-    AVAILABLE: '#1d4ed8',
-    BOOKED:    '#6b7280',
+    ACCEPTED: '#15803d',
+    PENDING:  '#b45309',
 };
 
 // ── Render calendar ───────────────────────────────────────────────
@@ -316,25 +268,13 @@ function renderCalendar(date) {
 
         const dayEvents = eventMap[day] || [];
 
-        // Event pills / dots
+        // Event dots (non-interactive for members)
         dayEvents.slice(0, 3).forEach(ev => {
-            if (IS_COACH && ev.type === 'availability') {
-                // Clickable pill for availability slots
-                const pill = document.createElement('button');
-                pill.className = 'cal-event-pill' + (ev.is_booked ? ' booked' : '');
-                pill.style.background = ev.color;
-                pill.textContent = ev.is_booked ? 'Booked' : 'Open';
-                pill.title = `${new Date(ev.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} – ${new Date(ev.end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
-                pill.addEventListener('click', e => { e.stopPropagation(); openEditModal(ev.id); });
-                cell.appendChild(pill);
-            } else {
-                // Non-interactive dot for appointments
-                const dot = document.createElement('span');
-                dot.className = 'cal-event-dot';
-                dot.style.background = STATUS_COLOR[ev.status] || '#6b7280';
-                dot.title = `${ev.title}\n${new Date(ev.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} – ${new Date(ev.end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
-                cell.appendChild(dot);
-            }
+            const dot = document.createElement('span');
+            dot.className = 'cal-event-dot';
+            dot.style.background = STATUS_COLOR[ev.status] || '#6b7280';
+            dot.title = `${ev.title}\n${new Date(ev.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} – ${new Date(ev.end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+            cell.appendChild(dot);
         });
 
         if (dayEvents.length > 3) {
@@ -345,16 +285,6 @@ function renderCalendar(date) {
         }
 
         if (dayEvents.length) cell.classList.add('has-events');
-
-        // Coaches: clicking the day background opens "add" modal pre-filled to that date
-        if (IS_COACH) {
-            cell.classList.add('clickable');
-            cell.addEventListener('click', () => {
-                const isoDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                openAddModal(isoDate);
-            });
-        }
-
         grid.appendChild(cell);
     }
 }
@@ -370,234 +300,6 @@ document.getElementById('next-month').addEventListener('click', () => {
 
 renderCalendar(currentDate);
 
-// ── Modal helpers ─────────────────────────────────────────────────
-if (IS_COACH) {
-    const modal       = document.getElementById('avail-modal');
-    const titleEl     = document.getElementById('modal-heading');
-    const startInput  = document.getElementById('modal-start');
-    const endInput    = document.getElementById('modal-end');
-    const saveBtn     = document.getElementById('modal-save-btn');
-    const deleteBtn   = document.getElementById('modal-delete-btn');
-    const errorEl     = document.getElementById('modal-error');
-    let   editingId   = null;   // null = add mode, number = edit mode
-
-    function toLocalISO(isoStr) {
-        // Convert "2025-04-10T09:00:00" (naive local from Django) to datetime-local value
-        return isoStr.substring(0, 16);
-    }
-
-    function showModal() {
-        modal.classList.add('open');
-        startInput.focus();
-    }
-
-    function hideModal() {
-        modal.classList.remove('open');
-        errorEl.style.display = 'none';
-        errorEl.textContent = '';
-        editingId = null;
-    }
-
-    function showError(msg) {
-        errorEl.textContent = msg;
-        errorEl.style.display = 'block';
-    }
-
-    function openAddModal(isoDate) {
-        editingId = null;
-        titleEl.textContent = 'Add Availability Slot';
-        deleteBtn.style.display = 'none';
-        startInput.value = isoDate ? `${isoDate}T09:00` : '';
-        endInput.value   = isoDate ? `${isoDate}T10:00` : '';
-        showModal();
-    }
-
-    function openEditModal(slotId) {
-        const ev = EVENTS.find(e => e.type === 'availability' && e.id === slotId);
-        if (!ev) return;
-        if (ev.is_booked) { showToast('This slot is already booked and cannot be changed.', 'warn'); return; }
-
-        editingId = slotId;
-        titleEl.textContent = 'Edit Availability Slot';
-        deleteBtn.style.display = 'flex';
-        startInput.value = toLocalISO(ev.start);
-        endInput.value   = toLocalISO(ev.end);
-        showModal();
-    }
-
-    // Expose for sidebar buttons
-    window.openEditModal = openEditModal;
-
-    document.getElementById('modal-close-btn').addEventListener('click', hideModal);
-    document.getElementById('modal-cancel-btn').addEventListener('click', hideModal);
-    modal.addEventListener('click', e => { if (e.target === modal) hideModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') hideModal(); });
-
-    // ── Save ──────────────────────────────────────────────────────
-    saveBtn.addEventListener('click', async () => {
-        errorEl.style.display = 'none';
-        const start = startInput.value;
-        const end   = endInput.value;
-
-        if (!start || !end) { showError('Please fill in both start and end times.'); return; }
-        if (start >= end)   { showError('End time must be after start time.'); return; }
-
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving…';
-
-        const url  = editingId ? URL_EDIT.replace('{id}', editingId) : URL_ADD;
-        const body = JSON.stringify({ start_time: start, end_time: end });
-
-        try {
-            const res  = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-                body,
-            });
-            const data = await res.json();
-
-            if (!res.ok) {
-                showError(extractError(data.error));
-            } else {
-                if (editingId) {
-                    // Update existing event in store
-                    const idx = EVENTS.findIndex(e => e.type === 'availability' && e.id === editingId);
-                    if (idx !== -1) {
-                        EVENTS[idx].start = data.start;
-                        EVENTS[idx].end   = data.end;
-                    }
-                    updateSidebarCard(editingId, data.start, data.end);
-                    showToast('Slot updated!', 'success');
-                } else {
-                    // Add new event to store
-                    EVENTS.push({
-                        type: 'availability', id: data.id,
-                        title: 'Open Slot', start: data.start, end: data.end,
-                        color: '#1d4ed8', status: 'AVAILABLE', is_booked: false,
-                    });
-                    addSidebarCard(data);
-                    showToast('Availability added!', 'success');
-                }
-                hideModal();
-                renderCalendar(currentDate);
-            }
-        } catch {
-            showError('Network error — please try again.');
-        } finally {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<span class="material-icons">save</span>Save';
-        }
-    });
-
-    // ── Delete ────────────────────────────────────────────────────
-    deleteBtn.addEventListener('click', async () => {
-        if (!editingId) return;
-        if (!confirm('Remove this availability slot?')) return;
-
-        deleteBtn.disabled = true;
-
-        try {
-            const res = await fetch(URL_DEL.replace('{id}', editingId), {
-                method: 'POST',
-                headers: { 'X-CSRFToken': CSRF },
-            });
-            const data = await res.json();
-
-            if (!res.ok) {
-                showError(extractError(data.error));
-            } else {
-                EVENTS = EVENTS.filter(e => !(e.type === 'availability' && e.id === editingId));
-                removeSidebarCard(editingId);
-                hideModal();
-                renderCalendar(currentDate);
-                showToast('Slot removed.', 'success');
-            }
-        } catch {
-            showError('Network error — please try again.');
-        } finally {
-            deleteBtn.disabled = false;
-        }
-    });
-
-    // ── Sidebar DOM helpers ───────────────────────────────────────
-    function fmtTime(isoStr) {
-        return new Date(isoStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    function fmtDay(isoStr)  { return new Date(isoStr).getDate(); }
-    function fmtMon(isoStr)  {
-        return new Date(isoStr).toLocaleString('default', { month: 'short' });
-    }
-
-    function addSidebarCard(data) {
-        const inner = document.getElementById('avail-sidebar-inner');
-        const empty = document.getElementById('avail-empty-state');
-
-        if (!inner) {
-            // Replace empty state with a real list
-            const wrapper = document.getElementById('avail-list-sidebar');
-            wrapper.innerHTML = `
-                <div class="appt-list" id="avail-sidebar-inner">
-                    ${buildCardHTML(data)}
-                </div>`;
-        } else {
-            inner.insertAdjacentHTML('beforeend', buildCardHTML(data));
-        }
-        if (empty) empty.remove();
-    }
-
-    function buildCardHTML(data) {
-        return `
-        <div class="appt-card status-available" id="sidebar-slot-${data.id}">
-            <div class="appt-date-col">
-                <span class="appt-day">${fmtDay(data.start)}</span>
-                <span class="appt-month">${fmtMon(data.start)}</span>
-            </div>
-            <div class="appt-info">
-                <p class="appt-name"><span class="material-icons">lock_open</span>Open Slot</p>
-                <p class="appt-time"><span class="material-icons">schedule</span>
-                    ${fmtTime(data.start)} – ${fmtTime(data.end)}
-                </p>
-            </div>
-            <button class="btn-edit-sidebar" onclick="openEditModal(${data.id})" title="Edit slot">
-                <span class="material-icons">edit</span>
-            </button>
-        </div>`;
-    }
-
-    function updateSidebarCard(id, start, end) {
-        const card = document.getElementById(`sidebar-slot-${id}`);
-        if (!card) return;
-        card.querySelector('.appt-day').textContent   = fmtDay(start);
-        card.querySelector('.appt-month').textContent = fmtMon(start);
-        card.querySelector('.appt-time').innerHTML    =
-            `<span class="material-icons">schedule</span>${fmtTime(start)} – ${fmtTime(end)}`;
-    }
-
-    function removeSidebarCard(id) {
-        const card = document.getElementById(`sidebar-slot-${id}`);
-        if (card) card.remove();
-        const inner = document.getElementById('avail-sidebar-inner');
-        if (inner && !inner.children.length) {
-            inner.parentElement.innerHTML = `
-                <div class="empty-state" id="avail-empty-state">
-                    <span class="material-icons empty-icon">calendar_today</span>
-                    <p>No open availability slots. Click a day on the calendar to add one.</p>
-                </div>`;
-        }
-    }
-
-    // ── Error parser ──────────────────────────────────────────────
-    function extractError(raw) {
-        if (!raw) return 'An error occurred.';
-        try {
-            const obj = JSON.parse(raw);
-            return Object.values(obj).flat().map(e => e.message || e).join(' ');
-        } catch {
-            return raw;
-        }
-    }
-}
-
 // ── Toast ─────────────────────────────────────────────────────────
 function showToast(msg, type) {
     const t = document.getElementById('toast');
@@ -606,6 +308,350 @@ function showToast(msg, type) {
     clearTimeout(t._timer);
     t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
 }
+</script>
+
+<!-- ========== APPOINTMENT MODAL JAVASCRIPT (members) ========== -->
+<script>
+// ===== Global variables for appointment modal =====
+let selectedCoachId = null;
+let selectedDay = null;          // ISO date string (YYYY-MM-DD)
+let selectedSlotStart = null;    // ISO datetime string
+let selectedSlotEnd = null;      // ISO datetime string
+let selectedTimeSlot = null;     // for "By Time" mode: the selected start hour
+let selectedTimeCoachId = null;
+
+// ===== Open / close functions =====
+function openAppointmentModal() {
+    const modal = document.getElementById('appointment-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadCoaches();               // load coach list on open
+        resetModalState();
+    }
+}
+
+function closeAppointmentModal() {
+    document.getElementById('appointment-modal').style.display = 'none';
+    resetModalState();
+}
+
+function resetModalState() {
+    selectedCoachId = null;
+    selectedDay = null;
+    selectedSlotStart = null;
+    selectedSlotEnd = null;
+    selectedTimeSlot = null;
+    selectedTimeCoachId = null;
+    document.getElementById('send-request-btn').disabled = true;
+    document.getElementById('coach-availability').style.display = 'none';
+    document.getElementById('coach-slots').style.display = 'none';
+    document.getElementById('time-slots').style.display = 'none';
+    document.getElementById('time-coaches').style.display = 'none';
+    // Clear all dynamic containers
+    document.getElementById('coach-list').innerHTML = '';
+    document.getElementById('coach-days').innerHTML = '';
+    document.getElementById('slot-list').innerHTML = '';
+    document.getElementById('time-calendar').innerHTML = '';
+    document.getElementById('time-slot-list').innerHTML = '';
+    document.getElementById('coach-for-time').innerHTML = '';
+}
+
+// ===== Mode switching =====
+document.querySelectorAll('input[name="appt-mode"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const isCoachMode = this.value === 'coach';
+        document.getElementById('coach-panel').style.display = isCoachMode ? 'block' : 'none';
+        document.getElementById('time-panel').style.display = isCoachMode ? 'none' : 'block';
+        // Reset selections
+        resetModalState();
+        if (!isCoachMode) {
+            loadTimeCalendar();    // load calendar for "By Time"
+        } else {
+            loadCoaches();
+        }
+    });
+});
+
+// ===== API calls =====
+async function fetchCoaches() {
+    const response = await fetch('/api/coaches/');
+    return response.json();
+}
+
+async function fetchCoachAvailability(coachId, startDate, endDate) {
+    const url = `/api/coach-availability/?coach_id=${coachId}&start=${startDate}&end=${endDate}`;
+    const response = await fetch(url);
+    return response.json();
+}
+
+async function fetchAllAvailability(date) {
+    const url = `/api/all-availability/?date=${date}`;
+    const response = await fetch(url);
+    return response.json();
+}
+
+async function sendAppointmentRequest(coachId, startTime, endTime) {
+    const response = await fetch('/api/request-appointment/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF,
+        },
+        body: JSON.stringify({ coach_id: coachId, start_time: startTime, end_time: endTime })
+    });
+    return response.json();
+}
+
+// ===== BY COACH: Load and display coaches =====
+async function loadCoaches() {
+    const container = document.getElementById('coach-list');
+    container.innerHTML = 'Loading coaches...';
+    try {
+        const coaches = await fetchCoaches();
+        container.innerHTML = '';
+        coaches.forEach(coach => {
+            const btn = document.createElement('button');
+            btn.textContent = `${coach.first_name} ${coach.last_name}`;
+            btn.dataset.coachId = coach.id;
+            btn.addEventListener('click', () => selectCoach(coach.id, btn));
+            container.appendChild(btn);
+        });
+    } catch (err) {
+        container.innerHTML = 'Error loading coaches.';
+    }
+}
+
+function selectCoach(coachId, btnElement) {
+    document.querySelectorAll('#coach-list button').forEach(b => b.classList.remove('selected'));
+    btnElement.classList.add('selected');
+    selectedCoachId = coachId;
+    selectedDay = null;
+    selectedSlotStart = null;
+    document.getElementById('send-request-btn').disabled = true;
+    loadCoachDays(coachId);
+}
+
+async function loadCoachDays(coachId) {
+    const container = document.getElementById('coach-days');
+    container.innerHTML = 'Loading availability...';
+    document.getElementById('coach-availability').style.display = 'block';
+    document.getElementById('coach-slots').style.display = 'none';
+
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + 14);
+    const startStr = today.toISOString().split('T')[0];
+    const endStr = endDate.toISOString().split('T')[0];
+
+    try {
+        const slots = await fetchCoachAvailability(coachId, startStr, endStr);
+        const daysMap = new Map();
+        slots.forEach(slot => {
+            const day = slot.start_time.split('T')[0];
+            if (!daysMap.has(day)) daysMap.set(day, []);
+            daysMap.get(day).push(slot);
+        });
+
+        container.innerHTML = '';
+        if (daysMap.size === 0) {
+            container.innerHTML = '<p>No availability in the next two weeks.</p>';
+            return;
+        }
+
+        const sortedDays = Array.from(daysMap.keys()).sort();
+        sortedDays.forEach(day => {
+            const btn = document.createElement('button');
+            btn.textContent = new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            btn.dataset.day = day;
+            btn.addEventListener('click', () => selectDay(day, btn, daysMap.get(day)));
+            container.appendChild(btn);
+        });
+    } catch (err) {
+        container.innerHTML = 'Error loading availability.';
+    }
+}
+
+function selectDay(day, btnElement, slots) {
+    document.querySelectorAll('#coach-days button').forEach(b => b.classList.remove('selected'));
+    btnElement.classList.add('selected');
+    selectedDay = day;
+    displaySlotsForDay(slots);
+}
+
+function displaySlotsForDay(slots) {
+    const container = document.getElementById('slot-list');
+    container.innerHTML = '';
+    slots.forEach(slot => {
+        const start = new Date(slot.start_time);
+        const end = new Date(slot.end_time);
+        const timeLabel = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' – ' + end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const btn = document.createElement('button');
+        btn.textContent = timeLabel;
+        btn.dataset.start = slot.start_time;
+        btn.dataset.end = slot.end_time;
+        btn.addEventListener('click', () => selectSlot(slot.start_time, slot.end_time, btn));
+        container.appendChild(btn);
+    });
+    document.getElementById('coach-slots').style.display = 'block';
+}
+
+function selectSlot(start, end, btnElement) {
+    document.querySelectorAll('#slot-list button').forEach(b => b.classList.remove('selected'));
+    btnElement.classList.add('selected');
+    selectedSlotStart = start;
+    selectedSlotEnd = end;
+    document.getElementById('send-request-btn').disabled = false;
+}
+
+// ===== BY TIME: Load calendar =====
+async function loadTimeCalendar() {
+    const container = document.getElementById('time-calendar');
+    container.innerHTML = 'Loading calendar...';
+    const today = new Date();
+    const days = [];
+    for (let i = 0; i < 14; i++) {
+        const day = new Date(today);
+        day.setDate(today.getDate() + i);
+        days.push(day.toISOString().split('T')[0]);
+    }
+
+    container.innerHTML = '';
+    for (let day of days) {
+        const btn = document.createElement('button');
+        btn.textContent = new Date(day).getDate();
+        btn.dataset.day = day;
+        btn.addEventListener('click', () => selectTimeDay(day, btn));
+        container.appendChild(btn);
+        try {
+            const slots = await fetchAllAvailability(day);
+            if (slots.length > 0) {
+                btn.classList.add('has-slots');
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        } catch {
+            btn.disabled = true;
+        }
+    }
+}
+
+async function selectTimeDay(day, btnElement) {
+    document.querySelectorAll('#time-calendar button').forEach(b => b.classList.remove('selected'));
+    btnElement.classList.add('selected');
+    selectedDay = day;
+    const slots = await fetchAllAvailability(day);
+    const startTimes = [...new Set(slots.map(s => s.start_time))];
+    displayTimeSlots(startTimes);
+}
+
+function displayTimeSlots(startTimes) {
+    const container = document.getElementById('time-slot-list');
+    container.innerHTML = '';
+    startTimes.sort().forEach(start => {
+        const btn = document.createElement('button');
+        const time = new Date(start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        btn.textContent = time;
+        btn.dataset.start = start;
+        btn.addEventListener('click', () => selectTimeSlot(start, btn));
+        container.appendChild(btn);
+    });
+    document.getElementById('time-slots').style.display = 'block';
+    document.getElementById('time-coaches').style.display = 'none';
+    document.getElementById('send-request-btn').disabled = true;
+}
+
+function selectTimeSlot(start, btnElement) {
+    document.querySelectorAll('#time-slot-list button').forEach(b => b.classList.remove('selected'));
+    btnElement.classList.add('selected');
+    selectedTimeSlot = start;
+    loadCoachesForTimeSlot(start);
+}
+
+async function loadCoachesForTimeSlot(start) {
+    const container = document.getElementById('coach-for-time');
+    container.innerHTML = 'Loading coaches...';
+    const day = start.split('T')[0];
+    const slots = await fetchAllAvailability(day);
+    const coachesAtTime = slots.filter(s => s.start_time === start).map(s => ({ id: s.coach_id, name: s.coach_name }));
+    container.innerHTML = '';
+    if (coachesAtTime.length === 0) {
+        container.innerHTML = '<p>No coaches available at this time.</p>';
+        return;
+    }
+    coachesAtTime.forEach(coach => {
+        const btn = document.createElement('button');
+        btn.textContent = coach.name;
+        btn.dataset.coachId = coach.id;
+        btn.addEventListener('click', () => selectTimeCoach(coach.id, btn, start));
+        container.appendChild(btn);
+    });
+    document.getElementById('time-coaches').style.display = 'block';
+}
+
+function selectTimeCoach(coachId, btnElement, start) {
+    document.querySelectorAll('#coach-for-time button').forEach(b => b.classList.remove('selected'));
+    btnElement.classList.add('selected');
+    selectedTimeCoachId = coachId;
+    const end = new Date(new Date(start).getTime() + 60*60*1000).toISOString();
+    selectedSlotStart = start;
+    selectedSlotEnd = end;
+    document.getElementById('send-request-btn').disabled = false;
+}
+
+// ===== Send Request =====
+document.getElementById('send-request-btn').addEventListener('click', async function() {
+    let coachId, start, end;
+    const mode = document.querySelector('input[name="appt-mode"]:checked').value;
+    if (mode === 'coach') {
+        if (!selectedCoachId || !selectedSlotStart) return;
+        coachId = selectedCoachId;
+        start = selectedSlotStart;
+        end = selectedSlotEnd;
+    } else {
+        if (!selectedTimeCoachId || !selectedSlotStart) return;
+        coachId = selectedTimeCoachId;
+        start = selectedSlotStart;
+        end = selectedSlotEnd;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Sending...';
+
+    try {
+        const result = await sendAppointmentRequest(coachId, start, end);
+        if (result.success) {
+            showToast('Appointment request sent!', 'success');
+            closeAppointmentModal();
+            // Optionally refresh page or update events
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showModalError(result.error || 'Request failed.');
+        }
+    } catch (err) {
+        showModalError('Network error.');
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<span class="material-icons">send</span> Send Request';
+    }
+});
+
+function showModalError(msg) {
+    const errDiv = document.getElementById('appt-modal-error');
+    errDiv.textContent = msg;
+    errDiv.style.display = 'block';
+    setTimeout(() => { errDiv.style.display = 'none'; }, 3000);
+}
+
+// ===== Close modal handlers =====
+document.getElementById('appointment-modal-close').addEventListener('click', closeAppointmentModal);
+document.getElementById('appt-modal-cancel').addEventListener('click', closeAppointmentModal);
+document.getElementById('appointment-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeAppointmentModal();
+});
+
+// Expose open function globally
+window.openAppointmentModal = openAppointmentModal;
 </script>
 
 {% else %}

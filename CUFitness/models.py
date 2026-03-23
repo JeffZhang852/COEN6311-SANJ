@@ -6,11 +6,14 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .managers import CustomUserManager
 from multiselectfield import MultiSelectField
-
+import uuid
 from decimal import Decimal
+from .managers import CustomUserManager
 
-
-
+#=====================================================
+#========    Universal Models (Setups)     ===========
+#region===============================================
+# Main user role control
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     # List of roles, defaulting all to members
     # Coach needs to request, staff and admin are done in backend
@@ -43,8 +46,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(null=True, help_text='Format: YYYY-MM-DD')
     address = models.CharField(max_length=255, default='', blank=True, help_text='Address here')
 
-
-
     # Coach appointment request
     REQUEST_STATUS_CHOICES = [
         ('NONE', 'No Request'),
@@ -70,19 +71,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         default='COACH_ONLY',
         verbose_name='Workout history privacy setting'
     )
+    # Option for coach to auto accept first demand for appointment
+    auto_accept_appointments = models.BooleanField(
+        default=False,
+        help_text='Automatically accept all incoming appointment requests'
+    )
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
-
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
 
-# override save() to auto-sync is_staff from role.
-# when a user's role changes (coach promotion, staff assignment, etc.), is_staff is automatically kept correct
+    # override save() to auto-sync is_staff from role.
+    # when a user's role changes (coach promotion, staff assignment, etc.), is_staff is automatically kept correct
     def save(self, *args, **kwargs):
         # Keep Django's is_staff flag in sync with the role field
         self.is_staff = self.role in ('STAFF', 'ADMIN')
@@ -99,7 +104,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             ("can_view_user_reports", "Can view user reports"),
         ]
 
-
+# Articles
 class Article(models.Model):
     # cascade means that if user is deleted then article will be deleted as well
     # idk if we want that cause maybe we want to keep articles even staff are fired
@@ -128,12 +133,11 @@ class Article(models.Model):
             f" {self.created_at:%Y-%m-%d %H:%M} - {self.updated_at:%Y-%m-%d %H:%M} - {self.author} - {self.title} - {self.locked} - {self.description}"
         )
 
-
+# List of equipments, used for equipment availability check and coach's equipment reservation
 class EquipmentList(models.Model):
-    # Actual equipment list needs to be done in shell to make it add them one time.
-
-    name = models.CharField(max_length=25, unique=True) #may not require unique to be true
+    name = models.CharField(max_length=25, unique=True)
     description = models.TextField(blank=True, help_text="Add description here")
+    quantity = models.PositiveIntegerField(default=1, help_text="Number of units available")
     is_active = models.BooleanField(default=True, help_text="Uncheck when out of service")
 
     class Meta:
@@ -142,151 +146,7 @@ class EquipmentList(models.Model):
     def __str__(self):
         return self.name
 
-class EquipmentBooking(models.Model):
-    equipment = models.ForeignKey(EquipmentList, on_delete=models.CASCADE, related_name='bookings')
-    coach = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='coached_bookings', limit_choices_to={'role': 'COACH'})
-    member = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='training_sessions', null=True,
-                               blank=True, help_text="Paid user being trained (optional)")
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_cancelled = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['start_time']
-        # Prevent overlapping bookings for the same equipment
-        constraints = [
-            models.UniqueConstraint(
-                fields=['equipment', 'start_time', 'end_time'],
-                name='unique_booking_per_timeslot'
-            )
-        ]
-
-    def clean(self):
-        if self.start_time >= self.end_time:
-            raise ValidationError('End time must be after start time.')
-
-        overlapping = EquipmentBooking.objects.filter(
-            equipment=self.equipment,
-            start_time__lt=self.end_time,
-            end_time__gt=self.start_time,
-            is_cancelled=False
-        )
-        if self.pk:
-            overlapping = overlapping.exclude(pk=self.pk)
-        if overlapping.exists():
-            raise ValidationError('This equipment is already booked during the selected time.')
-
-    def save(self, *args, **kwargs):
-        self.full_clean()  # runs validators including clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.equipment.name} booked by {self.coach.email} from {self.start_time} to {self.end_time}"
-
-
-class CoachAvailability(models.Model):
-    coach = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': 'COACH'},
-        related_name='availabilities'
-    )
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    is_booked = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['start_time']
-        verbose_name_plural = 'Coach availabilities'
-
-    def clean(self):
-        if self.start_time >= self.end_time:
-            raise ValidationError('End time must be after start time.')
-        # No overlapping availability for same coach
-        overlapping = CoachAvailability.objects.filter(
-            coach=self.coach,
-            start_time__lt=self.end_time,
-            end_time__gt=self.start_time
-        )
-        if self.pk:
-            overlapping = overlapping.exclude(pk=self.pk)
-        if overlapping.exists():
-            raise ValidationError('Availability slots cannot overlap.')
-
-    def __str__(self):
-        return f"{self.coach.email}: {self.start_time} - {self.end_time}"
-
-    def save(self, *args, **kwargs):
-        self.full_clean()   # runs validators including clean()
-        super().save(*args, **kwargs)
-
-class CoachAppointment(models.Model):
-    STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('ACCEPTED', 'Accepted'),
-        ('REFUSED', 'Refused'),
-        ('CANCELLED', 'Cancelled'),
-    ]
-    coach = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': 'COACH'},
-        related_name='coach_appointments'
-    )
-    member = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': 'MEMBER'},
-        related_name='member_appointments'
-    )
-    availability = models.OneToOneField(
-        CoachAvailability,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        help_text='Linked availability slot'
-    )
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    refusal_reason = models.TextField(blank=True, help_text='Reason if refused')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def clean(self):
-        if self.start_time >= self.end_time:
-            raise ValidationError('End time must be after start time.')
-        # Check coach is not double-booked (excluding pending? maybe only accepted)
-        if self.status == 'ACCEPTED':
-            overlapping = CoachAppointment.objects.filter(
-                coach=self.coach,
-                start_time__lt=self.end_time,
-                end_time__gt=self.start_time,
-                status='ACCEPTED'
-            )
-            if self.pk: # exclude self when updating an existing record
-                overlapping = overlapping.exclude(pk=self.pk)
-            if overlapping.exists():
-                raise ValidationError(
-                    f'Coach already has an accepted appointment between '
-                    f'{self.start_time} and {self.end_time}.'
-                )
-
-    def __str__(self):
-        return f"Appointment {self.member.email} with {self.coach.email} - {self.status}"
-
-    def save(self, *args, **kwargs):
-        self.full_clean()   # runs validators including clean()
-        super().save(*args, **kwargs)
-
-
-# -----------   Recipe Models   -----------
-
+# Recipe Models
 class Recipe(models.Model):
     DIFFICULTY_CHOICES = [
         ('EASY',   'Easy'),
@@ -396,7 +256,6 @@ class RecipeIngredient(models.Model):
         base = f'{self.quantity} {self.name}'
         return f'{base} ({self.notes})' if self.notes else base
 
-
 # WorkoutPlan ──< WorkoutPlanExercise >── Exercise
 
 class Exercise(models.Model):
@@ -490,11 +349,202 @@ class WorkoutPlanExercise(models.Model):
     def __str__(self):
         return f'{self.exercise.title} in {self.workout.title}'
 
+#endregion
+
+#=====================================================
+#=======Role Specific-Admin/Staff     ===============
+#region===============================================
+class GymInfo(models.Model):
+    """
+    Stores opening/closing times for each day of the week.
+    One record per day (unique). Admin can configure which days the gym is open
+    and what hours. Used by coaches when adding availability slots.
+    """
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
+    DAY_CHOICES = [
+        (MONDAY, 'Monday'),
+        (TUESDAY, 'Tuesday'),
+        (WEDNESDAY, 'Wednesday'),
+        (THURSDAY, 'Thursday'),
+        (FRIDAY, 'Friday'),
+        (SATURDAY, 'Saturday'),
+        (SUNDAY, 'Sunday'),
+    ]
+
+    day = models.IntegerField(choices=DAY_CHOICES, unique=True)
+    open_time = models.TimeField(null=True, blank=True, help_text='Opening time (leave blank if closed)')
+    close_time = models.TimeField(null=True, blank=True, help_text='Closing time (leave blank if closed)')
+    is_open = models.BooleanField(default=True, help_text='Uncheck to mark the gym closed all day')
+
+    class Meta:
+        ordering = ['day']
+        verbose_name_plural = 'Gym Information'
+
+    def __str__(self):
+        day_name = self.get_day_display()
+        if not self.is_open:
+            return f"{day_name}: Closed"
+        # If open but times missing, show a warning
+        if self.open_time and self.close_time:
+            return f"{day_name}: {self.open_time.strftime('%H:%M')} - {self.close_time.strftime('%H:%M')}"
+        return f"{day_name}: Open (hours not set)"
+
+#endregion
+
+#=====================================================
+#=======Role Specific-Coach     ===============
+#region===============================================
+class CoachAvailability(models.Model):
+    coach = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'COACH'},
+        related_name='availabilities'
+    )
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    is_booked = models.BooleanField(default=False)
+
+    # NEW FIELDS for recurring slots
+    is_recurring = models.BooleanField(
+        default=False,
+        help_text='If True, this slot repeats weekly'
+    )
+    recurrence_group = models.UUIDField(
+        null=True, blank=True,
+        help_text='UUID to group recurring slots (all slots in a series share the same UUID)'
+    )
+
+    class Meta:
+        ordering = ['start_time']
+        verbose_name_plural = 'Coach availabilities'
+
+    def clean(self):
+        if self.start_time >= self.end_time:
+            raise ValidationError('End time must be after start time.')
+        # No overlapping availability for same coach
+        overlapping = CoachAvailability.objects.filter(
+            coach=self.coach,
+            start_time__lt=self.end_time,
+            end_time__gt=self.start_time
+        )
+        if self.pk:
+            overlapping = overlapping.exclude(pk=self.pk)
+        if overlapping.exists():
+            raise ValidationError('Availability slots cannot overlap.')
+
+    def __str__(self):
+        return f"{self.coach.email}: {self.start_time} - {self.end_time}"
+
+    def save(self, *args, **kwargs):
+        self.full_clean()   # runs validators including clean()
+        super().save(*args, **kwargs)
+
+    # Prevent deletion of booked slots
+    def delete(self, *args, **kwargs):
+        if self.is_booked:
+            raise ValidationError("Cannot delete a booked availability slot.")
+        super().delete(*args, **kwargs)
+
+class CoachAppointment(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REFUSED', 'Refused'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    coach = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'COACH'},
+        related_name='coach_appointments'
+    )
+    member = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'MEMBER'},
+        related_name='member_appointments'
+    )
+    availability = models.OneToOneField(
+        CoachAvailability,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text='Linked availability slot'
+    )
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    refusal_reason = models.TextField(blank=True, help_text='Reason if refused')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def clean(self):
+        if self.start_time >= self.end_time:
+            raise ValidationError('End time must be after start time.')
+        # Check coach is not double-booked (excluding pending? maybe only accepted)
+        if self.status == 'ACCEPTED':
+            overlapping = CoachAppointment.objects.filter(
+                coach=self.coach,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time,
+                status='ACCEPTED'
+            )
+            if self.pk: # exclude self when updating an existing record
+                overlapping = overlapping.exclude(pk=self.pk)
+            if overlapping.exists():
+                raise ValidationError(
+                    f'Coach already has an accepted appointment between '
+                    f'{self.start_time} and {self.end_time}.'
+                )
+
+    def __str__(self):
+        return f"Appointment {self.member.email} with {self.coach.email} - {self.status}"
+
+    def save(self, *args, **kwargs):
+        self.full_clean()   # runs validators including clean()
+        super().save(*args, **kwargs)
+
+#endregion
+
+#=====================================================
+#=======Role Specific-User     ===============
+#=====================================================
+class Message(models.Model):
+    sender = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='sent_messages'
+    )
+    recipient = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='received_messages'
+    )
+    subject = models.CharField(max_length=200)
+    body = models.TextField(max_length=3000)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    # Optional: parent field for threading, optional. see if the thing works
+    # parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.sender} -> {self.recipient}: {self.subject[:20]}"
 
 
-
-# Placeholder for review and report
-
+# optional feature: Placeholder
 # class CoachReview(models.Model):
 #     def __str__(self):
 #         return None

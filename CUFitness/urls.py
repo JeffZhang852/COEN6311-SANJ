@@ -7,11 +7,11 @@ urlpatterns = [
     path('', views.home, name='home'),
 
 # -----------   Navbar Pages  -----------
-    path ("services/", views.services, name='services'),
-    path ("memberships/", views.memberships, name='memberships'),
+    path("services/", views.services, name='services'),
+    path("memberships/", views.memberships, name='memberships'),
     path("trainers/", views.trainers, name='trainers'),
 
-    path ("user_articles/", views.user_articles, name='user_articles'),
+    path("user_articles/", views.user_articles, name='user_articles'),
     path("workout_plans/", views.workout_plans, name='workout_plans'),
     path("user_recipes/", views.user_recipes, name='user_recipes'),
     #path("user_workouts/", views.user_workouts, name='user_workouts'),
@@ -19,10 +19,10 @@ urlpatterns = [
 
 
 # -----------   Dropdown Menu Pages  -----------
-    path ("amenities/", views.amenities, name='amenities'),
-    path ("schedule/", views.schedule, name='schedule'),
-    path ("contact/", views.contact, name='contact'),
-    path ("about/", views.about, name='about'),
+    path("amenities/", views.amenities, name='amenities'),
+    path("schedule/", views.schedule, name='schedule'),
+    path("contact/", views.contact, name='contact'),
+    path("about/", views.about, name='about'),
 
 # -----------   Footer Pages  -----------
     path("faq/", views.faq, name='faq'),
@@ -30,8 +30,8 @@ urlpatterns = [
 
 # -----------   User Authentication   -----------
     path("register/", views.Register.as_view(), name="register"),
-    path ("login/", views.login_user, name='login'),
-    path ('logout/', views.logout_user, name='logout'),
+    path("login/", views.login_user, name='login'),
+    path('logout/', views.logout_user, name='logout'),
 
 # -----------   User Profile & Settings   -----------
     path('user_profile/', views.user_profile, name='user_profile'),
@@ -56,7 +56,6 @@ urlpatterns = [
     path("staff_user_detail/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
 
 
-
 # -----------   Article Pages  -----------
     path('staff_articles/', views.staff_articles, name='staff_articles'),
     path('create_article/', views.create_article, name='create_article'),
@@ -76,7 +75,6 @@ urlpatterns = [
     path("recipe/<int:id>/delete/", views.delete_recipe, name="delete_recipe"),
 
 # -----------   Workout Pages  -----------
-
     path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
     path('create_workouts/', views.create_workouts, name='create_workouts'),
     # path to article pages from staff-articles page
@@ -86,7 +84,6 @@ urlpatterns = [
     path("workout/<int:id>/delete/", views.delete_workout, name="delete_workout"),
 
 # -----------   Exercise Pages  -----------
-
     path("staff_exercises/", views.staff_exercises, name='staff_exercises'),
     path('create_exercises/', views.create_exercises, name='create_exercises'),
     # path to article pages from staff-articles page
@@ -96,28 +93,39 @@ urlpatterns = [
     path("exercise/<int:id>/delete/", views.delete_exercise, name="delete_exercise"),
 
 
+# -----------   Chatbot Pages  -----------
+    path('chatbot/', views.chatbot, name='chatbot'),
 
-# Calendar AJAX endpoints (availability add / edit / delete)
+#  ----------- Appointment api (obsolete, kept for reference) ----------
+    # -----------   Coach Schedule & Availability AJAX   -----------
+    path('user_coach_schedule/', views.user_coach_schedule, name='user_coach_schedule'),
     path('api/availability/add/', views.ajax_add_availability, name='ajax_add_availability'),
     path('api/availability/<int:slot_id>/edit/', views.ajax_edit_availability, name='ajax_edit_availability'),
     path('api/availability/<int:slot_id>/delete/', views.ajax_delete_availability, name='ajax_delete_availability'),
+    path('api/availability/<uuid:group_id>/cancel_series/', views.ajax_cancel_series, name='ajax_cancel_series'),
+    path('api/coaches/', views.api_coaches, name='api_coaches'),
+    path('api/coach-availability/', views.api_coach_availability, name='api_coach_availability'),
+    path('api/all-availability/', views.api_all_availability, name='api_all_availability'),
+    path('api/request-appointment/', views.api_request_appointment, name='api_request_appointment'),
+    path('api/appointment/<int:appointment_id>/accept/', views.ajax_accept_appointment, name='ajax_accept_appointment'),
+    path('api/appointment/<int:appointment_id>/reject/', views.ajax_reject_appointment, name='ajax_reject_appointment'),
 
 
 # -----------   Coach Request Handling  -----------
-    path("staff/coach-request/<int:user_id>/", views.handle_coach_request, name="handle_coach_request"),  # NEW
+    path("staff/coach-request/<int:user_id>/", views.handle_coach_request, name="handle_coach_request"),
 
-# -----------   Coach Pages  -----------
-
-# Coach list
-    # we already have the 'trainer' page under navbar. just need to make it logged-in users only
+# -----------   Coach Pages (legacy, might be merged) -----------
+    # Coach list
     path('coaches/', views.coach_list_view, name='coach_list'),
-
-# Coach dashboard
+    # Coach dashboard (legacy)
     path('coach/dashboard/', views.coach_dashboard, name='coach_dashboard'),
     path('coach/availability/', views.manage_availability, name='manage_availability'),
     path('coach/availability/delete/<int:slot_id>/', views.delete_availability, name='delete_availability'),
     path('coach/appointments/', views.manage_appointments, name='manage_appointments'),
 
+    # Messaging
+    path('api/coaches/search/', views.api_coach_search, name='api_coach_search'),
+    path('send_message/', views.send_message, name='send_message'),
+    path('reply_message/<int:message_id>/', views.reply_message, name='reply_message'),
+    path('mark_read/<int:message_id>/', views.mark_read, name='mark_read'),
 ]
-
-

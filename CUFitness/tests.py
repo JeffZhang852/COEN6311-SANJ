@@ -136,7 +136,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.contrib.auth import get_user_model
-from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, EquipmentBooking, Recipe, RecipeIngredient
+from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, Recipe, RecipeIngredient
 from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettingsForm, UpdateEmailForm, UpdatePasswordForm
 from decimal import Decimal
 
@@ -252,40 +252,7 @@ class EquipmentBookingTest(TestCase):
         self.start_time = timezone.now()
         self.end_time = self.start_time + timedelta(hours=1)
 
-    def test_valid_booking(self):
-        booking = EquipmentBooking.objects.create(
-            equipment=self.equipment,
-            coach=self.coach,
-            start_time=self.start_time,
-            end_time=self.end_time
-        )
 
-        self.assertEqual(str(booking).startswith("Bench Press booked"), True)
-
-    def test_invalid_time_booking(self):
-        with self.assertRaises(ValidationError):
-            EquipmentBooking.objects.create(
-                equipment=self.equipment,
-                coach=self.coach,
-                start_time=self.end_time,
-                end_time=self.start_time
-            )
-
-    def test_overlapping_booking(self):
-        EquipmentBooking.objects.create(
-            equipment=self.equipment,
-            coach=self.coach,
-            start_time=self.start_time,
-            end_time=self.end_time
-        )
-
-        with self.assertRaises(ValidationError):
-            EquipmentBooking.objects.create(
-                equipment=self.equipment,
-                coach=self.coach,
-                start_time=self.start_time + timedelta(minutes=30),
-                end_time=self.end_time + timedelta(minutes=30)
-            )
 
 class CoachAvailabilityTest(TestCase):
 
