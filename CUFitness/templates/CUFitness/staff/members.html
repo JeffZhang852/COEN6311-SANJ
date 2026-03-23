@@ -1,69 +1,18 @@
 {% extends 'CUFitness/staff/staff_base.html' %}
 {% load static %}
-{% block title %} Members {% endblock %}
+{% block title %} CUFitness {% endblock %}
 
 {% block extra_styles %}
-<link rel="stylesheet" href="{% static 'members.css' %}"/>
 {% endblock %}
 
 {% block content %}
 
 {% if user.role == "STAFF" %}
 
-<div class="members-container">
-
-    <div class="members-header">
-        <h1>Member Management</h1>
-    </div>
-
-    <div class="members-section">
-        <h2 class="members-title">
-            All Members ({{ members|length }})
-        </h2>
-
-        <ul class="members-list">
-            {% for member in members %}
-            <li class="member-item">
-
-                <a href="{% url 'staff_user_detail' member.id %}" class="user-link">
-
-                    <div class="member-info">
-                        <span class="member-name">
-                            {{ member.first_name }} {{ member.last_name }}
-                        </span>
-                        <span class="member-email">
-                            {{ member.email }}
-                        </span>
-                        <span class="member-badge">
-                            {{ member.membership }}
-                        </span>
-                    </div>
-
-                </a>
-
-                <div class="member-actions">
-                    <button class="btn promote-btn"
-                            onclick="event.stopPropagation(); alert('Promote as Coach coming soon')">
-                        Promote as Coach
-                    </button>
-
-                    <button class="btn ban-btn"
-                            onclick="event.stopPropagation(); alert('Ban Member coming soon')">
-                        Ban Member
-                    </button>
-                </div>
-
-            </li>
-            {% empty %}
-            <li>No members found.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-</div>
+    
 
 {% else %}
-<p>not a staff member</p>
+    <p> not a staff member </p>
 {% endif %}
 
 {% endblock %}
