@@ -1,11 +1,11 @@
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.http import HttpResponseNotAllowed
 
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.contrib import messages
 
 from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo
@@ -17,7 +17,6 @@ from .forms import UpdateEmailForm, UpdatePasswordForm
 
 # for calendar;
 from django.http import JsonResponse
-import json as _json
 import json
 from django.db import transaction
 
