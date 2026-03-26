@@ -9,20 +9,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
-- exercise model
-- workoutplan model
-- workout model
-- views to different workout pages
-- views,urls, html,css content for exercises
-- changed staff resource_management(articles, recipes, etc.) to be drop down menu instead
-- changed user resources(articles, recipes, etc.) to be drop down menu instead
-- added working filter for recipe pages (allergies, servings, etc.)
-- added phone number, date of birth and address fields to the user model
-- updated seed_data file
-- updated test file
 
 ### Changed
-- complete overhaul of the recipe && article HTML and css files (for user && staff)
+- made the chatbot load on a separate thread in the background as the server starts, 
+	because it was taking long time to start otherwise (especially the first startup)
 ### Fixed
 -
 
