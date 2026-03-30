@@ -4,11 +4,13 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
 from .managers import CustomUserManager
 from multiselectfield import MultiSelectField
 import uuid
 from decimal import Decimal
 from .managers import CustomUserManager
+from django.utils.timezone import now
 
 #=====================================================
 #========    Universal Models (Setups)     ===========
@@ -553,3 +555,34 @@ class Message(models.Model):
 #
 #     def __str__(self):
 #         return None
+
+
+#=====================================================
+#=======++      Fitness Challenges     ===============
+#===================================================== 
+class Challenge(models.Model):
+    title = models.CharField(max_length=150)
+    description = models.TextField()
+    goal_target = models.IntegerField()  # e.g. 30 days / 100 pushups
+    start_date = models.DateField()
+    end_date = models.DateField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class ChallengeParticipation(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    progress = models.IntegerField(default=0)  # current progress
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'challenge')
+
+    def progress_percentage(self):
+        if self.challenge.goal_target == 0:
+            return 0
+        return min(100,int((self.progress / self.challenge.goal_target) * 100))

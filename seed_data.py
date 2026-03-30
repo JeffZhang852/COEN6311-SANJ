@@ -20,7 +20,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "COEN6311.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from CUFitness.models import Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise
+from CUFitness.models import Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise, Challenge
 
 User = get_user_model()
 
@@ -1611,6 +1611,29 @@ create_workout(
         {'exercise': tricep_dip,        'sets': 3, 'reps': '12-15', 'rest_seconds': 45},
         {'exercise': cable_crunch,      'sets': 3, 'reps': '15',    'rest_seconds': 45},
     ],
+)
+
+## Fitness Challenges
+print("\n── Creating Challenges ──")
+
+Challenge.objects.get_or_create(
+    title="7-Day Push-Up Challenge",
+    description="Complete 50 push-ups daily for 7 days.",
+    goal_target=7,
+    start_date="2026-04-01",
+    end_date="2026-04-07",
+    created_by=staff1,
+    created_at="2026-04-01"
+)
+
+Challenge.objects.get_or_create(
+    title="10K Steps Daily",
+    description="Walk 10,000 steps every day for 14 days.",
+    goal_target=14,
+    start_date="2026-04-01",
+    end_date="2026-04-14",
+    created_by=staff2,
+    created_at="2026-04-01"
 )
 
 

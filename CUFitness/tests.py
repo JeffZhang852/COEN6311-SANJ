@@ -1696,3 +1696,17 @@ class RecipeViewTest(TestCase):
         self.client.force_login(self.other_staff)
         self.client.post(reverse('delete_recipe', args=[self.recipe.id]))
         self.assertTrue(Recipe.objects.filter(id=self.recipe.id).exists())
+
+# ══════════════════════════════════════════════════
+# CHALLENGES VIEW TESTS
+# ══════════════════════════════════════════════════
+class ChallengeViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.member = make_member()
+
+    def test_challenges_page_loads(self):
+        self.client.force_login(self.member)
+        response = self.client.get(reverse('user_challenges'))
+        self.assertEqual(response.status_code, 200)
