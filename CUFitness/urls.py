@@ -128,4 +128,10 @@ urlpatterns = [
     path('send_message/', views.send_message, name='send_message'),
     path('reply_message/<int:message_id>/', views.reply_message, name='reply_message'),
     path('mark_read/<int:message_id>/', views.mark_read, name='mark_read'),
+
+# -----------   Coach Reviews  -----------
+path('coach/<int:coach_id>/reviews/', views.coach_reviews, name='coach_reviews'),
+path('appointment/<int:appointment_id>/review/', views.submit_review, name='submit_review'),
+path('staff/review/<int:review_id>/delete/', views.staff_delete_review, name='staff_delete_review'),
+
 ]

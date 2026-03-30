@@ -1,0 +1,39 @@
+{% extends 'CUFitness/base.html' %}
+{% block title %}Reviews — {{ coach.first_name }} {{ coach.last_name }}{% endblock %}
+{% block content %}
+<div style="max-width:760px;margin:60px auto;padding:0 20px;">
+    <h2 style="color:var(--color-primary);">
+        {{ coach.first_name }} {{ coach.last_name }}
+        <span style="font-size:1rem;color:#888;font-weight:400;">— Coach Reviews</span>
+    </h2>
+
+    {% if avg_rating %}
+    <p style="font-size:1.4rem;font-weight:700;color:var(--color-accent);">
+        ★ {{ avg_rating }} <span style="font-size:1rem;font-weight:400;color:#888;">average ({{ reviews|length }} review{{ reviews|length|pluralize }})</span>
+    </p>
+    {% else %}
+    <p style="color:#888;">No reviews yet.</p>
+    {% endif %}
+
+    {% for review in reviews %}
+    <div style="background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 8px rgba(0,0,0,.07);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong style="color:var(--color-primary);">
+                {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                &nbsp; {{ review.member.first_name }} {{ review.member.last_name }}
+            </strong>
+            <span style="font-size:.82rem;color:#aaa;">{{ review.created_at|date:"M d, Y" }}</span>
+        </div>
+        <p style="margin:0;color:#444;">{{ review.body }}</p>
+        {% if user.is_staff %}
+        <form method="post" action="{% url 'staff_delete_review' review.id %}" style="margin-top:10px;">
+            {% csrf_token %}
+            <button type="submit" style="background:none;border:1px solid #e53e3e;color:#e53e3e;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;">
+                Delete
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

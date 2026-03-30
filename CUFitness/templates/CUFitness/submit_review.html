@@ -1,0 +1,25 @@
+{% extends 'CUFitness/base.html' %}
+{% block title %}Leave a Review{% endblock %}
+{% block content %}
+<div style="max-width:560px;margin:60px auto;padding:0 20px;">
+    <h2 style="color:var(--color-primary);">Review your session</h2>
+    <p style="color:#666;">
+        Coach: <strong>{{ appointment.coach.first_name }} {{ appointment.coach.last_name }}</strong><br>
+        Date: <strong>{{ appointment.start_time|date:"D, M d Y g:i A" }}</strong>
+    </p>
+    <form method="post" style="background:#fff;padding:32px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+        {% csrf_token %}
+        {% for field in form %}
+        <div style="margin-bottom:18px;">
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <button type="submit" style="background:var(--color-primary);color:#fff;border:none;padding:12px 28px;border-radius:8px;font-weight:600;cursor:pointer;">
+            Submit Review
+        </button>
+        <a href="{% url 'user_calendar' %}" style="margin-left:14px;color:#666;font-size:.9rem;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

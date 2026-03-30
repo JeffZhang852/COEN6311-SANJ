@@ -116,9 +116,18 @@
                         </p>
                     </div>
                     <span class="appt-badge {{ appt.status|lower }}">{{ appt.status }}</span>
+                    {% if appt.status == 'ACCEPTED' %}
+        {% if appt.review %}
+            <span style="font-size:.8rem; color:#2e7d32;">★ Reviewed</span>
+        {% else %}
+            <a href="{% url 'submit_review' appt.id %}"
+               style="font-size:.82rem; color:var(--color-primary); font-weight:600; text-decoration:none;">
+                Leave a Review
+            </a>
+        {% endif %}
+    {% endif %}
                 </div>
                 {% endfor %}
-            </div>
         {% else %}
             <div class="empty-state">
                 <span class="material-icons empty-icon">history_toggle_off</span>

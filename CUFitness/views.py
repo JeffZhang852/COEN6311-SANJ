@@ -4,12 +4,14 @@ from django.utils import timezone
 from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.http import HttpResponseNotAllowed
+from django.db.models import Avg
+
 
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo
-from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo, CoachReview
+from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm, CoachReviewForm
 from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
 
 from django.contrib.auth import update_session_auth_hash
@@ -1453,3 +1455,59 @@ def ajax_reject_appointment(request, appointment_id):
     appointment.status = 'REFUSED'
     appointment.save()
     return JsonResponse({'success': True})
+
+# ============================================================
+# Coach Reviews
+# ============================================================
+
+@login_required(login_url='/login/')
+def submit_review(request, appointment_id):
+    appointment = get_object_or_404(
+        CoachAppointment,
+        id=appointment_id,
+        member=request.user,
+        status='ACCEPTED'
+    )
+
+    # block if review already exists
+    if hasattr(appointment, 'review'):
+        messages.info(request, 'You have already reviewed this appointment.')
+        return redirect('user_calendar')
+
+    if request.method == 'POST':
+        form = CoachReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.member = request.user
+            review.coach = appointment.coach
+            review.appointment = appointment
+            review.save()
+            messages.success(request, 'Review submitted. Thank you!')
+            return redirect('user_calendar')
+    else:
+        form = CoachReviewForm()
+
+    return render(request, 'CUFitness/submit_review.html', {
+        'form': form,
+        'appointment': appointment,
+    })
+
+
+def coach_reviews(request, coach_id):
+    coach = get_object_or_404(CustomUser, id=coach_id, role='COACH')
+    reviews = CoachReview.objects.filter(coach=coach).select_related('member')
+    avg = reviews.aggregate(avg=Avg('rating'))['avg']
+    return render(request, 'CUFitness/coach_reviews.html', {
+        'coach': coach,
+        'reviews': reviews,
+        'avg_rating': round(avg, 1) if avg else None,
+    })
+
+
+@user_passes_test(is_staff_user, login_url='/staff_login/')
+def staff_delete_review(request, review_id):
+    review = get_object_or_404(CoachReview, id=review_id)
+    coach_id = review.coach.id
+    review.delete()
+    messages.success(request, 'Review deleted.')
+    return redirect('coach_reviews', coach_id=coach_id)

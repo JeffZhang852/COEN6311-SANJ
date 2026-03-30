@@ -543,11 +543,41 @@ class Message(models.Model):
     def __str__(self):
         return f"{self.sender} -> {self.recipient}: {self.subject[:20]}"
 
+#CoachReview
+class CoachReview(models.Model):
+    coach = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'COACH'},
+        related_name='reviews'
+    )
+    member = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'MEMBER'},
+        related_name='given_reviews'
+    )
+    appointment = models.OneToOneField(
+        CoachAppointment,
+        on_delete=models.CASCADE,
+        related_name='review',
+        help_text='One review per completed appointment'
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text='Rating from 1 to 5'
+    )
+    body = models.TextField(max_length=1000, help_text='Your review')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-# optional feature: Placeholder
-# class CoachReview(models.Model):
-#     def __str__(self):
-#         return None
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.member.email} → {self.coach.email} ({self.rating}★)'
+
+#
+#
 #
 # class CoachReport(models.Model):
 #

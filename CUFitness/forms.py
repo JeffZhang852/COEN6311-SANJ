@@ -2,7 +2,7 @@ from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from .models import CustomUser,CoachAppointment,CoachAvailability
-from .models import Article, Recipe, RecipeIngredient, GymInfo, Message
+from .models import Article, Recipe, RecipeIngredient, GymInfo, Message, CoachReview
 from django.forms import inlineformset_factory
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
@@ -151,4 +151,14 @@ class MessageForm(forms.ModelForm):
         fields = ['subject', 'body']
         widgets = {
             'body': forms.Textarea(attrs={'rows': 5, 'maxlength': 5000}),
+        }
+
+
+class CoachReviewForm(forms.ModelForm):
+    class Meta:
+        model = CoachReview
+        fields = ['rating', 'body']
+        widgets = {
+            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5}),
+            'body': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Share your experience...'}),
         }

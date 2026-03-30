@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .forms import CustomUserCreationForm, CoachRequestForm
-from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentList
+from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentList, CoachReview
 from .models import Article, Recipe, RecipeIngredient, GymInfo
 
 class CustomUserAdmin(UserAdmin):
@@ -77,4 +77,11 @@ class GymInfoAdmin(admin.ModelAdmin):
     list_display = ('day', 'is_open', 'open_time', 'close_time')
     list_editable = ('is_open', 'open_time', 'close_time')
     ordering = ('day',)
+
+@admin.register(CoachReview)
+class CoachReviewAdmin(admin.ModelAdmin):
+    list_display = ('member', 'coach', 'rating', 'created_at')
+    list_filter  = ('rating', 'coach')
+    search_fields = ('member__email', 'coach__email')
+    date_hierarchy = 'created_at'
 
