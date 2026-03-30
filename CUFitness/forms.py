@@ -2,7 +2,7 @@ from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from .models import CustomUser,CoachAppointment,CoachAvailability
-from .models import Article, Recipe, RecipeIngredient, GymInfo, Message
+from .models import Article, Recipe, RecipeIngredient, GymInfo, Message, EquipmentList
 from django.forms import inlineformset_factory
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
@@ -155,3 +155,22 @@ class MessageForm(forms.ModelForm):
         widgets = {
             'body': forms.Textarea(attrs={'rows': 5, 'maxlength': 5000}),
         }
+
+
+class EquipmentMaintenanceForm(forms.ModelForm):
+    class Meta:
+        model = EquipmentList
+        fields = ['maintenance_start', 'maintenance_end', 'maintenance_note']
+        widgets = {
+            'maintenance_start': forms.DateInput(attrs={'type': 'date'}),
+            'maintenance_end': forms.DateInput(attrs={'type': 'date'}),
+            'maintenance_note': forms.TextInput(attrs={'placeholder': 'e.g. Belt replacement'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('maintenance_start')
+        end = cleaned.get('maintenance_end')
+        if start and end and end < start:
+            raise forms.ValidationError('Return date must be after the start date.')
+        return cleaned

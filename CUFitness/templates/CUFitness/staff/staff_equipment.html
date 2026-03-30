@@ -1,0 +1,39 @@
+{% extends 'CUFitness/staff/staff_base.html' %}
+{% load static %}
+{% block title %}Equipment Management{% endblock %}
+{% block content %}
+{% if user.role == "STAFF" %}
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Equipment Management</h1>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <p style="color:green;">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+
+  <ul class="user-list">
+    {% for item in equipment_list %}
+    <li class="user-item" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <span>{{ item.name }}</span>
+        <span class="user-email">Qty: {{ item.quantity }}</span>
+        {% if item.is_under_maintenance %}
+          <span style="color:#ef4444; margin-left:1rem;">Under Maintenance until {{ item.maintenance_end|date:"M j, Y" }}</span>
+        {% elif item.maintenance_start %}
+          <span style="color:#f59e0b; margin-left:1rem;">Maintenance from {{ item.maintenance_start|date:"M j" }} to {{ item.maintenance_end|date:"M j, Y" }}</span>
+        {% endif %}
+      </div>
+      <a href="{% url 'staff_equipment_maintenance' item.id %}" class="user-link" style="padding:.3rem .75rem; border:1px solid #6b7280; border-radius:4px; font-size:.875rem;">
+        Schedule Maintenance
+      </a>
+    </li>
+    {% empty %}
+    <li>No equipment found.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% endblock %}

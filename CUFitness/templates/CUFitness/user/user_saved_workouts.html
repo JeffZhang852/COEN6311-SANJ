@@ -1,10 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/general_website/base.html' %}
+{% block title %}My Workout Plans{% endblock %}
+{% load static %}
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'user/user_profile.css' %}"/>
+{% endblock %}
 
-</body>
-</html>
+{% block content %}
+{% if user.is_authenticated %}
+
+<section class="sessions-section">
+  <div class="section-header">
+    <div class="section-label">My Plans</div>
+    <h2>Assigned <em>Workout Plans</em></h2>
+    <p>Workout plans assigned to you by your coach.</p>
+  </div>
+
+  <div class="sessions-list">
+    {% for assignment in assigned_plans %}
+    <div class="session-row" style="flex-direction:column; align-items:flex-start; gap:.6rem; padding:1.25rem 1.5rem;">
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <div>
+          <div class="session-type">{{ assignment.workout_plan.title }}</div>
+          <div class="session-detail">
+            From coach: <strong>{{ assignment.coach.first_name }} {{ assignment.coach.last_name }}</strong>
+            &mdash; {{ assignment.assigned_at|date:"M j, Y" }}
+          </div>
+          <div class="session-detail" style="margin-top:.2rem;">
+            {{ assignment.workout_plan.get_goal_display }}
+            {% if assignment.workout_plan.difficulty %}
+              &middot; {{ assignment.workout_plan.get_difficulty_display }}
+            {% endif %}
+            {% if assignment.workout_plan.duration_minutes %}
+              &middot; {{ assignment.workout_plan.duration_minutes }} min
+            {% endif %}
+          </div>
+        </div>
+        <div class="session-time">{{ assignment.workout_plan.exercises.count }} exercise{{ assignment.workout_plan.exercises.count|pluralize }}</div>
+      </div>
+
+      {% if assignment.note %}
+      <div style="background:#f9fafb; border-left:3px solid #6b7280; padding:.5rem .75rem; border-radius:0 4px 4px 0; font-style:italic; font-size:.9rem; width:100%;">
+        {{ assignment.note }}
+      </div>
+      {% endif %}
+
+      {% if assignment.workout_plan.body %}
+      <div style="font-size:.875rem; color:#4b5563; margin-top:.25rem;">{{ assignment.workout_plan.description }}</div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div class="session-empty">No workout plans have been assigned to you yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+{% else %}
+<div class="profile-unauthenticated">
+  <p>Please <a href="{% url 'login' %}">log in</a> to view your workout plans.</p>
+</div>
+{% endif %}
+{% endblock %}

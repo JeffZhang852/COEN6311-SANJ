@@ -138,12 +138,23 @@ class EquipmentList(models.Model):
     description = models.TextField(blank=True, help_text="Add description here")
     quantity = models.PositiveIntegerField(default=1, help_text="Number of units available")
     is_active = models.BooleanField(default=True, help_text="Uncheck when out of service")
+    maintenance_start = models.DateField(null=True, blank=True, help_text="Start of maintenance period")
+    maintenance_end = models.DateField(null=True, blank=True, help_text="Expected return date")
+    maintenance_note = models.CharField(max_length=200, blank=True, help_text="Reason for maintenance")
 
     class Meta:
         verbose_name_plural = "Equipments"
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_under_maintenance(self):
+        from django.utils.timezone import now
+        today = now().date()
+        if self.maintenance_start and self.maintenance_end:
+            return self.maintenance_start <= today <= self.maintenance_end
+        return False
 
 # Recipe Models
 class Recipe(models.Model):
@@ -552,3 +563,6 @@ class Message(models.Model):
 #
 #     def __str__(self):
 #         return None
+
+
+

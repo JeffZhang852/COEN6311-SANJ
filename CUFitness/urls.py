@@ -41,6 +41,9 @@ urlpatterns = [
     path('user_calendar/', views.user_calendar, name='user_calendar'),
     path('user_saved_recipes/', views.user_saved_recipes, name='user_saved_recipes'),
     path('user_saved_workouts/', views.user_saved_workouts, name='user_saved_workouts'),
+    path('assign_workout_plan/', views.assign_workout_plan, name='assign_workout_plan'),
+    path('coach_assigned_plans/', views.coach_assigned_plans, name='coach_assigned_plans'),
+    path('unassign_workout_plan/<int:assignment_id>/', views.unassign_workout_plan, name='unassign_workout_plan'),
 
 
 # -----------   Staff Pages  -----------
@@ -54,6 +57,8 @@ urlpatterns = [
 # path to user profiles from staff_home page
     path("staff_user_detail/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
 
+    path('staff_equipment/', views.staff_equipment, name='staff_equipment'),
+    path('staff_equipment/<int:equipment_id>/maintenance/', views.staff_equipment_maintenance, name='staff_equipment_maintenance'),
 
 # -----------   Article Pages  -----------
     path('staff_articles/', views.staff_articles, name='staff_articles'),
@@ -127,4 +132,5 @@ urlpatterns = [
     path('send_message/', views.send_message, name='send_message'),
     path('reply_message/<int:message_id>/', views.reply_message, name='reply_message'),
     path('mark_read/<int:message_id>/', views.mark_read, name='mark_read'),
+
 ]

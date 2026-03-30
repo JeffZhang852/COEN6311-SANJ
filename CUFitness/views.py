@@ -12,6 +12,8 @@ from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestFo
     PrivacySettingsForm, ProfilePictureForm
 from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
 from .forms import UpdateEmailForm, UpdatePasswordForm, ProfilePictureForm
+from .forms import  EquipmentMaintenanceForm
+
 
 # for calendar;
 from django.http import JsonResponse
@@ -75,11 +77,14 @@ def home(request):
 # region all navbar pages
 # -----------   Navbar Pages  -----------
 def services(request):
+    from django.utils.timezone import now
+    today = now().date()
     equipment = EquipmentList.objects.filter(is_active=True).order_by('name')
-    total_items = sum(e.quantity for e in equipment)  # total number of equipment units
+    total_items = sum(e.quantity for e in equipment if not e.is_under_maintenance)
     context = {
         'equipment_list': equipment,
         'total_equipment_items': total_items,
+        'today': today,
     }
     return render(request, 'CUFitness/general_website/navbar/services.html', context)
 
@@ -482,7 +487,39 @@ def user_saved_recipes(request):
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_saved_workouts(request):
-    return render(request, 'CUFitness/user/user_saved_workouts.html')
+    assigned = MemberWorkoutPlan.objects.filter(member=request.user).select_related('workout_plan', 'coach')
+    return render(request, 'CUFitness/user/user_saved_workouts.html', {'assigned_plans': assigned})
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def assign_workout_plan(request):
+    form = AssignWorkoutPlanForm(request.POST or None, coach=request.user)
+    if request.method == 'POST' and form.is_valid():
+        assignment = form.save(commit=False)
+        assignment.coach = request.user
+        assignment.save()
+        messages.success(request, f'Workout plan assigned to {assignment.member.first_name} {assignment.member.last_name}.')
+        return redirect('coach_assigned_plans')
+    return render(request, 'CUFitness/user/assign_workout_plan.html', {'form': form})
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def coach_assigned_plans(request):
+    assignments = MemberWorkoutPlan.objects.filter(coach=request.user).select_related('member', 'workout_plan')
+    return render(request, 'CUFitness/user/coach_assigned_plans.html', {'assignments': assignments})
+
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def unassign_workout_plan(request, assignment_id):
+    assignment = get_object_or_404(MemberWorkoutPlan, pk=assignment_id, coach=request.user)
+    if request.method == 'POST':
+        member_name = f'{assignment.member.first_name} {assignment.member.last_name}'
+        assignment.delete()
+        messages.success(request, f'Plan removed from {member_name}.')
+    return redirect('coach_assigned_plans')
 
 
 # calendar
@@ -1472,3 +1509,29 @@ def ajax_reject_appointment(request, appointment_id):
     appointment.status = 'REFUSED'
     appointment.save()
     return JsonResponse({'success': True})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_equipment(request):
+    equipment = EquipmentList.objects.all().order_by('name')
+    return render(request, 'CUFitness/staff/staff_equipment.html', {'equipment_list': equipment})
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_equipment_maintenance(request, equipment_id):
+    item = get_object_or_404(EquipmentList, pk=equipment_id)
+    form = EquipmentMaintenanceForm(request.POST or None, instance=item)
+    if request.method == 'POST':
+        if 'clear' in request.POST:
+            item.maintenance_start = None
+            item.maintenance_end = None
+            item.maintenance_note = ''
+            item.save()
+            messages.success(request, f'Maintenance cleared for {item.name}.')
+            return redirect('staff_equipment')
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Maintenance scheduled for {item.name}.')
+            return redirect('staff_equipment')
+    return render(request, 'CUFitness/staff/staff_equipment_maintenance.html', {'form': form, 'item': item})

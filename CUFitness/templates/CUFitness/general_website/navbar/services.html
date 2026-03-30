@@ -53,15 +53,22 @@
   <div class="sv-label">The Floor</div>
   <h2 class="sv-heading">Our <em>Equipment</em></h2>
   {% if equipment_list %}
-  <p class="sv-sub">We have <strong>{{ total_equipment_items }}</strong> pieces of equipment ready for you.</p>
+  <p class="sv-sub">We have <strong>{{ total_equipment_items }}</strong> pieces of equipment available today.</p>
   {% endif %}
   <div class="sv-equipment-grid">
     {% for item in equipment_list %}
-    <div class="sv-equip-card">
+    <div class="sv-equip-card {% if item.is_under_maintenance %}sv-equip-card--maintenance{% endif %}">
       <div class="sv-equip-qty">{{ item.quantity }}</div>
       <h3>{{ item.name }}</h3>
-      {% if item.description %}
-        <p>{{ item.description }}</p>
+      {% if item.is_under_maintenance %}
+        <p style="color:#ef4444; font-weight:600;">Under Maintenance</p>
+        {% if item.maintenance_end %}
+          <p style="font-size:.85rem; color:#6b7280;">Expected back: {{ item.maintenance_end|date:"M j, Y" }}</p>
+        {% endif %}
+      {% else %}
+        {% if item.description %}
+          <p>{{ item.description }}</p>
+        {% endif %}
       {% endif %}
     </div>
     {% empty %}
@@ -69,6 +76,7 @@
     {% endfor %}
   </div>
 </section>
+
 
 <!-- ── FEATURED PROGRAM ── -->
 <section class="sv-feature">

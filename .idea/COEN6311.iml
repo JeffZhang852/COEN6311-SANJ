@@ -17,7 +17,7 @@
       <sourceFolder url="file://$MODULE_DIR$/CUFitness/images" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.14 (COEN6311-SANJ)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="bootstrap" level="application" />
   </component>
@@ -29,7 +29,7 @@
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/../COEN6311\templates" />
+        <option value="$USER_HOME$/COEN6311\templates" />
       </list>
     </option>
   </component>
