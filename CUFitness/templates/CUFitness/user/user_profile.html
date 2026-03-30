@@ -1,0 +1,169 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% block title %} Profile {% endblock %}
+{% load static %}
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'user/user_profile.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<!---------------- Profile Hero ---------------->
+<section class="profile-hero">
+  <div class="profile-hero-inner">
+
+    <!-- Avatar placeholder -->
+    <div class="avatar-wrap">
+        <div class="avatar-placeholder">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" alt="Profile picture">
+          {% endif %}
+        </div>
+        <form method="post" action="{% url 'upload_picture' %}" enctype="multipart/form-data" id="avatar-form">
+          {% csrf_token %}
+          <input type="file" id="avatar-upload" name="profile_picture" accept="image/*" style="display:none;">
+          <label for="avatar-upload" class="avatar-upload-btn">&#8593; Upload Photo</label>
+        </form>
+        {% if user.profile_picture.name != 'defaults/Default_Profile_Picture.jpg' %}
+            <form method="post" action="{% url 'delete_picture' %}">
+                {% csrf_token %}
+                <button type="submit" class="avatar-delete-btn">✕ Remove Photo</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Name & meta -->
+    <div class="profile-meta">
+
+      <div class="profile-eyebrow">
+        <span class="profile-role-tag">{{ user.role|title }}</span>
+        <span class="profile-divider">·</span>
+        <span class="profile-since">Member since January 2025</span>
+      </div>
+
+      <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+
+      <div class="profile-tier-badge">{{ user.membership }} membership</div>
+
+      <div class="profile-contact-grid">
+        <div class="profile-contact-field">
+          <span class="profile-contact-label">Email</span>
+          <span class="profile-contact-value">{{ user.email }}</span>
+        </div>
+        <div class="profile-contact-field">
+          <span class="profile-contact-label">Phone</span>
+          {% if user.phone_number %}
+          <span class="profile-contact-value">{{ user.phone_number }}</span>
+          {% else %}
+          <span class="profile-contact-value profile-contact-empty">No phone on file</span>
+          {% endif %}
+        </div>
+        <div class="profile-contact-field">
+          <span class="profile-contact-label">Address</span>
+          {% if user.address %}
+          <span class="profile-contact-value">{{ user.address }}</span>
+          {% else %}
+          <span class="profile-contact-value profile-contact-empty">No address on file</span>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Edit button -->
+    <div class="profile-actions">
+      <a href="{% url 'user_settings' %}" class="profile-edit-btn">Edit Profile &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<!---------------- Upcoming Appointments ---------------->
+<section class="sessions-section">
+  <div class="section-header">
+    <div class="section-label">Schedule</div>
+    <h2>Upcoming <em>Appointments</em></h2>
+    <p>Your next booked training appointments.</p>
+  </div>
+
+  <div class="sessions-list">
+    {% for upcoming_appointment in upcoming_appointments %}
+    <div class="session-row">
+      <div class="session-index">{{ forloop.counter|stringformat:"02d" }}</div>
+      <div class="session-info">
+        <div class="session-type">{{ upcoming_appointment.coach.first_name }} {{ upcoming_appointment.coach.last_name }}</div>
+        <div class="session-detail">{{ upcoming_appointment.get_status_display }}</div>
+      </div>
+      <div class="session-time">{{ upcoming_appointment.start_time|date:"M j" }} &mdash; {{ upcoming_appointment.start_time|time:"g:i A" }}</div>
+    </div>
+    {% empty %}
+    <div class="session-empty">No upcoming appointments.</div>
+    {% endfor %}
+
+  </div>
+</section>
+
+<!---------------- Past Appointments ---------------->
+<section class="sessions-section">
+  <div class="section-header">
+    <div class="section-label">Schedule</div>
+    <h2>Past <em>Appointments</em></h2>
+    <p>Your past booked training appointments.</p>
+  </div>
+
+  <div class="sessions-list">
+    {% for past_appointment in past_appointments %}
+    <div class="session-row">
+      <div class="session-index">{{ forloop.counter|stringformat:"02d" }}</div>
+      <div class="session-info">
+        <div class="session-type">{{ past_appointment.coach.first_name }} {{ past_appointment.coach.last_name }}</div>
+        <div class="session-detail">{{ past_appointment.get_status_display }}</div>
+      </div>
+      <div class="session-time">{{ past_appointment.start_time|date:"M j" }} &mdash; {{ past_appointment.start_time|time:"g:i A" }}</div>
+    </div>
+    {% empty %}
+    <div class="session-empty">No past appointments.</div>
+    {% endfor %}
+
+  </div>
+</section>
+
+<!---------------- Canceled Appointments ---------------->
+<section class="sessions-section">
+  <div class="section-header">
+    <div class="section-label">Schedule</div>
+    <h2>Canceled <em>Appointments</em></h2>
+    <p>Your canceled training appointments.</p>
+  </div>
+
+  <div class="sessions-list">
+    {% for canceled_appointment in canceled_appointments %}
+    <div class="session-row">
+      <div class="session-index">{{ forloop.counter|stringformat:"02d" }}</div>
+      <div class="session-info">
+        <div class="session-type">{{ canceled_appointment.coach.first_name }} {{ canceled_appointment.coach.last_name }}</div>
+        <div class="session-detail">{{ canceled_appointment.get_status_display }}</div>
+      </div>
+      <div class="session-time">{{ canceled_appointment.start_time|date:"M j" }} &mdash; {{ canceled_appointment.start_time|time:"g:i A" }}</div>
+    </div>
+    {% empty %}
+    <div class="session-empty">No canceled appointments.</div>
+    {% endfor %}
+
+  </div>
+</section>
+
+<!---------------- script to upload picture ---------------->
+<script>
+    document.getElementById('avatar-upload').addEventListener('change', function() {
+    document.getElementById('avatar-form').submit();
+    });
+</script>
+
+{% else %}
+<div class="profile-unauthenticated">
+  <p>Please <a href="{% url 'login' %}">log in</a> to view your profile.</p>
+</div>
+{% endif %}
+{% endblock %}

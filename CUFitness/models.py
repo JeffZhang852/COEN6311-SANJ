@@ -23,12 +23,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('STAFF', 'Staff'),
         ('ADMIN', 'Admin'),
     ]
-    role = models.CharField(
-        max_length=20,
-        choices=ROLE_CHOICES,
-        default='MEMBER',
-        verbose_name='user role'
-    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='MEMBER', verbose_name='user role')
 
     # Membership variations
     MEMBERSHIP_CHOICES = [
@@ -41,10 +36,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(_("first name"), max_length=50, default='')
     last_name = models.CharField(_("last name"), max_length=50, default='')
     membership= models.CharField(_("membership"), max_length=50, choices=MEMBERSHIP_CHOICES,default='BASIC')
-
     phone_number = models.CharField(max_length=20, default='', help_text='e.g. +1 514 555 0123')
     date_of_birth = models.DateField(null=True, help_text='Format: YYYY-MM-DD')
     address = models.CharField(max_length=255, default='', blank=True, help_text='Address here')
+
+    # Profile picture — optional, defaults to the generic silhouette
+    #upload_to='profile_pictures/' means uploaded photos go to MEDIA_ROOT/profile_pictures/
+    # default='defaults/...' points to the fallback image inside MEDIA_ROOT
+    profile_picture = models.ImageField(upload_to='profile_pictures/', default='defaults/Default_Profile_Picture.jpg',blank=True,)
 
     # Coach appointment request
     REQUEST_STATUS_CHOICES = [

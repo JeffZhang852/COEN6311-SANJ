@@ -1,0 +1,231 @@
+/* ═══════════════════════════════════════════
+   AUTHENTICATION  —  Login & Register
+   Matches home.css design system
+═══════════════════════════════════════════ */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-0);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 50% 50%, hsla(349,61%,20%,0.3) 0%, transparent 70%),
+    repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+  pointer-events: none;
+}
+
+/* ── Left panel: hidden ── */
+.auth-panel-left {
+  display: none;
+}
+
+/* ── Right panel: centered card ── */
+.auth-panel-right {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 56px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  margin: 40px 20px;
+}
+
+.auth-form-wrap {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-form-header {
+  margin-bottom: 40px;
+}
+
+.auth-form-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--cu-red);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.auth-form-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+.auth-form-header h1 em {
+  font-style: italic;
+  color: var(--cu-red);
+}
+
+.auth-form-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  line-height: 1.65;
+}
+
+/* ── Form fields ── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.auth-field input,
+.auth-field select {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.auth-field input::placeholder {
+  color: var(--text-muted);
+}
+
+.auth-field input:focus,
+.auth-field select:focus {
+  border-color: var(--cu-red);
+  background: var(--surface-2);
+}
+
+/* Django auto-generated form p tags */
+.auth-form p {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.auth-form p label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.auth-form p input,
+.auth-form p select {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.auth-form p input::placeholder { color: var(--text-muted); }
+.auth-form p input:focus,
+.auth-form p select:focus {
+  border-color: var(--cu-red);
+  background: var(--surface-2);
+}
+
+.auth-form ul.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.auth-form ul.errorlist li {
+  font-size: 12px;
+  color: hsl(349,61%,65%);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Submit button ── */
+.auth-submit {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--cu-red);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  margin-top: 8px;
+}
+.auth-submit:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+/* ── Footer link ── */
+.auth-footer-link {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.auth-footer-link a {
+  color: var(--cu-red);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.auth-footer-link a:hover { opacity: 0.75; }
+
+/* ── Already logged in ── */
+.auth-logged-in {
+  text-align: center;
+  padding: 48px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 540px) {
+  .auth-panel-right {
+    padding: 40px 24px;
+    margin: 20px 16px;
+  }
+}

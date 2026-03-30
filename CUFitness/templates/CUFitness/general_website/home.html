@@ -1,0 +1,141 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+{% block title %} CUFitness {% endblock %}
+
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'general_website/home.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO ================= -->
+<section class="home-hero" id="home">
+  <div class="home-hero-content">
+    <div class="home-hero-label">Concordia University Fitness</div>
+    <h1>Build Strength.<br><em>Gain Confidence.</em></h1>
+    <p class="home-hero-sub">
+      Train with expert coaches and achieve your fitness goals faster.
+      Expert-led programs, personalized plans, and a community that pushes you forward.
+    </p>
+    <div class="hero-cta-group">
+      <a href="{% url 'register' %}" class="hero-btn-primary">Join Now &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<div class="section-header">
+  <div class="section-label">What We Offer</div>
+  <h2>Our <em>Services</em></h2>
+  <p>Everything you need to reach your fitness goals — under one roof.</p>
+</div>
+
+<div class="services-grid">
+  <div class="service-card">
+    <div class="service-icon">&#127947;</div>
+    <div class="service-tag">Service &middot; 01</div>
+    <h3>Personal Training</h3>
+    <p>One-on-one coaching tailored to your fitness goals, schedule, and experience level.</p>
+  </div>
+
+  <div class="service-card">
+    <div class="service-icon">&#129367;</div>
+    <div class="service-tag">Service &middot; 03</div>
+    <h3>Nutrition Plans</h3>
+    <p>Custom diet plans designed by our experts to maximize your results and fuel your training.</p>
+  </div>
+
+  <div class="service-card">
+    <div class="service-icon">&#9889;</div>
+    <div class="service-tag">Service &middot; 02</div>
+    <h3>AI Assistant</h3>
+    <p>Available 24/7 to answer your training, nutrition, and recovery questions.</p>
+  </div>
+
+</div>
+
+<!-- ================= TRAINERS ================= -->
+<section class="trainers-section">
+  <div class="section-header">
+    <div class="section-label">Expert Coaches</div>
+    <h2>Meet Our <em>Trainers</em></h2>
+    <p>Certified professionals dedicated to helping you reach your potential.</p>
+  </div>
+
+    <div class="trainers-grid">
+        {% for coach in active_coaches %}
+            <div class="trainer-row">
+                <div class="trainer-info">
+                    <span>{{ coach.first_name }} {{ coach.last_name }}</span>
+                </div>
+            </div>
+        {% empty %}
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<div class="section-header">
+  <div class="section-label">Membership Plans</div>
+  <h2>Simple, Transparent <em>Pricing</em></h2>
+  <p>Choose the plan that works for you — upgrade or cancel anytime.</p>
+</div>
+
+<div class="pricing-grid">
+
+  <div class="pricing-card">
+    <div class="pricing-tier">Basic</div>
+    <div class="pricing-price">
+      <span class="currency">$</span>
+      <span class="amount">29</span>
+      <span class="period">/month</span>
+    </div>
+    <div class="pricing-divider"></div>
+    <ul class="pricing-features">
+      <li>Gym floor access</li>
+      <li>Locker room access</li>
+      <li>2 group classes/month</li>
+        <li>Nutrition articles access</li>
+    </ul>
+    <a href="{% url 'register' %}" class="pricing-cta">Get Started &rarr;</a>
+  </div>
+
+  <div class="pricing-card featured">
+    <div class="pricing-badge">Most Popular</div>
+    <div class="pricing-tier">Standard</div>
+    <div class="pricing-price">
+      <span class="currency">$</span>
+      <span class="amount">49</span>
+      <span class="period">/month</span>
+    </div>
+    <div class="pricing-divider"></div>
+    <ul class="pricing-features">
+        <li>Everything in Basic</li>
+        <li>Unlimited group classes</li>
+        <li>1 PT session/month</li>
+        <li>Recipes access</li>
+    </ul>
+    <a href="{% url 'register' %}" class="pricing-cta">Get Started &rarr;</a>
+  </div>
+
+  <div class="pricing-card">
+    <div class="pricing-tier">Platinum</div>
+    <div class="pricing-price">
+      <span class="currency">$</span>
+      <span class="amount">79</span>
+      <span class="period">/month</span>
+    </div>
+    <div class="pricing-divider"></div>
+    <ul class="pricing-features">
+      <li>Everything in Standard</li>
+      <li>4 PT sessions/month</li>
+      <li>Custom workout plans</li>
+      <li>Priority coach booking</li>
+    </ul>
+    <a href="{% url 'register' %}" class="pricing-cta">Get Started &rarr;</a>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -409,7 +409,7 @@ class LoginViewTest(TestCase):
         self.assertRedirects(response, reverse('home'))
 
     def test_coach_login_success(self):
-        response = self.client.post(reverse('login'), {
+        response = self.client.post(reverse('coach_login'), {
             'email': 'coach@test.com',
             'password': 'Pass@1234',
         })
@@ -489,16 +489,7 @@ class AccessControlTest(TestCase):
         response = self.client.get(reverse('staff_articles'))
         self.assertNotEqual(response.status_code, 200)
 
-    def test_unauthenticated_cannot_access_staff_home(self):
-        response = self.client.get(reverse('staff_home'))
-        self.assertNotEqual(response.status_code, 200)
-
     # --- Member cannot access staff pages ---
-
-    def test_member_cannot_access_staff_home(self):
-        self.client.force_login(self.member)
-        response = self.client.get(reverse('staff_home'))
-        self.assertNotEqual(response.status_code, 200)
 
     def test_member_cannot_access_articles_list(self):
         self.client.force_login(self.member)
@@ -1120,12 +1111,6 @@ class PublicPageTest(TestCase):
 
     def test_services_page(self):
         self.assertEqual(self.client.get(reverse('services')).status_code, 200)
-
-    def test_memberships_page(self):
-        self.assertEqual(self.client.get(reverse('memberships')).status_code, 200)
-
-    def test_trainers_page(self):
-        self.assertEqual(self.client.get(reverse('trainers')).status_code, 200)
 
     def test_nutrition_page(self):
         self.assertEqual(self.client.get(reverse('user_articles')).status_code, 200)

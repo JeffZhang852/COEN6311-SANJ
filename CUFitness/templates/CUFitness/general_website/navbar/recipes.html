@@ -1,0 +1,184 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+{% block title %} Nutrition & Recipes {% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'general_website/recipes.css' %}"/>
+{% endblock %}
+
+{% block content %}
+<div class="rec-hero">
+  <div class="rec-hero-label">Kitchen</div>
+  <h1>Performance<br><em>Recipes</em></h1>
+  <p class="rec-hero-sub">Chef-crafted meals built around your training — high protein, balanced macros, and actually delicious.</p>
+</div>
+
+
+  <div class="filter-bar">
+    <!-- Difficulty -->
+    <div class="filter-chip active" data-filter-type="difficulty" data-filter-value="all">All</div>
+    <div class="filter-chip" data-filter-type="difficulty" data-filter-value="easy">Easy</div>
+    <div class="filter-chip" data-filter-type="difficulty" data-filter-value="medium">Medium</div>
+    <div class="filter-chip" data-filter-type="difficulty" data-filter-value="hard">Hard</div>
+
+    <div class="filter-divider"></div>
+
+    <!-- Total time -->
+    <div class="filter-chip" data-filter-type="time" data-filter-value="under15">⏱ &lt;15 min</div>
+    <div class="filter-chip" data-filter-type="time" data-filter-value="under30">⏱ &lt;30 min</div>
+    <div class="filter-chip" data-filter-type="time" data-filter-value="under60">⏱ &lt;60 min</div>
+
+    <div class="filter-divider"></div>
+
+    <!-- Servings -->
+    <div class="filter-chip" data-filter-type="servings" data-filter-value="1">1 serving</div>
+    <div class="filter-chip" data-filter-type="servings" data-filter-value="2">2 servings</div>
+    <div class="filter-chip" data-filter-type="servings" data-filter-value="4">4+ servings</div>
+
+    <div class="filter-divider"></div>
+
+    <!-- Allergies / dietary -->
+    <div class="filter-chip" data-filter-type="diet" data-filter-value="NO_NUTS">No Nuts</div>
+    <div class="filter-chip" data-filter-type="diet" data-filter-value="NO_DAIRY_LACTOSE">No Dairy</div>
+    <div class="filter-chip" data-filter-type="diet" data-filter-value="NO_GLUTEN">No Gluten</div>
+    <div class="filter-chip" data-filter-type="diet" data-filter-value="VEGAN">Vegan</div>
+    <div class="filter-chip" data-filter-type="diet" data-filter-value="VEGETARIAN">Vegetarian</div>
+    <div class="filter-chip" data-filter-type="diet" data-filter-value="NO_SEAFOOD">No Seafood</div>
+  </div>
+
+  <div class="rec-grid">
+
+    {% for recipe in free_recipes %}
+      <a href="{% url 'recipe_details' recipe.id %}" class="rec-card"
+        data-difficulty="{{ recipe.difficulty|lower }}"
+        data-time="{{ recipe.total_time_minutes }}"
+        data-servings="{{ recipe.servings }}"
+        data-diet="{{ recipe.dietary_restrictions|join:',' }}"
+      >
+        <div class="rec-card-index">{{ forloop.counter }}</div>
+        <div class="rec-card-body">
+          <div class="rec-card-tag">
+            <span class="rec-card-tag-label">Recipe</span>
+            <span class="rec-card-diff diff-{{ recipe.difficulty|lower }}">{{ recipe.get_difficulty_display }}</span>
+          </div>
+          <h3>{{ recipe.title }}</h3>
+          <p>{{ recipe.description }}</p>
+          <span class="rec-card-meta">{{ recipe.servings }} serving{{ recipe.servings|pluralize }} · ⏱ {{ recipe.total_time_minutes }} min</span>
+        </div>
+        <div class="rec-card-arrow">→</div>
+      </a>
+    {% empty %}
+      <p style="padding:40px; color:var(--text-muted)">No recipes yet.</p>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+      {% for recipe in locked_recipes %}
+      <a href="{% url 'recipe_details' recipe.id %}" class="rec-card"
+        data-difficulty="{{ recipe.difficulty|lower }}"
+        data-time="{{ recipe.total_time_minutes }}"
+        data-servings="{{ recipe.servings }}"
+        data-diet="{{ recipe.dietary_restrictions|join:',' }}"
+      >
+        <div class="rec-card-index">{{ forloop.counter }}</div>
+        <div class="rec-card-body">
+          <div class="rec-card-tag">
+            <span class="rec-card-tag-label">Recipe · Members</span>
+            <span class="rec-card-diff diff-{{ recipe.difficulty|lower }}">{{ recipe.get_difficulty_display }}</span>
+          </div>
+          <h3>{{ recipe.title }}</h3>
+          <p>{{ recipe.description }}</p>
+          <span class="rec-card-meta">{{ recipe.servings }} serving{{ recipe.servings|pluralize }} · ⏱ {{ recipe.total_time_minutes }} min</span>
+        </div>
+        <div class="rec-card-arrow">→</div>
+      </a>
+      {% endfor %}
+    {% else %}
+      {% for recipe in locked_recipes %}
+      <a href="{% url 'login' %}" class="rec-card locked"
+        data-difficulty="{{ recipe.difficulty|lower }}"
+        data-time="{{ recipe.total_time_minutes }}"
+        data-servings="{{ recipe.servings }}"
+        data-diet="{{ recipe.dietary_restrictions|join:',' }}"
+      >
+        <div class="rec-card-index">{{ forloop.counter }}</div>
+        <div class="rec-card-body">
+          <div class="rec-card-tag">
+            <span class="rec-card-tag-label">Recipe</span>
+            <span class="rec-card-diff diff-{{ recipe.difficulty|lower }}">{{ recipe.get_difficulty_display }}</span>
+          </div>
+          <h3>{{ recipe.title }}</h3>
+          <p>{{ recipe.description }}</p>
+          <div class="locked-badge" style="margin-top:4px">🔒 Log in to view</div>
+        </div>
+        <div class="rec-card-arrow">→</div>
+      </a>
+      {% endfor %}
+    {% endif %}
+
+  </div>
+
+<!-- javascript for filter -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Track active filter per type
+  const active = { difficulty: 'all', time: null, servings: null, diet: null };
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const type = chip.dataset.filterType;
+      const value = chip.dataset.filterValue;
+
+      // Toggle off if already active (except 'all')
+      if (active[type] === value && value !== 'all') {
+        active[type] = null;
+        chip.classList.remove('active');
+      } else {
+        // Deactivate other chips of same type
+        document.querySelectorAll(`.filter-chip[data-filter-type="${type}"]`)
+          .forEach(c => c.classList.remove('active'));
+        active[type] = value;
+        chip.classList.add('active');
+      }
+
+      applyFilters();
+    });
+  });
+
+  function applyFilters() {
+    document.querySelectorAll('.rec-card').forEach(card => {
+      let show = true;
+
+      // Difficulty
+      if (active.difficulty && active.difficulty !== 'all') {
+        if (card.dataset.difficulty !== active.difficulty) show = false;
+      }
+
+      // Total time (uses total_time_minutes rendered as data-time)
+      if (active.time) {
+        const time = parseInt(card.dataset.time);
+        if (active.time === 'under15' && time >= 15) show = false;
+        if (active.time === 'under30' && time >= 30) show = false;
+        if (active.time === 'under60' && time >= 60) show = false;
+      }
+
+      // Servings
+      if (active.servings) {
+        const servings = parseInt(card.dataset.servings);
+        if (active.servings === '4') { if (servings < 4) show = false; }
+        else { if (servings !== parseInt(active.servings)) show = false; }
+      }
+
+      // Dietary restrictions — card must include the selected tag
+      if (active.diet) {
+        const cardDiet = card.dataset.diet ? card.dataset.diet.split(',') : [];
+        if (!cardDiet.includes(active.diet)) show = false;
+      }
+
+      card.style.display = show ? '' : 'none';
+    });
+  }
+});
+</script>
+
+
+{% endblock %}

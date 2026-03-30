@@ -8,14 +8,11 @@ urlpatterns = [
 
 # -----------   Navbar Pages  -----------
     path("services/", views.services, name='services'),
-    path("memberships/", views.memberships, name='memberships'),
-    path("trainers/", views.trainers, name='trainers'),
-
-    path("user_articles/", views.user_articles, name='user_articles'),
+    path("articles/", views.user_articles, name='user_articles'),
     path("workout_plans/", views.workout_plans, name='workout_plans'),
     path("user_recipes/", views.user_recipes, name='user_recipes'),
     #path("user_workouts/", views.user_workouts, name='user_workouts'),
-    #path("user_exercises/", views.user_exercises, name='user_exercises'),
+    path("user_exercises/", views.user_exercises, name='user_exercises'),
 
 
 # -----------   Dropdown Menu Pages  -----------
@@ -31,10 +28,14 @@ urlpatterns = [
 # -----------   User Authentication   -----------
     path("register/", views.Register.as_view(), name="register"),
     path("login/", views.login_user, name='login'),
+    path("coach_login/", views.coach_login, name='coach_login'),
     path('logout/', views.logout_user, name='logout'),
 
 # -----------   User Profile & Settings   -----------
     path('user_profile/', views.user_profile, name='user_profile'),
+    path("user_profile/upload_picture/", views.upload_picture, name='upload_picture'),
+    path('user_profile/delete-picture/', views.delete_picture, name='delete_picture'),
+
     path('user_settings/', views.user_settings, name='user_settings'),
     path('user_inbox/', views.user_inbox, name='user_inbox'),
     path('user_calendar/', views.user_calendar, name='user_calendar'),
@@ -44,9 +45,7 @@ urlpatterns = [
 
 # -----------   Staff Pages  -----------
     path('staff_login/', views.staff_login, name='staff_login'),
-    path('staff_home/', views.staff_home, name='staff_home'),
     path('staff_profile/', views.staff_profile, name='staff_profile'),
-    path('members/', views.members, name='members'),
     path('coach_requests/', views.coach_requests, name='coach_requests'),
     path('staff_reports/', views.staff_reports, name='staff_reports'),
     path('staff_messages/', views.staff_messages, name='staff_messages'),
@@ -116,7 +115,7 @@ urlpatterns = [
 
 # -----------   Coach Pages (legacy, might be merged) -----------
     # Coach list
-    path('coaches/', views.coach_list_view, name='coach_list'),
+    #path('coaches/', views.coach_list_view, name='coach_list'),
     # Coach dashboard (legacy)
     path('coach/dashboard/', views.coach_dashboard, name='coach_dashboard'),
     path('coach/availability/', views.manage_availability, name='manage_availability'),
