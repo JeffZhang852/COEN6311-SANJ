@@ -1,0 +1,101 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+
+{% block title %}Services{% endblock %}
+
+{% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'general_website/services.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="sv-hero">
+  <div class="sv-hero-bg"></div>
+  <div class="sv-hero-content">
+    <div class="sv-label">What We Offer</div>
+    <h1>Our Training <em>Services</em></h1>
+    <p class="sv-hero-sub">Designed to help you reach peak performance — whatever your starting point.</p>
+  </div>
+</section>
+
+<!-- ── SERVICE CARDS ── -->
+<section class="sv-section">
+  <div class="sv-label">Core Services</div>
+  <h2 class="sv-heading">Everything You Need <em>Under One Roof</em></h2>
+  <div class="sv-cards">
+    <div class="sv-card">
+      <div class="sv-card-icon">🏋️</div>
+      <h3>Personal Training</h3>
+      <p>Customized workout plans and 1-on-1 coaching tailored to your specific goals.</p>
+    </div>
+    <div class="sv-card">
+      <div class="sv-card-icon">🥗</div>
+      <h3>Nutrition Coaching</h3>
+      <p>Browse our recipes for meal ideas and macro guidance tailored to your fitness goals and lifestyle.</p>
+    </div>
+    <div class="sv-card">
+      <div class="sv-card-icon">💪</div>
+      <h3>Strength Programs</h3>
+      <p>Build muscle and improve endurance with programs that actually work.</p>
+    </div>
+    <div class="sv-card">
+      <div class="sv-card-icon">💻</div>
+      <h3>AI-Powered Fitness Coaching</h3>
+      <p>Communicate with state-of-the-art AI powered fitness assistant to guide you throughout your fitness journey</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── EQUIPMENT ── -->
+<section class="sv-section sv-section--alt">
+  <div class="sv-label">The Floor</div>
+  <h2 class="sv-heading">Our <em>Equipment</em></h2>
+  {% if equipment_list %}
+  <p class="sv-sub">We have <strong>{{ total_equipment_items }}</strong> pieces of equipment ready for you.</p>
+  {% endif %}
+  <div class="sv-equipment-grid">
+    {% for item in equipment_list %}
+    <div class="sv-equip-card">
+      <div class="sv-equip-qty">{{ item.quantity }}</div>
+      <h3>{{ item.name }}</h3>
+      {% if item.description %}
+        <p>{{ item.description }}</p>
+      {% endif %}
+    </div>
+    {% empty %}
+    <p class="sv-empty">No equipment listed at the moment.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ── FEATURED PROGRAM ── -->
+<section class="sv-feature">
+  <div class="sv-feature-inner">
+    <div class="sv-label">Premium</div>
+    <h2>Intelligent <em>Transformation</em> Program</h2>
+    <p>Our flagship offering combines AI-driven workout planning, personalized nutrition, and dedicated 1-on-1 coaching — all in one seamless program built around you.</p>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="sv-cta">
+  <div class="sv-cta-inner">
+    <h2>Ready to Get <em>Started?</em></h2>
+    <p>Join CUFitness today and take the first step toward your best self.</p>
+    <a href="{% url 'register' %}" class="sv-btn">Join Now</a>
+  </div>
+</section>
+
+<script>
+  const cards = document.querySelectorAll('.sv-card, .sv-equip-card');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('sv--visible');
+    });
+  }, { threshold: 0.15 });
+  cards.forEach(c => observer.observe(c));
+</script>
+
+{% endblock %}

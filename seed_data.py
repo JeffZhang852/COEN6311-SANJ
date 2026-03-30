@@ -20,7 +20,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "COEN6311.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from CUFitness.models import Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise
+from CUFitness.models import Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise, EquipmentList
 
 User = get_user_model()
 
@@ -161,7 +161,7 @@ member3 = create_user(
 # 4. Coach User
 # ─────────────────────────────────────────────
 print("\n── Creating Coach ──")
-coach = create_user(
+coach1 = create_user(
     email          = "coach1@cufitness.com",
     password       = "Coach@1234",
     first_name     = "Mike",
@@ -169,6 +169,30 @@ coach = create_user(
     role           = "COACH",
     membership     = "BASIC",
     phone_number   = "+1 514 900 0007",
+    address        = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
+    date_of_birth  = "1985-09-03",
+)
+
+coach2 = create_user(
+    email          = "coach2@cufitness.com",
+    password       = "Coach@1234",
+    first_name     = "George",
+    last_name      = "Thompson",
+    role           = "COACH",
+    membership     = "BASIC",
+    phone_number   = "+1 514 900 0008",
+    address        = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
+    date_of_birth  = "1985-09-03",
+)
+
+coach3 = create_user(
+    email          = "coach3@cufitness.com",
+    password       = "Coach@1234",
+    first_name     = "Sarah",
+    last_name      = "Thompson",
+    role           = "COACH",
+    membership     = "BASIC",
+    phone_number   = "+1 514 900 0009",
     address        = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
     date_of_birth  = "1985-09-03",
 )
@@ -487,7 +511,7 @@ create_recipe(
 )
 
 create_recipe(
-    author      = coach,
+    author      = coach2,
     title       = "Lean Turkey Meatballs with Zoodles",
     description = "Low-carb, high-protein dinner that's easy to batch cook for the week.",
     difficulty  = "MEDIUM",
@@ -549,7 +573,7 @@ create_recipe(
 )
 
 create_recipe(
-    author      = coach,
+    author      = coach2,
     title       = "Athlete's Salmon & Sweet Potato Power Plate",
     description = "Premium performance meal optimised for muscle recovery and sustained energy.",
     difficulty  = "MEDIUM",
@@ -643,7 +667,7 @@ create_recipe(
 )
 
 create_recipe(
-    author      = coach,
+    author      = coach1,
     title       = "Spicy Tuna Rice Cake Stack",
     description = "A quick, no-cook high-protein snack or light lunch with zero prep drama.",
     difficulty  = "EASY",
@@ -741,7 +765,7 @@ create_recipe(
 )
 
 create_recipe(
-    author      = coach,
+    author      = coach3,
     title       = "Slow-Cooker Chicken & White Bean Stew",
     description = "Set it and forget it — a high-protein, gut-friendly stew ready when you get home.",
     difficulty  = "MEDIUM",
@@ -1363,7 +1387,7 @@ turkish_get_up = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = coach,
+    created_by   = coach1,
 )
 
 farmers_carry = create_exercise(
@@ -1380,7 +1404,7 @@ farmers_carry = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
-    created_by   = coach,
+    created_by   = coach1,
 )
 
 # ─────────────────────────────────────────────
@@ -1515,7 +1539,7 @@ create_workout(
 )
 
 create_workout(
-    author           = coach,
+    author           = coach2,
     title            = "Fat Burn HIIT Circuit",
     description      = "A high-intensity circuit designed to maximise calorie burn and cardiovascular fitness.",
     body             = (
@@ -1538,7 +1562,7 @@ create_workout(
 )
 
 create_workout(
-    author           = coach,
+    author           = coach3,
     title            = "Cardio & Core Conditioning",
     description      = "A moderate-intensity session combining cardiovascular work with core strengthening.",
     body             = (
@@ -1613,6 +1637,29 @@ create_workout(
     ],
 )
 
+# ─────────────────────────────────────────────
+# 9. Equipment
+# ─────────────────────────────────────────────
+print("\n── Creating Equipment ──")
+
+def create_equipment(name, description, quantity):
+    if EquipmentList.objects.filter(name=name).exists():
+        print(f"  [skip] Equipment already exists: '{name}'")
+        return
+    EquipmentList.objects.create(name=name, description=description, quantity=quantity)
+    print(f"  [created] Equipment: '{name}' x{quantity}")
+
+create_equipment("Barbell",          "Olympic 20kg barbell for compound lifts.",                      8)
+create_equipment("Dumbbells",        "Adjustable dumbbell rack ranging from 2.5kg to 50kg.",         20)
+create_equipment("Squat Rack",       "Full power rack with safety bars and pull-up attachment.",      4)
+create_equipment("Bench Press",      "Flat bench press station with barbell and weight plates.",      4)
+create_equipment("Cable Machine",    "Dual-pulley cable station for rows, pulldowns, and curls.",     3)
+create_equipment("Treadmill",        "Motorised treadmill with incline and heart rate monitor.",      6)
+create_equipment("Rowing Machine",   "Air-resistance rowing ergometer for full-body cardio.",         4)
+create_equipment("Kettlebells",      "Cast-iron kettlebell set from 8kg to 32kg.",                   16)
+create_equipment("Leg Press",        "Plate-loaded 45-degree leg press machine.",                     2)
+create_equipment("Pull-Up Station",  "Wall-mounted pull-up and dip station with multiple grips.",     3)
+
 
 # ─────────────────────────────────────────────
 # Summary
@@ -1624,6 +1671,7 @@ print(f"   Articles     : {Article.objects.count()} total")
 print(f"   Recipes      : {Recipe.objects.count()} total")
 print(f"   Exercises    : {Exercise.objects.count()} total")
 print(f"   Workout Plans: {WorkoutPlan.objects.count()} total")
+print(f"   Equipment    : {EquipmentList.objects.count()} total")
 print()
 print("Login credentials:")
 print("  Admin  : admin@cufitness.com   / Admin@1234")
@@ -1633,4 +1681,6 @@ print("  Members: member1@cufitness.com / Member@1234")
 print("           member2@cufitness.com / Member@1234")
 print("           member3@cufitness.com / Member@1234")
 print("  Coach  : coach1@cufitness.com  / Coach@1234")
+print("           coach2@cufitness.com  / Coach@1234")
+print("           coach3@cufitness.com  / Coach@1234")
 print("="*50)

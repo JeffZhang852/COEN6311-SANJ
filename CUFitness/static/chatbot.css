@@ -1,0 +1,338 @@
+:root {
+    --cu-red:      hsl(349, 61%, 50%);
+    --cu-red-glow: hsla(349, 61%, 50%, 0.15);
+    --surface-0: #0d0d0d;
+    --surface-1: #141414;
+    --surface-2: #1c1c1c;
+    --surface-3: #222222;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --text-primary: #f0ede8;
+    --text-secondary: #9a9490;
+    --text-muted: #5a5753;
+    --radius-lg: 20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body { background: var(--surface-0); font-family: 'DM Sans', sans-serif; }
+
+  /* ── Page layout ── */
+  .cb-page {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    padding: 0 80px 60px;
+  }
+
+  /* ── Hero header ── */
+  .cb-hero {
+    position: relative;
+    padding: 64px 0 48px;
+    overflow: hidden;
+  }
+  .cb-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 100% at 90% 50%, hsla(349,61%,20%,0.22) 0%, transparent 70%),
+      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+    pointer-events: none;
+  }
+  .cb-hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--cu-red);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .cb-hero-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--cu-red);
+  }
+  .cb-hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .cb-hero h1 em {
+    font-style: italic;
+    color: var(--cu-red);
+  }
+  .cb-hero-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 420px;
+    position: relative;
+  }
+
+  /* ── Chat window ── */
+  .cb-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface-1);
+  }
+
+  /* ── Chat header bar ── */
+  .cb-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .cb-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--cu-red-glow);
+    border: 1px solid hsla(349,61%,50%,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .cb-header-info {}
+  .cb-header-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  .cb-header-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .cb-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+
+  /* ── Messages area ── */
+  .cb-messages {
+    flex: 1;
+    height: 52vh;
+    min-height: 320px;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .cb-messages::-webkit-scrollbar { width: 4px; }
+  .cb-messages::-webkit-scrollbar-track { background: transparent; }
+  .cb-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── Welcome state ── */
+  .cb-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 12px;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+  .cb-welcome-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .cb-welcome p {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 280px;
+    line-height: 1.6;
+  }
+
+  /* ── Message bubbles ── */
+  .cb-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 72%;
+  }
+  .cb-msg.user { align-self: flex-end; align-items: flex-end; }
+  .cb-msg.bot  { align-self: flex-start; align-items: flex-start; }
+
+  .cb-msg-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 0 4px;
+  }
+
+  .cb-msg-bubble {
+    padding: 12px 18px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .cb-msg.user .cb-msg-bubble {
+    background: var(--cu-red);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .cb-msg.bot .cb-msg-bubble {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+  }
+
+  /* ── Typing indicator ── */
+  .cb-typing .cb-msg-bubble {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 18px;
+  }
+  .cb-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: cb-bounce 1.2s infinite ease-in-out;
+  }
+  .cb-dot:nth-child(2) { animation-delay: 0.2s; }
+  .cb-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes cb-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ── Input bar ── */
+  .cb-input-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  #message-input {
+    flex: 1;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #message-input::placeholder { color: var(--text-muted); }
+  #message-input:focus { border-color: var(--border-hover); }
+
+  .cb-send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--cu-red);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.15s;
+    color: #fff;
+    font-size: 16px;
+  }
+  .cb-send-btn:hover { opacity: 0.85; }
+  .cb-send-btn:active { transform: scale(0.95); }
+  .cb-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Upsell / login gate ── */
+  .cb-upsell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+  .cb-upsell-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+  }
+  .cb-upsell h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0 0 .75rem;
+  }
+  .cb-upsell h2 em {
+    font-style: italic;
+    color: var(--cu-red);
+  }
+  .cb-upsell p {
+    color: var(--text-secondary);
+    max-width: 460px;
+    line-height: 1.7;
+    font-size: 15px;
+    margin: 0 0 2rem;
+  }
+  .cb-upsell-btn {
+    display: inline-block;
+    padding: .8rem 2.2rem;
+    background: var(--cu-red);
+    color: #fff;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .cb-upsell-btn:hover  { opacity: 0.85; }
+  .cb-upsell-btn:active { transform: scale(0.97); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .cb-page    { padding: 0 20px 40px; }
+    .cb-hero    { padding: 40px 0 32px; }
+    .cb-messages { height: 45vh; padding: 20px; }
+    .cb-msg     { max-width: 88%; }
+  }

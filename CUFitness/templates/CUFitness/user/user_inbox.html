@@ -1,0 +1,154 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% block title %}Inbox{% endblock %}
+{% load static %}
+
+{% block extra_styles %}
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'user/user_inbox.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="inbox-wrap">
+
+  {% if is_member %}
+  <!-- ================= SIDEBAR — COMPOSE ================= -->
+  <aside class="inbox-sidebar">
+    <div>
+      <div class="inbox-sidebar-label">Messaging</div>
+      <h2>New <em>Message</em></h2>
+    </div>
+
+    <!-- Coach search -->
+    <div class="coach-search-wrap">
+      <div class="field-label">Search Coach</div>
+      <input type="text" id="coach-search" class="inbox-input" placeholder="Type a name...">
+      <div id="coach-results" class="coach-results" style="display:none;"></div>
+      <div id="selected-coach" class="selected-coach-pill" style="display:none;">
+        &#8594; <span id="recipient-name"></span>
+        <input type="hidden" id="recipient-id">
+      </div>
+    </div>
+
+    <!-- Compose form -->
+    <form method="post" action="{% url 'send_message' %}" class="compose-form">
+      {% csrf_token %}
+      <input type="hidden" name="recipient_id" id="form-recipient-id">
+
+      <div class="form-field">
+        <div class="field-label">Subject</div>
+        <input type="text" name="subject" class="inbox-input" placeholder="What's this about?" required maxlength="200">
+      </div>
+
+      <div class="form-field">
+        <div class="field-label">Message</div>
+        <textarea name="body" class="inbox-textarea" placeholder="Write your message..." required maxlength="5000"></textarea>
+      </div>
+
+      <button type="submit" class="send-btn">Send Message &rarr;</button>
+    </form>
+  </aside>
+  {% endif %}
+
+  <!-- ================= MAIN — MESSAGE LIST ================= -->
+  <main class="inbox-main">
+    <div class="inbox-main-header">
+      <div class="section-label">{{ is_member|yesno:"Conversations,Inbox" }}</div>
+      <h2>Your <em>Messages</em></h2>
+    </div>
+
+    <div class="messages-list">
+      {% for msg in messages %}
+      <div class="message-item {% if not msg.is_read and msg.recipient == user %}unread{% endif %}" id="msg-{{ msg.id }}">
+
+        <div class="message-meta">
+          <div class="message-from">
+            {% if msg.sender == user %}
+              To: <span>{{ msg.recipient.get_full_name|default:msg.recipient.email }}</span>
+            {% else %}
+              From: <span>{{ msg.sender.get_full_name|default:msg.sender.email }}</span>
+            {% endif %}
+          </div>
+          {% if not msg.is_read and msg.recipient == user %}
+            <div class="message-unread-dot"></div>
+          {% endif %}
+          <div class="message-timestamp">{{ msg.timestamp|date:"M d, Y · H:i" }}</div>
+        </div>
+
+        <div class="message-subject">{{ msg.subject }}</div>
+        <div class="message-body">{{ msg.body|linebreaksbr|truncatewords:50 }}</div>
+
+        <div class="message-actions">
+          {% if not is_member and msg.recipient == user and msg.sender.role == 'MEMBER' %}
+            <a href="{% url 'reply_message' msg.id %}" class="action-btn">&#8617; Reply</a>
+          {% endif %}
+          {% if msg.recipient == user and not msg.is_read %}
+            <button class="action-btn mark-read" data-id="{{ msg.id }}">&#10003; Mark Read</button>
+          {% endif %}
+        </div>
+
+      </div>
+      {% empty %}
+      <div class="inbox-empty">No messages yet.</div>
+      {% endfor %}
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // Coach search
+  const searchInput = document.getElementById('coach-search');
+  const resultsDiv  = document.getElementById('coach-results');
+  const selectedDiv = document.getElementById('selected-coach');
+  const recipientNameSpan = document.getElementById('recipient-name');
+  const recipientIdHidden = document.getElementById('recipient-id');
+  const formRecipientId   = document.getElementById('form-recipient-id');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const query = this.value;
+      if (query.length < 2) { resultsDiv.style.display = 'none'; resultsDiv.innerHTML = ''; return; }
+      fetch(`/api/coaches/search/?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(coaches => {
+          if (!coaches.length) { resultsDiv.style.display = 'none'; return; }
+          resultsDiv.innerHTML = coaches.map(c =>
+            `<div class="coach-result-item" data-id="${c.id}" data-name="${c.first_name} ${c.last_name}">
+              ${c.first_name} ${c.last_name} <span style="opacity:0.5;font-size:11px;">${c.email}</span>
+            </div>`
+          ).join('');
+          resultsDiv.style.display = 'block';
+          document.querySelectorAll('.coach-result-item').forEach(item => {
+            item.addEventListener('click', function () {
+              recipientIdHidden.value = this.dataset.id;
+              formRecipientId.value  = this.dataset.id;
+              recipientNameSpan.textContent = this.dataset.name;
+              selectedDiv.style.display = 'inline-flex';
+              resultsDiv.style.display = 'none';
+              searchInput.value = '';
+            });
+          });
+        });
+    });
+  }
+
+  // Mark as read
+  document.querySelectorAll('.mark-read').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const msgId = this.dataset.id;
+      fetch(`/mark_read/${msgId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+      }).then(res => res.json()).then(data => {
+        if (data.status === 'ok') {
+          const item = document.getElementById(`msg-${msgId}`);
+          item.classList.remove('unread');
+          item.querySelector('.message-unread-dot')?.remove();
+          this.remove();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

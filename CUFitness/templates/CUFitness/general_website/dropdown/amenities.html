@@ -1,0 +1,106 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+{% block title %} Amenities {% endblock %}
+
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'general_website/amenities.css' %}"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO ================= -->
+<div class="amenities-hero">
+  <div class="amenities-hero-inner">
+    <div class="amenities-hero-label">Facilities</div>
+    <h1>World-Class <em>Amenities</em></h1>
+    <p>Everything you need to train, recover, and thrive &mdash; all under one roof at Concordia University Fitness.</p>
+  </div>
+</div>
+
+<!-- ================= AMENITY SECTIONS ================= -->
+<div class="amenities-body">
+
+  <!-- 1. Cardio Zone -->
+  <section class="amenity-section">
+    <div class="amenity-content">
+      <div class="amenity-text">
+        <span class="amenity-tag">Amenity &middot; 01</span>
+        <h2>Cardio <em>Zone</em></h2>
+        <p>Equipped with treadmills, stationary bikes, ellipticals, and rowing machines. Perfect for endurance training and warm-ups.</p>
+        <ul class="amenity-features">
+          <li>Treadmills &amp; ellipticals</li>
+          <li>Stationary &amp; spin bikes</li>
+          <li>Rowing machines</li>
+          <li>Heart-rate monitoring</li>
+        </ul>
+      </div>
+      <div class="amenity-visual" aria-label="Cardio Zone">
+        <img src="{% static 'amenities_images/Cardio_Zone.jpg' %}" alt="Cardio Zone" class="amenity-photo">
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Strength Training -->
+  <section class="amenity-section reverse">
+    <div class="amenity-content">
+      <div class="amenity-text">
+        <span class="amenity-tag">Amenity &middot; 02</span>
+        <h2>Strength <em>Training</em></h2>
+        <p>Free weights, squat racks, benches, cable machines, and resistance equipment designed for progressive overload and muscle development.</p>
+        <ul class="amenity-features">
+          <li>Free weights up to 50 kg</li>
+          <li>Power racks &amp; squat stands</li>
+          <li>Cable &amp; pulley machines</li>
+          <li>Olympic benches</li>
+        </ul>
+      </div>
+      <div class="amenity-visual" aria-label="Strength Training">
+        <img src="{% static 'amenities_images/Strength_Training.jpg' %}" alt="Strength Training" class="amenity-photo">
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Locker Rooms -->
+  <section class="amenity-section">
+    <div class="amenity-content">
+      <div class="amenity-text">
+        <span class="amenity-tag">Amenity &middot; 03</span>
+        <h2>Locker <em>Rooms</em></h2>
+        <p>Secure lockers, shower facilities, and clean changing areas available for all active members.</p>
+        <ul class="amenity-features">
+          <li>Individual combination lockers</li>
+          <li>Private shower stalls</li>
+          <li>Complimentary towel service</li>
+          <li>Hair dryers &amp; mirrors</li>
+        </ul>
+      </div>
+      <div class="amenity-visual" aria-label="Locker Rooms">
+        <img src="{% static 'amenities_images/Locker_Rooms.jpg' %}" alt="Locker Rooms" class="amenity-photo">
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Massage Area -->
+  <section class="amenity-section reverse">
+    <div class="amenity-content">
+      <div class="amenity-text">
+        <span class="amenity-tag">Amenity &middot; 04</span>
+        <h2>Massage <em>Area</em></h2>
+        <p>Relax and recover with professional massage space designed to reduce muscle tension, improve mobility, and accelerate recovery after intense training sessions.</p>
+        <ul class="amenity-features">
+          <li>Professional massage tables</li>
+          <li>Trained massage therapists</li>
+          <li>Appointment booking available</li>
+          <li>Post-session recovery kits</li>
+        </ul>
+      </div>
+      <div class="amenity-visual" aria-label="Massage Area">
+        <img src="{% static 'amenities_images/Massage_Chairs.jpg' %}" alt="Massage Chairs" class="amenity-photo">
+      </div>
+    </div>
+  </section>
+
+</div><!-- /.amenities-body -->
+
+{% endblock %}
