@@ -40,6 +40,10 @@ class CoachRequestForm(forms.ModelForm):
         model = CustomUser
         fields = []  # No need to send stuff. May add notification via email later if needed.
 
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['profile_picture']
 
 class ArticleForm(forms.ModelForm):
     class Meta:
@@ -47,7 +51,6 @@ class ArticleForm(forms.ModelForm):
         fields = ['title','description', 'body', 'locked']
         exclude = ["author"] # we set it manually
         widgets = {}
-
 
 class RecipeForm(forms.ModelForm):
     class Meta:

@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CUFitness{% endblock %}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="{% static 'general_website/base.css' %}">
+    <link rel="stylesheet" href="{% static 'general_website/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'general_website/navbar.css' %}">
+
+    {% block extra_styles %}{% endblock %}
+</head>
+
+<body>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="cu-alert">
+      {{ message }}
+      <button class="cu-alert-close" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<header class="nav-header" id="nav-header">
+  <a href="/CUFitness/static" class="nav-logo">CU<span>Fitness</span></a>
+
+  <nav class="nav-links">
+
+    <a href="{% url 'services' %}" class="nav-link">Services</a>
+
+    <!-- Resources dropdown -->
+    <div class="nav-dropdown">
+      <button class="nav-link nav-drop-btn">
+        Resources
+        <span class="material-icons nav-chevron">expand_more</span>
+      </button>
+      <div class="nav-drop-panel">
+        <a href="{% url 'user_articles' %}">
+          <span class="material-icons">article</span> Articles
+        </a>
+        <a href="{% url 'user_recipes' %}">
+          <span class="material-icons">restaurant</span> Recipes
+        </a>
+        <a href="">
+          <span class="material-icons">fitness_center</span> Workout Plans
+        </a>
+        <a href="{% url 'user_exercises' %}">
+          <span class="material-icons">directions_run</span> Exercises
+        </a>
+        <a href="{% url 'user_challenges' %}">Challenges
+        </a>
+        <a href="{% url 'chatbot' %}">
+          <span class="material-icons">smart_toy</span> Fitness Assistant
+        </a>
+      </div>
+    </div>
+
+    <!-- More Info dropdown -->
+    <div class="nav-dropdown">
+      <button class="nav-link nav-drop-btn">
+        More
+        <span class="material-icons nav-chevron">expand_more</span>
+      </button>
+      <div class="nav-drop-panel">
+        <a href="{% url 'amenities' %}">
+          <span class="material-icons">star</span> Amenities
+        </a>
+        <a href="{% url 'schedule' %}">
+          <span class="material-icons">calendar_month</span> Gym Schedule
+        </a>
+        <a href="{% url 'contact' %}">
+          <span class="material-icons">mail</span> Contact Us
+        </a>
+        <a href="{% url 'about' %}">
+          <span class="material-icons">info</span> About
+        </a>
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- Account area -->
+  <div class="nav-account">
+    {% if user.is_authenticated %}
+      <div class="nav-dropdown">
+        <button class="nav-account-btn">
+          <span class="material-icons">account_circle</span>
+          <span class="nav-account-name">{{ user.first_name|default:user.email }}</span>
+          <span class="material-icons nav-chevron">expand_more</span>
+        </button>
+        <div class="nav-drop-panel nav-drop-panel--right">
+          <a href="{% url 'user_profile' %}">
+            <span class="material-icons">person</span> Profile
+          </a>
+          <a href="{% url 'user_inbox' %}">
+            <span class="material-icons">inbox</span> Inbox
+          </a>
+          <a href="{% url 'user_calendar' %}">
+            <span class="material-icons">calendar_month</span> Your Schedule
+          </a>
+          <a href="{% url 'user_saved_workouts' %}">
+            <span class="material-icons">fitness_center</span> Your Workouts
+          </a>
+          <a href="{% url 'user_saved_recipes' %}">
+            <span class="material-icons">restaurant</span> Your Recipes
+          </a>
+          <a href="{% url 'user_settings' %}">
+            <span class="material-icons">manage_accounts</span> Settings
+          </a>
+          <div class="nav-drop-divider"></div>
+          <a href="{% url 'logout' %}" class="nav-drop-danger">
+            <span class="material-icons">logout</span> Log Out
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="nav-dropdown">
+        <button class="nav-btn-ghost nav-drop-btn">
+          Log In
+          <span class="material-icons nav-chevron">expand_more</span>
+        </button>
+        <div class="nav-drop-panel nav-drop-panel--right">
+            <a href="{% url 'login' %}">
+                <span class="material-icons">login</span> Member Login
+            </a>
+            <a href="{% url 'coach_login' %}">
+                <span class="material-icons">badge</span> Coach Login
+            </a>
+            <a href="{% url 'staff_login' %}">
+                <span class="material-icons">badge</span> Staff Login
+            </a>
+
+        </div>
+      </div>
+      <a href="{% url 'register' %}" class="nav-btn-primary">Join Now</a>
+    {% endif %}
+  </div>
+
+  <!-- Mobile hamburger -->
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="{% url 'services' %}">Services</a>
+  <a href="{% url 'user_articles' %}">Articles</a>
+  <a href="{% url 'user_recipes' %}">Recipes</a>
+  <a href="{% url 'chatbot' %}">AI Chatbot</a>
+  <a href="{% url 'amenities' %}">Amenities</a>
+  <a href="{% url 'contact' %}">Contact</a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'user_profile' %}">Profile</a>
+    <a href="{% url 'logout' %}">Log Out</a>
+  {% else %}
+    <a href="{% url 'login' %}">Log In</a>
+    <a href="{% url 'register' %}">Join Now</a>
+  {% endif %}
+</div>
+<div class="nav-overlay" id="nav-overlay"></div>
+
+{% block content %}{% endblock %}
+
+{% include 'CUFitness/general_website/footer.html' %}
+
+<script>
+  // ── Scroll shrink ──
+  const header = document.getElementById('nav-header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('nav-header--scrolled', window.scrollY > 40);
+  });
+
+  // ── Click-based dropdowns ──
+  function closeAllDropdowns(except) {
+    document.querySelectorAll('.nav-dropdown').forEach(d => {
+      if (d === except) return;
+      d.classList.remove('nav-dropdown--open');
+      const panel = d.querySelector('.nav-drop-panel');
+      if (panel) panel.classList.remove('nav-drop-panel--open');
+    });
+  }
+
+  document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+    const btn   = dropdown.querySelector('.nav-drop-btn, .nav-account-btn');
+    const panel = dropdown.querySelector('.nav-drop-panel');
+    if (!btn || !panel) return;
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = panel.classList.contains('nav-drop-panel--open');
+      closeAllDropdowns();
+      if (!isOpen) {
+        dropdown.classList.add('nav-dropdown--open');
+        panel.classList.add('nav-drop-panel--open');
+      }
+    });
+  });
+
+  // Close when clicking anywhere outside
+  document.addEventListener('click', () => closeAllDropdowns());
+
+  // ── Mobile drawer ──
+  const hamburger = document.getElementById('nav-hamburger');
+  const drawer    = document.getElementById('nav-drawer');
+  const overlay   = document.getElementById('nav-overlay');
+  function toggleDrawer() {
+    drawer.classList.toggle('nav-drawer--open');
+    overlay.classList.toggle('nav-overlay--show');
+    hamburger.classList.toggle('nav-hamburger--open');
+  }
+  hamburger.addEventListener('click', toggleDrawer);
+  overlay.addEventListener('click', toggleDrawer);
+</script>
+
+</body>
+</html>

@@ -1,19 +1,17 @@
-from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
+from django.shortcuts import redirect, get_object_or_404, render
 from django.utils import timezone
 from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.http import HttpResponseNotAllowed
-
-from django.contrib.auth.decorators import permission_required, user_passes_test
+from django.contrib.auth.decorators import permission_required, user_passes_test, login_required
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo
-from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm,AppointmentResponseForm, PrivacySettingsForm
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo, Exercise
+from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm, AppointmentResponseForm, \
+    PrivacySettingsForm, ProfilePictureForm
 from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
-
-from django.contrib.auth import update_session_auth_hash
-from .forms import UpdateEmailForm, UpdatePasswordForm
+from .forms import UpdateEmailForm, UpdatePasswordForm, ProfilePictureForm
 
 # for calendar;
 from django.http import JsonResponse
@@ -22,14 +20,12 @@ from django.db import transaction
 
 # Chatbot
 import torch
-from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .apps import CUFitnessConfig
 
 # Appointment Making
 import uuid
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
 
 # Messaging
@@ -72,7 +68,12 @@ def home(request):
 
         return render(request, "CUFitness/staff/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
     else:
-        return render(request, 'CUFitness/home.html')
+        # send coaches for user_home page to display them
+        active_coaches = CustomUser.objects.filter(
+            role="COACH",
+            is_active=True
+        ).order_by("first_name")
+        return render(request, 'CUFitness/general_website/home.html', {"active_coaches": active_coaches})
 
 # region all navbar pages
 # -----------   Navbar Pages  -----------
@@ -83,50 +84,44 @@ def services(request):
         'equipment_list': equipment,
         'total_equipment_items': total_items,
     }
-    return render(request, 'CUFitness/navbar/services.html', context)
-
-def memberships(request):
-    return render(request, 'CUFitness/navbar/membership.html')
-
-
-#   TODO make it member only view, remove it from navbar options
-def trainers(request):
-    return render(request, 'CUFitness/navbar/trainers.html')
-
+    return render(request, 'CUFitness/general_website/navbar/services.html', context)
 
 def user_articles(request):
     free_articles = Article.objects.filter(locked=False)
     locked_articles = Article.objects.filter(locked=True)
-    return render(request, 'CUFitness/navbar/user_articles.html', {"free_articles": free_articles, "locked_articles": locked_articles})
+    return render(request, 'CUFitness/general_website/navbar/articles.html', {"free_articles": free_articles, "locked_articles": locked_articles})
 
 def workout_plans(request):
-    return render(request, 'CUFitness/navbar/workout_plans.html')
+    return render(request, 'CUFitness/general_website/navbar/workout_plans.html')
 
 def user_recipes(request):
     free_recipes = Recipe.objects.filter(locked=False)
     locked_recipes = Recipe.objects.filter(locked=True)
-    return render(request, "CUFitness/navbar/user_recipes.html", {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
+    return render(request, "CUFitness/general_website/navbar/recipes.html", {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
 
+def user_exercises(request):
+    exercises = Exercise.objects.all().order_by('muscle_group')
+    return render(request, "CUFitness/general_website/navbar/exercises.html", {"exercises": exercises})
 
 # -----------   Dropdown Menu Pages  -----------
 def amenities(request):
-    return render(request, 'CUFitness/dropdown/amenities.html')
+    return render(request, 'CUFitness/general_website/dropdown/amenities.html')
 
 def schedule(request):
-    return render(request, 'CUFitness/dropdown/schedule.html')
+    return render(request, 'CUFitness/general_website/dropdown/schedule.html')
 
 def contact(request):
-    return render(request, 'CUFitness/dropdown/contact.html')
+    return render(request, 'CUFitness/general_website/dropdown/contact.html')
 
 def about(request):
-    return render(request, 'CUFitness/dropdown/about.html')
+    return render(request, 'CUFitness/general_website/dropdown/about.html')
 
 # -----------   Footer Pages  -----------
 def faq(request):
-    return render(request, 'CUFitness/faq.html')
+    return render(request, 'CUFitness/general_website/faq.html')
 
 def policy(request):
-    return render(request, 'CUFitness/policy.html')
+    return render(request, 'CUFitness/general_website/policy.html')
 # endregion
 
 
@@ -135,14 +130,14 @@ def policy(request):
 class Register(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
-    template_name = "CUFitness/authentication_templates/register.html"
+    template_name = "CUFitness/general_website/authentication/register.html"
 
 def login_user(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
         user = authenticate(request, email=email, password=password)
-        if user is not None and (user.role == 'MEMBER' or user.role == 'COACH'):
+        if user is not None and (user.role == 'MEMBER'):
             login(request, user)
             messages.success(request, 'You have been logged in as ' + user.first_name)
             return redirect('home')
@@ -153,23 +148,69 @@ def login_user(request):
             messages.error(request, 'Invalid Account Email or Password')
             return redirect('login')
     else:
-        return render(request, 'CUFitness/authentication_templates/login.html')
+        return render(request, 'CUFitness/general_website/authentication/login.html')
 
 def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out')
     return redirect('home')
 
+def coach_login(request):
+    if request.method == 'POST':
+        email = request.POST['email'] # change these to whatever fields put in the form
+        password = request.POST['password']
+        user = authenticate(request, email=email, password=password)
+        # only log if coach
+        if user is not None and user.role == 'COACH':
+            login(request, user)
+            # display the first_name of the logged-in user
+            messages.success(request, 'You have been logged in as ' + user.first_name)
+
+            return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
+        else:
+            messages.error(request, 'Invalid Account Email or Password')
+            return redirect('coach_login')
+    else:
+        return render(request, 'CUFitness/coach/coach_login.html') # render the HTML template on first visit
+
 
 # -----------   User Profile & Account   -----------
 @login_required(login_url='login')
 def user_profile(request):
-    return render(request, 'CUFitness/user_profile/user_profile.html')
+    # send each user's past/upcoming appointments with coaches
+    now = timezone.now()
+    # select_related('coach') avoids N+1 queries when displaying the coach's name in the template
+    appointments = CoachAppointment.objects.filter(member=request.user).select_related('coach').order_by('start_time')
+    upcoming_appointments = appointments.filter(start_time__gte=now).exclude(status='CANCELLED')
+    past_appointments = appointments.filter(start_time__lt=now)
+    canceled_appointments = appointments.filter(status='CANCELLED')
+
+    context = {"upcoming_appointments":upcoming_appointments, "past_appointments":past_appointments, "canceled_appointments":canceled_appointments}
+
+    return render(request, 'CUFitness/user/user_profile.html', context)
+@login_required(login_url='login')
+@require_POST
+def upload_picture(request):
+    form = ProfilePictureForm(request.POST, request.FILES, instance=request.user)
+    if form.is_valid():
+        form.save()
+    return redirect('user_profile')
+
+@login_required(login_url='login')
+@require_POST
+def delete_picture(request):
+    user = request.user
+    # only delete if it's not the default
+    if user.profile_picture and user.profile_picture.name != 'defaults/Default_Profile_Picture.jpg':
+        user.profile_picture.delete(save=False)  # removes file from disk
+    user.profile_picture = 'defaults/Default_Profile_Picture.jpg'
+    user.save()
+    return redirect('user_profile')
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_settings(request):
-    """Settings page for members and coaches — email, password, privacy, coach request."""
+    # settings page for members and coaches — email, password, privacy, coach request.
     privacy_form = PrivacySettingsForm(instance=request.user)
     email_form = UpdateEmailForm(instance=request.user)
     password_form = UpdatePasswordForm(user=request.user)
@@ -215,12 +256,12 @@ def user_settings(request):
         'password_form': password_form,
         'coach_request_status': request.user.coach_request_status,
     }
-    return render(request, 'CUFitness/user_profile/settings.html', context)
+    return render(request, 'CUFitness/user/user_settings.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_inbox(request):
-    return render(request, 'CUFitness/user_profile/user_inbox.html')
+    return render(request, 'CUFitness/user/user_inbox.html')
 
 # @login_required(login_url='login')
 # @user_passes_test(lambda user: is_member(user) or is_coach(user))
@@ -356,7 +397,7 @@ def user_calendar(request):
         'calendar_events_json': json.dumps(calendar_events),
         'is_coach': False,
     }
-    return render(request, 'CUFitness/user_profile/user_calendar.html', context)
+    return render(request, 'CUFitness/user/user_calendar.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -434,17 +475,17 @@ def user_coach_schedule(request):
         'calendar_events_json': json.dumps(calendar_events),
         'gym_settings': json.dumps(gym_info),   # template expects this name
     }
-    return render(request, 'CUFitness/user_profile/user_coach_schedule.html', context)
+    return render(request, 'CUFitness/user/user_coach_schedule.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_saved_recipes(request):
-    return render(request, 'CUFitness/user_profile/user_saved_recipes.html')
+    return render(request, 'CUFitness/user/user_saved_recipes.html')
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_saved_workouts(request):
-    return render(request, 'CUFitness/user_profile/user_saved_workouts.html')
+    return render(request, 'CUFitness/user/user_saved_workouts.html')
 
 
 # calendar
@@ -521,7 +562,7 @@ def ajax_add_availability(request):
         except ValueError:
             return JsonResponse({'error': 'Invalid datetime format in slot'}, status=400)
 
-        # Validate each slot: not in past, exactly one hour, within gym hours
+        # Validate each slot: not in the past, exactly one hour, within gym hours
         if start_dt < now:
             return JsonResponse({'error': f'Slot {start_dt} is in the past'}, status=400)
         if (end_dt - start_dt) != timedelta(hours=1):
@@ -689,7 +730,6 @@ def ajax_cancel_series(request, group_id):
 
 
 # -----------   Staff Pages  -----------
-
 def staff_login(request):
     if request.method == 'POST':
         email = request.POST['email'] # change these to whatever fields put in the form
@@ -707,23 +747,6 @@ def staff_login(request):
             return redirect('staff_login')
     else:
         return render(request, 'CUFitness/staff/staff_login.html') # render the HTML template on first visit
-
-# prob not needed at this point
-# everything is handled through home function
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def staff_home(request):
-    active_members = CustomUser.objects.filter(
-        role="MEMBER",
-        is_active=True
-    ).order_by("first_name")
-
-    active_coaches = CustomUser.objects.filter(
-        role="COACH",
-        is_active=True
-    ).order_by("first_name")
-
-    return render(request, "CUFitness/staff/staff_home.html", {"active_members":active_members,"active_coaches":active_coaches})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -752,11 +775,6 @@ def staff_settings(request):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def members(request):
-    return render(request, 'CUFitness/staff/members.html')
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
 def coach_requests(request):
     pending = CustomUser.objects.filter(coach_request_status='PENDING')
     approved = CustomUser.objects.filter(coach_request_status='APPROVED')
@@ -772,7 +790,7 @@ def coach_requests(request):
 def handle_coach_request(request, user_id):
     """
     Staff-only. Approve or reject a member's coach request.
-    Expects a POST with 'action' = 'APPROVED' or 'REJECTED'.
+    expects a POST with 'action' = 'APPROVED' or 'REJECTED'.
     Approving also promotes the user's role from MEMBER → COACH.
     """
     if request.method != 'POST':
@@ -855,9 +873,9 @@ def article_details(request, id):
     article = get_object_or_404(Article, id=id)
 
     if request.user.is_authenticated:
-        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
     else:
-        base = 'CUFitness/base.html'
+        base = 'CUFitness/general_website/base.html'
 
 # make sure user can't enter the url manually to access the locked articles
 # An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
@@ -937,15 +955,15 @@ def create_recipe(request):
 
 def recipe_details(request, id):
     recipe = get_object_or_404(Recipe, id=id)
-    #the following is needed to get the "display" tags, since multiselectfield doesn't have that functionality by default unlike charfield
+    #the following is needed to get the "display" tags, since multi-select-field doesn't have that functionality by default unlike charfield
     # Build a lookup dict from the choices and map the stored codes to labels
     choices_dict = dict(Recipe.DIETARY_CHOICES)
     dietary_display = [choices_dict.get(code, code) for code in recipe.dietary_restrictions]
 
     if request.user.is_authenticated:
-        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
     else:
-        base = 'CUFitness/base.html'
+        base = 'CUFitness/general_website/base.html'
 
         # make sure user can't enter the url manually to access the locked recipes
         # An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
@@ -1056,13 +1074,12 @@ def delete_exercise(request, id):
 
 
 
-# ------------------------------------------------------------------
-
-
 
 
 # --- Member Views ---
 
+'''
+# not needed anymore... coach list is displayed in home page
 @login_required(login_url='login')
 @user_passes_test(is_member)
 def coach_list_view(request):
@@ -1070,6 +1087,8 @@ def coach_list_view(request):
 
     # TODO need a html page to display the list of coach. change url if necessary
     return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
+
+'''
 
 # --- Coach Views ---
 @login_required(login_url='login')
@@ -1132,7 +1151,7 @@ def delete_availability(request, slot_id):
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def manage_appointments(request):
-    """View pending appointments and respond."""
+    # View pending appointments and respond
     pending = (CoachAppointment.objects.filter
                (coach=request.user,
                 status='PENDING'
@@ -1175,8 +1194,8 @@ def chatbot(request):
         if not user_message:
             return JsonResponse({'error': 'Empty message'}, status=400)
 
-        tokenizer = CUFitnessConfig.tokenizer
-        model = CUFitnessConfig.model
+        from CUFitness.apps import get_chatbot_model
+        tokenizer, model = get_chatbot_model()
 
         # Format the message using the model's chat template
         # TinyLlama chat expects messages in a list of dicts with "role" and "content"
@@ -1358,7 +1377,7 @@ def user_inbox(request):
             'messages': messages,
             'is_member': False,
         }
-    return render(request, 'CUFitness/user_profile/user_inbox.html', context)
+    return render(request, 'CUFitness/user/user_inbox.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(is_member)
@@ -1423,7 +1442,7 @@ def reply_message(request, message_id):
         return redirect('user_inbox')
     else:
         # Show a simple form with original message quoted
-        return render(request, 'CUFitness/user_profile/user_coach_reply.html', {
+        return render(request, 'CUFitness/user/user_coach_reply.html', {
             'original': original
         })
 

@@ -1,0 +1,157 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+
+{% block title %}About Us — CUFitness{% endblock %}
+
+{% block extra_styles %}
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'general_website/about.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="ab-hero">
+  <div class="ab-hero-bg"></div>
+  <div class="ab-hero-content">
+    <div class="ab-label">Our Story</div>
+    <h1>Built for <em>Athletes.</em><br>Driven by <em>Purpose.</em></h1>
+    <p class="ab-hero-sub">CUFitness was founded on a simple belief — that world-class fitness should be accessible to everyone, not just the elite.</p>
+  </div>
+</section>
+
+<!-- ── WHO WE ARE ── -->
+<section class="ab-section">
+  <div class="ab-two-col">
+    <div class="ab-two-col-text">
+      <div class="ab-label">Who We Are</div>
+      <h2>More Than a Gym.<br><em>A Community.</em></h2>
+      <p>CUFitness started as a small training facility in Montreal and has grown into a full-service fitness hub serving hundreds of members across all fitness levels. We combine modern equipment, expert coaching, and cutting-edge AI tools to give every member an experience that is personal, effective, and motivating.</p>
+      <p>Whether you are picking up a barbell for the first time or preparing for a competition, our coaches, programs, and community are here to support every step of your journey.</p>
+    </div>
+    <div class="ab-two-col-visual">
+      <div class="ab-visual-card">
+        <div class="ab-visual-icon">🏋️</div>
+        <h3>Expert Coaching</h3>
+        <p>Every coach is certified, experienced, and matched to your specific goals and schedule.</p>
+      </div>
+      <div class="ab-visual-card">
+        <div class="ab-visual-icon">🤖</div>
+        <h3>AI-Powered Tools</h3>
+        <p>From our 24/7 fitness chatbot to smart programme recommendations — technology works for you.</p>
+      </div>
+      <div class="ab-visual-card">
+        <div class="ab-visual-icon">🥗</div>
+        <h3>Nutrition Support</h3>
+        <p>Unlock recipes, meal plans, and nutrition articles curated by our staff and coaches.</p>
+      </div>
+      <div class="ab-visual-card">
+        <div class="ab-visual-icon">📅</div>
+        <h3>Flexible Scheduling</h3>
+        <p>Book coach sessions, manage your calendar, and train on your own time — all in one place.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── VALUES ── -->
+<section class="ab-section ab-section--alt">
+  <div class="ab-label">What Drives Us</div>
+  <h2 class="ab-heading">Our <em>Core Values</em></h2>
+  <div class="ab-values">
+    <div class="ab-value">
+      <div class="ab-value-num">01</div>
+      <h3>Inclusivity</h3>
+      <p>We welcome every body, background, and fitness level. No judgment — only progress.</p>
+    </div>
+    <div class="ab-value">
+      <div class="ab-value-num">02</div>
+      <h3>Excellence</h3>
+      <p>From our equipment to our coaches, we hold everything we offer to the highest standard.</p>
+    </div>
+    <div class="ab-value">
+      <div class="ab-value-num">03</div>
+      <h3>Innovation</h3>
+      <p>We embrace technology to make training smarter — not just harder.</p>
+    </div>
+    <div class="ab-value">
+      <div class="ab-value-num">04</div>
+      <h3>Community</h3>
+      <p>The people around you matter. We build an environment where everyone lifts each other up.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── TIMELINE ── -->
+<section class="ab-section">
+  <div class="ab-label">Our Journey</div>
+  <h2 class="ab-heading">How We Got <em>Here</em></h2>
+  <div class="ab-timeline">
+    <div class="ab-tl-item">
+      <div class="ab-tl-year">2017</div>
+      <div class="ab-tl-dot"></div>
+      <div class="ab-tl-body">
+        <h3>Founded</h3>
+        <p>CUFitness opens its doors in Montreal with a small team of 3 coaches and a vision to make elite fitness accessible.</p>
+      </div>
+    </div>
+    <div class="ab-tl-item">
+      <div class="ab-tl-year">2019</div>
+      <div class="ab-tl-dot"></div>
+      <div class="ab-tl-body">
+        <h3>Expansion</h3>
+        <p>We doubled our floor space, added a dedicated strength area, and launched our first group fitness classes.</p>
+      </div>
+    </div>
+    <div class="ab-tl-item">
+      <div class="ab-tl-year">2022</div>
+      <div class="ab-tl-dot"></div>
+      <div class="ab-tl-body">
+        <h3>Online Platform</h3>
+        <p>Launched our digital platform — online coaching, personalised programmes, and member dashboards.</p>
+      </div>
+    </div>
+    <div class="ab-tl-item">
+      <div class="ab-tl-year">2024</div>
+      <div class="ab-tl-dot"></div>
+      <div class="ab-tl-body">
+        <h3>AI Integration</h3>
+        <p>Introduced our AI-powered fitness assistant, smart scheduling, and data-driven programme recommendations.</p>
+      </div>
+    </div>
+    <div class="ab-tl-item">
+      <div class="ab-tl-year">2026</div>
+      <div class="ab-tl-dot ab-tl-dot--active"></div>
+      <div class="ab-tl-body">
+        <h3>Today</h3>
+        <p>Over 500 active members, 15+ certified coaches, and a platform that keeps getting smarter.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="ab-cta">
+  <div class="ab-cta-inner">
+    <div class="ab-label">Ready?</div>
+    <h2>Start Your <em>Journey</em> Today</h2>
+    <p>Join CUFitness and get access to world-class coaching, AI-powered tools, and a community that has your back.</p>
+    <div class="ab-cta-btns">
+      <a href="{% url 'register' %}" class="ab-btn-primary">Join Now</a>
+      <a href="{% url 'contact' %}" class="ab-btn-ghost">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll(
+    '.ab-value, .ab-visual-card, .ab-tl-item, .ab-mission-stat'
+  );
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('ab--visible'); });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+</script>
+
+{% endblock %}

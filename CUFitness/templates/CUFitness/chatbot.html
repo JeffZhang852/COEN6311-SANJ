@@ -1,143 +1,152 @@
-{% extends 'CUFitness/base.html' %}
+{% extends 'CUFitness/general_website/base.html' %}
 {% load static %}
 
 {% block title %}Chatbot{% endblock %}
 
+{% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'chatbot.css' %}"/>
+{% endblock %}
+
 {% block content %}
-<!-- Centered container that scales with browser width -->
-<div class="chatbot-container">
-    <h2 class="text-dark">Chatbot</h2>
-    <div class="card chatbot-card">
-        <!-- Chat messages display area -->
-        <div class="card-body chat-display" id="chat-display">
-            <!-- Messages appear here -->
-        </div>
+{% if not user.is_authenticated %}
+  <div class="cb-upsell">
+    <div class="cb-upsell-icon">🤖</div>
+    <h2>Meet Your <em>AI-Powered</em> Fitness Assistant</h2>
+    <p>Get a membership now and enjoy our state-of-the-art AI powered fitness assistant —
+       available 24/7 to answer your training, nutrition, and recovery questions.</p>
+    <a href="{% url 'register' %}" class="cb-upsell-btn">Get a Membership</a>
+  </div>
+{% else %}
+<div class="cb-page">
 
-        <!-- Input form -->
-        <div class="card-footer chat-footer">
-            <form id="chat-form" method="post">
-                {% csrf_token %}
-                <div class="input-group">
-                    <input type="text" name="message" id="message-input" class="form-control" placeholder="Type your message..." autocomplete="off">
-                    <button class="btn btn-primary" type="submit">Send</button>
-                </div>
-            </form>
+  <!-- Hero -->
+  <div class="cb-hero">
+    <div class="cb-hero-label">AI Assistant</div>
+    <h1><em>Fitness</em> Chatbot</h1>
+    <p class="cb-hero-sub">Ask anything about training, nutrition, recovery, or your membership — powered by AI.</p>
+  </div>
+
+  <!-- Chat window -->
+  <div class="cb-window">
+
+    <!-- Header bar -->
+    <div class="cb-header">
+      <div class="cb-avatar">🤖</div>
+      <div class="cb-header-info">
+        <div class="cb-header-name">CUFitness Assistant</div>
+        <div class="cb-header-status">
+          <div class="cb-status-dot"></div>
+          Online
         </div>
+      </div>
     </div>
+
+    <!-- Messages -->
+    <div class="cb-messages" id="chat-display">
+      <div class="cb-welcome" id="cb-welcome">
+        <div class="cb-welcome-icon">💬</div>
+        <p>Ask me anything about workouts, nutrition, or your fitness goals.</p>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="cb-input-bar">
+      <form id="chat-form" method="post" style="display:contents">
+        {% csrf_token %}
+        <input type="text" name="message" id="message-input" placeholder="Ask about workouts, nutrition, recovery…" autocomplete="off">
+        <button class="cb-send-btn" type="submit" title="Send">&#10148;</button>
+      </form>
+    </div>
+
+  </div>
 </div>
-
-<style>
-    /* Container scales with browser width and stays centered */
-    .chatbot-container {
-        width: 80%;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-    }
-
-    /* Chat display area – height scales with viewport, light background */
-    .chat-display {
-        height: 60vh;
-        min-height: 300px;
-        overflow-y: auto;
-        background-color: #ffffff !important;
-        color: #212529 !important;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        padding: 15px;
-    }
-
-    /* Message bubbles – ensure dark text */
-    .chat-display .text-start .bg-light,
-    .chat-display .text-end .bg-light {
-        background-color: #e9ecef !important;
-        color: #212529 !important;
-    }
-
-
-    /* Footer area */
-    .chat-footer {
-        background-color: #f8f9fa !important;
-        border-top: 1px solid #dee2e6;
-    }
-
-    /* Input field */
-    #message-input {
-        color: #212529 !important;
-        background-color: #ffffff !important;
-    }
-    #message-input::placeholder {
-        color: #6c757d !important;
-    }
-</style>
 
 <script>
 document.getElementById('chat-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const input = document.getElementById('message-input');
-    const message = input.value.trim();
-    if (!message) return;
+  e.preventDefault();
+  const input = document.getElementById('message-input');
+  const message = input.value.trim();
+  if (!message) return;
 
-    // Disable input and button while waiting
-    input.disabled = true;
-    document.querySelector('#chat-form button').disabled = true;
+  // Hide welcome state
+  const welcome = document.getElementById('cb-welcome');
+  if (welcome) welcome.remove();
 
-    // Show user message immediately
-    appendMessage('user', message);
-    input.value = '';
+  input.disabled = true;
+  document.querySelector('.cb-send-btn').disabled = true;
+
+  appendMessage('user', message);
+  input.value = '';
+  scrollToBottom();
+
+  // Typing indicator
+  const typingId = 'typing-' + Date.now();
+  appendTyping(typingId);
+  scrollToBottom();
+
+  fetch('{% url "chatbot" %}', {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({ 'message': message })
+  })
+  .then(r => r.json())
+  .then(data => {
+    removeTyping(typingId);
+    appendMessage('bot', data.reply);
     scrollToBottom();
-
-    // Send AJAX request
-    fetch('{% url "chatbot" %}', {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({ 'message': message })
-    })
-    .then(response => response.json())
-    .then(data => {
-        appendMessage('bot', data.reply);
-        scrollToBottom();
-    })
-    .catch(error => {
-        appendMessage('bot', 'Sorry, an error occurred.');
-        console.error(error);
-    })
-    .finally(() => {
-        input.disabled = false;
-        document.querySelector('#chat-form button').disabled = false;
-        input.focus();
-    });
+  })
+  .catch(() => {
+    removeTyping(typingId);
+    appendMessage('bot', 'Sorry, an error occurred. Please try again.');
+  })
+  .finally(() => {
+    input.disabled = false;
+    document.querySelector('.cb-send-btn').disabled = false;
+    input.focus();
+  });
 });
 
 function appendMessage(sender, text) {
-    const display = document.getElementById('chat-display');
-    const div = document.createElement('div');
-    div.className = sender === 'user' ? 'text-end mb-2' : 'text-start mb-2';
-    div.innerHTML = `
-        <span class="badge ${sender === 'user' ? 'bg-primary' : 'bg-success'}">${sender === 'user' ? 'You' : 'Bot'}</span>
-        <div class="mt-1 p-2 bg-light rounded">${escapeHtml(text)}</div>
-    `;
-    display.appendChild(div);
+  const display = document.getElementById('chat-display');
+  const wrap = document.createElement('div');
+  wrap.className = 'cb-msg ' + sender;
+  wrap.innerHTML =
+    '<div class="cb-msg-label">' + (sender === 'user' ? 'You' : 'Assistant') + '</div>' +
+    '<div class="cb-msg-bubble">' + escapeHtml(text) + '</div>';
+  display.appendChild(wrap);
+}
+
+function appendTyping(id) {
+  const display = document.getElementById('chat-display');
+  const wrap = document.createElement('div');
+  wrap.className = 'cb-msg bot cb-typing';
+  wrap.id = id;
+  wrap.innerHTML =
+    '<div class="cb-msg-label">Assistant</div>' +
+    '<div class="cb-msg-bubble"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>';
+  display.appendChild(wrap);
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
 }
 
 function escapeHtml(unsafe) {
-    return unsafe.replace(/[&<>"']/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        if (m === '"') return '&quot;';
-        if (m === "'") return '&#039;';
-        return m;
-    });
+  return unsafe.replace(/[&<>"']/g, function(m) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m];
+  });
 }
 
 function scrollToBottom() {
-    const display = document.getElementById('chat-display');
-    display.scrollTop = display.scrollHeight;
+  const display = document.getElementById('chat-display');
+  display.scrollTop = display.scrollHeight;
 }
 </script>
+{% endif %}
 {% endblock %}
