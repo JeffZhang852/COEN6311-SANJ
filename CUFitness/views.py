@@ -33,7 +33,10 @@ from django.db.models import Q
 from .models import Message
 from .forms import MessageForm
 
-
+# Fitness Challenges
+from .models import Challenge, ChallengeParticipation
+from .forms import ChallengeForm
+from django.db.models import F
 
 User = get_user_model()
 
@@ -1472,3 +1475,156 @@ def ajax_reject_appointment(request, appointment_id):
     appointment.status = 'REFUSED'
     appointment.save()
     return JsonResponse({'success': True})
+
+
+## Fitness Challenges
+@login_required(login_url='login')
+def user_challenges(request):
+    challenges = Challenge.objects.all()
+
+    user_participation = ChallengeParticipation.objects.filter(user=request.user)
+    joined_ids = user_participation.values_list('challenge_id', flat=True)
+
+    # leaderboard (top users per challenge)
+    leaderboard_data = []
+
+    for challenge in Challenge.objects.all():
+        participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
+        
+        participants = (
+            participants_qs
+            .select_related('user')
+            .order_by('-progress')[:5]
+        )
+
+        top_participants = (
+            participants_qs
+            .select_related('user')
+            .order_by('-progress')[:5]
+        )
+
+        leaderboard_data.append({
+            'challenge': challenge,
+            'participants' : participants,
+            'top_participants': top_participants,
+            'count': participants_qs.count()
+        })
+
+    return render(request, 'CUFitness/general_website/navbar/user_challenges.html', {
+        'leaderboard_data': leaderboard_data,
+        'challenges': challenges,
+        'joined_ids': joined_ids,
+        'participations': user_participation,
+    })
+
+
+@login_required(login_url='login')
+def join_challenge(request, challenge_id):
+    challenge = get_object_or_404(Challenge, id=challenge_id)
+
+    ChallengeParticipation.objects.get_or_create(
+        user=request.user,
+        challenge=challenge
+    )
+
+    return redirect('user_challenges')
+
+
+@login_required(login_url='login')
+def update_progress(request, participation_id):
+    participation = get_object_or_404(
+        ChallengeParticipation,
+        id=participation_id,
+        user=request.user
+    )
+
+    if request.method == "POST":
+        increment = int(request.POST.get('progress', 0))
+
+        participation.progress += increment
+
+        # CAP the value
+        if participation.progress > participation.challenge.goal_target:
+            participation.progress = participation.challenge.goal_target
+
+        participation.save()
+        participation.refresh_from_db()
+
+    return redirect('user_challenges')
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def create_challenge(request):
+    if request.method == "POST":
+        form = ChallengeForm(request.POST)
+        if form.is_valid():
+            challenge = form.save(commit=False)
+            challenge.created_by = request.user
+            challenge.save()
+            return redirect('staff_challenges')
+    else:
+        form = ChallengeForm()
+
+    return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_challenges(request):
+    challenges = Challenge.objects.all()
+
+    return render(request, 'CUFitness/staff/challenges/challenges.html', {
+        'challenges': challenges
+    })
+
+def challenge_detail(request, id):
+    challenge = get_object_or_404(Challenge, id=id)
+
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+    else:
+        base = 'CUFitness/base.html'
+
+    participants = ChallengeParticipation.objects.filter(
+        challenge=challenge
+    ).select_related('user').order_by('-progress')
+
+    return render(request, 'CUFitness/staff/challenges/challenge_detail.html', {
+        'challenge': challenge,
+        'participants': participants,
+        'base_template': base,
+    })
+
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def edit_challenge(request, id):
+    challenge = get_object_or_404(Challenge, id=id)
+
+    if request.method == 'POST':
+        form = ChallengeForm(request.POST, instance=challenge)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Challenge updated successfully.')
+            return redirect('challenge_detail', id=challenge.id)
+    else:
+        form = ChallengeForm(instance=challenge)
+
+    return render(request, 'CUFitness/staff/challenges/create_challenge.html', {
+        'form': form,
+        'challenge': challenge
+    })
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def delete_challenge(request, id):
+    challenge = get_object_or_404(Challenge, id=id)
+
+    if request.method == 'POST':
+        challenge.delete()
+        messages.success(request, 'Challenge deleted successfully.')
+        return redirect('staff_challenges')
+
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    return redirect('challenge_detail', id=id)

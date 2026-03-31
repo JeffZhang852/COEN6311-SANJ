@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from .forms import CustomUserCreationForm, CoachRequestForm
 from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentList
-from .models import Article, Recipe, RecipeIngredient, GymInfo
+from .models import Article, Recipe, RecipeIngredient, GymInfo, Challenge, ChallengeParticipation
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -78,3 +78,22 @@ class GymInfoAdmin(admin.ModelAdmin):
     list_editable = ('is_open', 'open_time', 'close_time')
     ordering = ('day',)
 
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    list_display  = ('title', 'goal_target', 'start_date', 'end_date', 'created_by', 'created_at')
+    list_filter   = ('start_date', 'end_date', 'created_by')
+    search_fields = ('title', 'description', 'created_by__email')
+    ordering      = ('-created_at',)
+
+
+@admin.register(ChallengeParticipation)
+class ChallengeParticipationAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'challenge', 'progress', 'joined_at', 'progress_percentage_display')
+    list_filter   = ('challenge', 'joined_at')
+    search_fields = ('user__email', 'challenge__title')
+    ordering      = ('-joined_at',)
+
+    def progress_percentage_display(self, obj):
+        return f"{obj.progress_percentage()}%"
+    
+    progress_percentage_display.short_description = "Progress (%)"

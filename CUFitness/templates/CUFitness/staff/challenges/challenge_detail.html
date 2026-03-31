@@ -1,0 +1,123 @@
+{% extends base_template %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'general_website/article_details.css' %}">
+<link rel="stylesheet" href="{% static 'challenges_details.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="art-detail-page">
+  <div class="art-detail-container">
+
+    <div class="art-detail-header">
+
+        <div class="art-detail-tag">Challenge</div>
+
+        <div class="title-row">
+            <h1 class="art-detail-title">{{ challenge.title }}</h1>
+
+            {% if user.role == "STAFF" %}
+            <div class="article-actions">
+
+            {% if user == challenge.created_by or user.role == "ADMIN" %}
+            <a href="{% url 'edit_challenge' challenge.id %}" class="edit-btn">
+                <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </a>
+
+            <button class="delete-btn"
+                onclick="document.getElementById('delete-modal').style.display='flex'">
+                <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+            {% endif %}
+
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 🔥 AUTHOR SECTION (NEW) -->
+        <div class="art-detail-meta">
+
+            <div class="meta-avatar">
+            {{ challenge.created_by.first_name|first|default:"?" }}
+            {{ challenge.created_by.last_name|first|default:"" }}
+            </div>
+
+            <div class="meta-info">
+            <span class="meta-author">
+                {% if challenge.created_by %}
+                {{ challenge.created_by.first_name }} {{ challenge.created_by.last_name }}
+                {% else %}
+                Unknown Staff
+                {% endif %}
+            </span>
+
+            <span class="meta-date">
+                {{ challenge.created_at|date:"F d, Y" }}
+            </span>
+            </div>
+
+        </div>
+
+        <p class="art-detail-desc">{{ challenge.description }}</p>
+
+    </div>
+
+    <!-- Leaderboard / Participants -->
+    <div class="art-detail-body">
+        <h3>Participants</h3>
+        <p class="participant-count">
+            {{ participants|length }} joined
+        </p>
+
+        <div class="participant-list">
+
+            {% for p in participants %}
+            <div class="participant-row">
+
+                <span class="participant-name">
+                    {{ p.user.first_name }}
+                </span>
+
+                <span class="participant-progress">
+                    {{ p.progress }} / {{ challenge.goal_target }}
+                </span>
+
+                <span class="participant-status">
+                    {% if p.progress >= challenge.goal_target %}
+                        Completed
+                    {% else %}
+                        {{ p.progress_percentage  }}%
+                    {% endif %}
+                </span>
+
+            </div>
+            {% empty %}
+                <p>No participants yet</p>
+            {% endfor %}
+
+        </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+  <div class="modal-box">
+    <h3>Delete Challenge?</h3>
+    <p>This action cannot be undone.</p>
+
+    <form method="POST" action="{% url 'delete_challenge' challenge.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-confirm-delete">Delete</button>
+    </form>
+
+    <button onclick="document.getElementById('delete-modal').style.display='none'">
+      Cancel
+    </button>
+  </div>
+</div>
+
+{% endblock %}

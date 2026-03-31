@@ -1,0 +1,109 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'user_challenges.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="challenge-section">
+
+    <h2 class="section-title">Fitness Challenges</h2>
+
+    <div class="challenge-cards">
+        {% for challenge in challenges %}
+        <div class="challenge-card-user">
+            <h3>{{ challenge.title }}</h3>
+            <p>{{ challenge.description }}</p>
+            <p>Goal: {{ challenge.goal_target }}</p>
+
+            {% if user.role == "MEMBER" %}
+                {% if challenge.id in joined_ids %}
+                    <p>✅ Joined</p>
+                {% else %}
+                    <a href="{% url 'join_challenge' challenge.id %}">
+                        <button class="btn">Join</button>
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% empty %}
+            <p>No challenges available.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+
+<section class="challenge-section">
+    <h2 class="section-title">Your Progress</h2>
+
+    <div class="challenge-cards">
+        {% for p in participations %}
+        <div class="challenge-card-user">
+            <h3>{{ p.challenge.title }}</h3>
+
+            <p>{{ p.progress }} / {{ p.challenge.goal_target }}</p>
+            <p>{{ p.progress_percentage }}% complete</p>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ p.progress_percentage }}%;">
+                </div>
+            </div>
+
+            {% if p.progress < p.challenge.goal_target %}
+                <form method="POST" action="{% url 'update_progress' p.id %}">
+                    {% csrf_token %}
+                    <button name="progress" value="1">+1</button>
+                </form>
+            {% else %}
+                <p>Completed</p>
+            {% endif %}
+
+        </div>
+        {% empty %}
+            <p>You haven't joined any challenges yet.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="challenge-section">
+
+    <h2 class="section-title">Leaderboards</h2>
+
+    <div class="challenge-cards">
+
+        {% for item in leaderboard_data %}
+        <div class="challenge-card-user">
+
+            <!-- Challenge Name -->
+            <h3>{{ item.challenge.title }}</h3>
+            <p class="participant-count">
+                {% if item.count > 0 %}
+                    {{ item.count }} joined
+                {% else %}
+                    No participants yet
+                {% endif %}
+            </p>
+
+            <!-- Top Users -->
+            {% for entry in item.top_participants %}
+                <p>
+                    {{ forloop.counter }}. 
+                    {{ entry.user.first_name }} — 
+                    {{ entry.progress }} / {{ item.challenge.goal_target }}
+                </p>
+            {% empty %}
+                <p>No participants yet.</p>
+            {% endfor %}
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

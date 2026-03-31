@@ -127,4 +127,15 @@ urlpatterns = [
     path('send_message/', views.send_message, name='send_message'),
     path('reply_message/<int:message_id>/', views.reply_message, name='reply_message'),
     path('mark_read/<int:message_id>/', views.mark_read, name='mark_read'),
+
+    ## Fitness Challenges
+    path("create_challenge/", views.create_challenge, name='create_challenge'),
+    path("staff_challenges/", views.staff_challenges, name='staff_challenges'),
+    path("challenge/<int:id>/", views.challenge_detail, name="challenge_detail"),
+    path("edit_challenge/<int:id>/", views.edit_challenge, name="edit_challenge"),
+    path("delete_challenge/<int:id>/", views.delete_challenge, name="delete_challenge"),
+    path("user_challenges/", views.user_challenges, name='user_challenges'),
+    path("join_challenge/<int:challenge_id>/", views.join_challenge, name='join_challenge'),
+    path("update_progress/<int:participation_id>/", views.update_progress, name='update_progress'),
+
 ]

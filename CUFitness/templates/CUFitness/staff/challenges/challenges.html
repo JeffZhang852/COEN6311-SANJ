@@ -1,0 +1,47 @@
+{% extends 'CUFitness/staff/staff_base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'challenges_staff.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="challenge-hero">
+    <h1>Fitness <em>Challenges</em></h1>
+</div>
+
+<div class="create">
+    <a href="{% url 'create_challenge' %}" class="create-btn">
+        Create Challenge
+        <span class="material-icons">add</span>
+    </a>
+</div>
+<br>
+</br>
+
+<div class="challenge-grid">
+    {% for challenge in challenges %}
+    <div class="challenge-card">
+        
+        <a href="{% url 'challenge_detail' challenge.id %}" class="art-card">
+            <div class="art-card-index">{{ forloop.counter }}</div>
+
+            <div class="art-card-body">
+                <div class="art-card-tag">Challenge</div>
+                <h3>{{ challenge.title }}</h3>
+                <p>{{ challenge.description }}</p>
+
+                <span class="art-card-author">
+                    Goal: {{ challenge.goal_target }} ·
+                    {{ challenge.start_date|date:"M d" }}
+                </span>
+            </div>
+
+            <div class="art-card-arrow">→</div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

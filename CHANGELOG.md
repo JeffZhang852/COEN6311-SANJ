@@ -11,6 +11,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - added coach login option on home page -- for easier testing
 - added profile picturefor user/coaches/staff -with default picture- can upload/delete pictures
+- added Fitness Challenges module for user engagement & motivation
+- users can join challenges and track progress over time
+- staff can create, edit, and delete challenges through dedicated management UI
+- added leaderboard feature showing top participants per challenge
+- added Django admin support for managing challenges and participation
 
 ### Changed
 - redesigned the "home" page to fit the theme of the website
@@ -32,9 +37,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - redesigned the "user_calendar" page to fit the theme of the website
 - redesigned the "user_settings" page to fit the theme of the website
 - re-arranged some of the (html/css) files into sub-directories
+- redesigned challenge-related UI to match existing articles module styling
+- improved form usability with cancel button and structured layout
+- refined progress tracking logic to prevent exceeding challenge goals
 
 ### Fixed
--
+- resolved merge conflicts after integrating latest main branch updates
 
 ### Removed
 - removed unused/old HTML files (old login/register files)
