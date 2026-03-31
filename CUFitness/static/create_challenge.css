@@ -60,3 +60,35 @@
 .challenge-container button:hover {
     opacity: 0.9;
 }
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-primary {
+    padding: 8px 16px;
+    background-color: #0b0bcf;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #3f3fdd;
+}
+
+.btn-secondary {
+    padding: 8px 16px;
+    background-color: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #666;
+}

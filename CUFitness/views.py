@@ -1510,7 +1510,7 @@ def user_challenges(request):
             'count': participants_qs.count()
         })
 
-    return render(request, 'CUFitness/navbar/user_challenges.html', {
+    return render(request, 'CUFitness/general_website/navbar/user_challenges.html', {
         'leaderboard_data': leaderboard_data,
         'challenges': challenges,
         'joined_ids': joined_ids,

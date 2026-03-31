@@ -22,6 +22,8 @@ django.setup()
 from django.contrib.auth import get_user_model
 from CUFitness.models import Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise, EquipmentList, Challenge
 
+from django.utils import timezone
+from datetime import datetime
 
 User = get_user_model()
 
@@ -1667,24 +1669,28 @@ create_equipment("Pull-Up Station",  "Wall-mounted pull-up and dip station with 
 # ─────────────────────────────────────────────
 print("\n── Creating Challenges ──")
 
+start_date = timezone.make_aware(datetime(2026, 4, 1))
+end_date = timezone.make_aware(datetime(2026, 4, 7))
+end_date_2 = timezone.make_aware(datetime(2026, 4, 14))
+
 Challenge.objects.get_or_create(
     title="7-Day Push-Up Challenge",
     description="Complete 50 push-ups daily for 7 days.",
     goal_target=7,
-    start_date="2026-04-01",
-    end_date="2026-04-07",
+    start_date=start_date,
+    end_date=end_date,
     created_by=staff1,
-    created_at="2026-04-01"
+    created_at=start_date
 )
 
 Challenge.objects.get_or_create(
     title="10K Steps Daily",
     description="Walk 10,000 steps every day for 14 days.",
     goal_target=14,
-    start_date="2026-04-01",
-    end_date="2026-04-14",
+    start_date=start_date,
+    end_date=end_date_2,
     created_by=staff2,
-    created_at="2026-04-01"
+    created_at=start_date
 )
 
 

@@ -21,7 +21,18 @@
                     {{ field.errors }}
                 </div>
             {% endfor %}
-            <button>Create</button>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    {% if challenge %}Update{% else %}Create{% endif %}
+                </button>
+
+                <button type="button"
+                    class="btn-secondary"
+                    onclick="window.location.href='{% if challenge %}{% url 'challenge_detail' challenge.id %}{% else %}{% url 'staff_challenges' %}{% endif %}'">
+                    Cancel
+                </button>
+
+            </div>
         </form>
 
     </div>
