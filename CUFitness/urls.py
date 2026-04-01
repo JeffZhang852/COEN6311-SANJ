@@ -1,6 +1,23 @@
-from django.urls import path
+# CUFitness/urls.py
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token   # optional – only if you enable token auth
 from . import views
 
+# ---- REST API Router ----
+router = DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'availabilities', views.CoachAvailabilityViewSet)
+router.register(r'appointments', views.CoachAppointmentViewSet)
+router.register(r'articles', views.ArticleViewSet)
+router.register(r'recipes', views.RecipeViewSet)
+router.register(r'workouts', views.WorkoutPlanViewSet)
+router.register(r'exercises', views.ExerciseViewSet)
+router.register(r'messages', views.MessageViewSet)
+router.register(r'challenges', views.ChallengeViewSet)
+router.register(r'challenge-participations', views.ChallengeParticipationViewSet)
+router.register(r'gym-info', views.GymInfoViewSet)
 
 urlpatterns = [
 
@@ -138,4 +155,10 @@ urlpatterns = [
     path("join_challenge/<int:challenge_id>/", views.join_challenge, name='join_challenge'),
     path("update_progress/<int:participation_id>/", views.update_progress, name='update_progress'),
 
+    # ----- REST API endpoints -----
+    path('api/', include(router.urls)),
+    # Browsable API login/logout
+    path('api-auth/', include('rest_framework.urls')),
+    # Optional: token authentication endpoint (if you decide to enable it later)
+    # path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]

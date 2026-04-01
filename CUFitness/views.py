@@ -1,3 +1,5 @@
+# CUFitness/views.py
+
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.shortcuts import redirect, get_object_or_404, render
 from django.utils import timezone
@@ -7,7 +9,8 @@ from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import permission_required, user_passes_test, login_required
 from django.contrib import messages
 
-from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, GymInfo, Exercise
+from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, \
+    GymInfo, Exercise, WorkoutPlan
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm, AppointmentResponseForm, \
     PrivacySettingsForm, ProfilePictureForm
 from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
@@ -38,20 +41,42 @@ from .models import Challenge, ChallengeParticipation
 from .forms import ChallengeForm
 from django.db.models import F
 
+# =============================================================================
+# REST API (Django REST Framework) – new imports
+# =============================================================================
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+
+from .serializers import (
+    UserSerializer, CoachAvailabilitySerializer, CoachAppointmentSerializer,
+    ArticleSerializer, RecipeSerializer, WorkoutPlanSerializer, ExerciseSerializer,
+    MessageSerializer, ChallengeSerializer, ChallengeParticipationSerializer,
+    GymInfoSerializer
+)
+
 User = get_user_model()
+
 
 # Role checker. Needed to tell which account it is.
 def is_member(user):
     return user.is_authenticated and user.role == 'MEMBER'
 
+
 def is_coach(user):
     return user.is_authenticated and user.role == 'COACH'
+
 
 def is_staff_user(user):
     return user.is_authenticated and user.is_staff
 
+
 def is_admin_user(user):
     return user.is_authenticated and user.role == 'ADMIN'
+
 
 def home(request):
     if request.user.is_authenticated and request.user.role == 'STAFF':
@@ -66,7 +91,8 @@ def home(request):
             is_active=True
         ).order_by("first_name")
 
-        return render(request, "CUFitness/staff/staff_home.html", {"active_members": active_members, "active_coaches": active_coaches})
+        return render(request, "CUFitness/staff/staff_home.html",
+                      {"active_members": active_members, "active_coaches": active_coaches})
     else:
         # send coaches for user_home page to display them
         active_coaches = CustomUser.objects.filter(
@@ -74,6 +100,7 @@ def home(request):
             is_active=True
         ).order_by("first_name")
         return render(request, 'CUFitness/general_website/home.html', {"active_coaches": active_coaches})
+
 
 # region all navbar pages
 # -----------   Navbar Pages  -----------
@@ -86,42 +113,56 @@ def services(request):
     }
     return render(request, 'CUFitness/general_website/navbar/services.html', context)
 
+
 def user_articles(request):
     free_articles = Article.objects.filter(locked=False)
     locked_articles = Article.objects.filter(locked=True)
-    return render(request, 'CUFitness/general_website/navbar/articles.html', {"free_articles": free_articles, "locked_articles": locked_articles})
+    return render(request, 'CUFitness/general_website/navbar/articles.html',
+                  {"free_articles": free_articles, "locked_articles": locked_articles})
+
 
 def workout_plans(request):
     return render(request, 'CUFitness/general_website/navbar/workout_plans.html')
 
+
 def user_recipes(request):
     free_recipes = Recipe.objects.filter(locked=False)
     locked_recipes = Recipe.objects.filter(locked=True)
-    return render(request, "CUFitness/general_website/navbar/recipes.html", {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
+    return render(request, "CUFitness/general_website/navbar/recipes.html",
+                  {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
+
 
 def user_exercises(request):
     exercises = Exercise.objects.all().order_by('muscle_group')
     return render(request, "CUFitness/general_website/navbar/exercises.html", {"exercises": exercises})
 
+
 # -----------   Dropdown Menu Pages  -----------
 def amenities(request):
     return render(request, 'CUFitness/general_website/dropdown/amenities.html')
 
+
 def schedule(request):
     return render(request, 'CUFitness/general_website/dropdown/schedule.html')
+
 
 def contact(request):
     return render(request, 'CUFitness/general_website/dropdown/contact.html')
 
+
 def about(request):
     return render(request, 'CUFitness/general_website/dropdown/about.html')
+
 
 # -----------   Footer Pages  -----------
 def faq(request):
     return render(request, 'CUFitness/general_website/faq.html')
 
+
 def policy(request):
     return render(request, 'CUFitness/general_website/policy.html')
+
+
 # endregion
 
 
@@ -131,6 +172,7 @@ class Register(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
     template_name = "CUFitness/general_website/authentication/register.html"
+
 
 def login_user(request):
     if request.method == 'POST':
@@ -150,14 +192,16 @@ def login_user(request):
     else:
         return render(request, 'CUFitness/general_website/authentication/login.html')
 
+
 def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out')
     return redirect('home')
 
+
 def coach_login(request):
     if request.method == 'POST':
-        email = request.POST['email'] # change these to whatever fields put in the form
+        email = request.POST['email']  # change these to whatever fields put in the form
         password = request.POST['password']
         user = authenticate(request, email=email, password=password)
         # only log if coach
@@ -166,12 +210,13 @@ def coach_login(request):
             # display the first_name of the logged-in user
             messages.success(request, 'You have been logged in as ' + user.first_name)
 
-            return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
+            return redirect(
+                'home')  # cant write it as home.html because it's reverse searching for a template with the name "home"
         else:
             messages.error(request, 'Invalid Account Email or Password')
             return redirect('coach_login')
     else:
-        return render(request, 'CUFitness/coach/coach_login.html') # render the HTML template on first visit
+        return render(request, 'CUFitness/coach/coach_login.html')  # render the HTML template on first visit
 
 
 # -----------   User Profile & Account   -----------
@@ -185,9 +230,12 @@ def user_profile(request):
     past_appointments = appointments.filter(start_time__lt=now)
     canceled_appointments = appointments.filter(status='CANCELLED')
 
-    context = {"upcoming_appointments":upcoming_appointments, "past_appointments":past_appointments, "canceled_appointments":canceled_appointments}
+    context = {"upcoming_appointments": upcoming_appointments, "past_appointments": past_appointments,
+               "canceled_appointments": canceled_appointments}
 
     return render(request, 'CUFitness/user/user_profile.html', context)
+
+
 @login_required(login_url='login')
 @require_POST
 def upload_picture(request):
@@ -195,6 +243,7 @@ def upload_picture(request):
     if form.is_valid():
         form.save()
     return redirect('user_profile')
+
 
 @login_required(login_url='login')
 @require_POST
@@ -206,6 +255,7 @@ def delete_picture(request):
     user.profile_picture = 'defaults/Default_Profile_Picture.jpg'
     user.save()
     return redirect('user_profile')
+
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
@@ -240,7 +290,7 @@ def user_settings(request):
                 messages.success(request, 'Password updated successfully.')
                 return redirect('user_settings')
 
-# server-side check to prevent multiple submissions
+        # server-side check to prevent multiple submissions
         elif 'coach_request_submit' in request.POST:
             if request.user.coach_request_status in ('NONE', 'REJECTED'):
                 request.user.coach_request_status = 'PENDING'
@@ -258,10 +308,12 @@ def user_settings(request):
     }
     return render(request, 'CUFitness/user/user_settings.html', context)
 
+
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_inbox(request):
     return render(request, 'CUFitness/user/user_inbox.html')
+
 
 # @login_required(login_url='login')
 # @user_passes_test(lambda user: is_member(user) or is_coach(user))
@@ -399,6 +451,7 @@ def user_calendar(request):
     }
     return render(request, 'CUFitness/user/user_calendar.html', context)
 
+
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def user_coach_schedule(request):
@@ -473,14 +526,16 @@ def user_coach_schedule(request):
         'auto_accept': auto_accept,
         'upcoming_avail': upcoming_avail,
         'calendar_events_json': json.dumps(calendar_events),
-        'gym_settings': json.dumps(gym_info),   # template expects this name
+        'gym_settings': json.dumps(gym_info),  # template expects this name
     }
     return render(request, 'CUFitness/user/user_coach_schedule.html', context)
+
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_saved_recipes(request):
     return render(request, 'CUFitness/user/user_saved_recipes.html')
+
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
@@ -603,9 +658,9 @@ def ajax_add_availability(request):
 
                 # Skip if already exists (should not, but safety)
                 if CoachAvailability.objects.filter(
-                    coach=request.user,
-                    start_time=slot_start,
-                    end_time=slot_end
+                        coach=request.user,
+                        start_time=slot_start,
+                        end_time=slot_end
                 ).exists():
                     continue
 
@@ -634,6 +689,7 @@ def ajax_add_availability(request):
         'created': len(created_slots),
         'recurrence_group': str(recurrence_group) if recurrence_group else None
     })
+
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -732,7 +788,7 @@ def ajax_cancel_series(request, group_id):
 # -----------   Staff Pages  -----------
 def staff_login(request):
     if request.method == 'POST':
-        email = request.POST['email'] # change these to whatever fields put in the form
+        email = request.POST['email']  # change these to whatever fields put in the form
         password = request.POST['password']
         user = authenticate(request, email=email, password=password)
         # only log in staff members
@@ -741,17 +797,20 @@ def staff_login(request):
             # display the first_name of the logged-in user
             messages.success(request, 'You have been logged in as ' + user.first_name)
 
-            return redirect('home') # cant write it as home.html because it's reverse searching for a template with the name "home"
+            return redirect(
+                'home')  # cant write it as home.html because it's reverse searching for a template with the name "home"
         else:
             messages.error(request, 'Invalid Account Email or Password')
             return redirect('staff_login')
     else:
-        return render(request, 'CUFitness/staff/staff_login.html') # render the HTML template on first visit
+        return render(request, 'CUFitness/staff/staff_login.html')  # render the HTML template on first visit
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_profile(request):
     return render(request, 'CUFitness/staff/staff_profile.html')
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -773,6 +832,7 @@ def staff_settings(request):
         'password_form': password_form,
     })
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def coach_requests(request):
@@ -784,6 +844,7 @@ def coach_requests(request):
         'approved_requests': approved,
         'rejected_requests': rejected,
     })
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -807,7 +868,7 @@ def handle_coach_request(request, user_id):
 
     if action == 'APPROVED':
         member.coach_request_status = 'APPROVED'
-        member.role = 'COACH'        # promote the account
+        member.role = 'COACH'  # promote the account
         member.save()
         messages.success(
             request,
@@ -828,15 +889,18 @@ def handle_coach_request(request, user_id):
 
     return redirect('coach_requests')
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_reports(request):
     return render(request, 'CUFitness/staff/staff_reports.html')
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_messages(request):
     return render(request, 'CUFitness/staff/staff_messages.html')
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -853,7 +917,8 @@ def staff_user_detail(request, user_id):
 @user_passes_test(is_staff_user)
 def staff_articles(request):
     articles = Article.objects.all()
-    return render(request, "CUFitness/staff/articles/staff_articles.html", {"articles":articles})
+    return render(request, "CUFitness/staff/articles/staff_articles.html", {"articles": articles})
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -861,13 +926,15 @@ def create_article(request):
     if request.method == "POST":
         form = ArticleForm(request.POST)
         if form.is_valid():
-            article = form.save(commit=False) #dont immedietly save because we need to add more data to the form (user, author...)
+            article = form.save(
+                commit=False)  # dont immedietly save because we need to add more data to the form (user, author...)
             article.author = request.user
-            article.save() # now save everything
+            article.save()  # now save everything
             return redirect('staff_articles')
     else:
         form = ArticleForm()
-    return render(request, "CUFitness/staff/articles/create_article.html", {"form":form})
+    return render(request, "CUFitness/staff/articles/create_article.html", {"form": form})
+
 
 def article_details(request, id):
     article = get_object_or_404(Article, id=id)
@@ -877,8 +944,8 @@ def article_details(request, id):
     else:
         base = 'CUFitness/general_website/base.html'
 
-# make sure user can't enter the url manually to access the locked articles
-# An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
+    # make sure user can't enter the url manually to access the locked articles
+    # An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
     if article.locked and not request.user.is_authenticated:
         return redirect('login')
 
@@ -886,6 +953,7 @@ def article_details(request, id):
         'article_obj': article,
         'base_template': base,
     })
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -903,6 +971,7 @@ def edit_article(request, id):
     else:
         form = ArticleForm(instance=article)
     return render(request, 'CUFitness/staff/articles/edit_article.html', {'form': form, 'article': article})
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -922,6 +991,8 @@ def delete_article(request, id):
         return HttpResponseNotAllowed(['POST'])
 
     return redirect('article_details', id=id)
+
+
 # endregion
 
 
@@ -930,7 +1001,8 @@ def delete_article(request, id):
 @user_passes_test(is_staff_user)
 def staff_recipes(request):
     recipes = Recipe.objects.all()
-    return render(request, "CUFitness/staff/recipes/staff_recipes.html", {"recipes":recipes})
+    return render(request, "CUFitness/staff/recipes/staff_recipes.html", {"recipes": recipes})
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -953,9 +1025,10 @@ def create_recipe(request):
 
     return render(request, 'CUFitness/staff/recipes/create_recipe.html', {'form': form, 'formset': formset})
 
+
 def recipe_details(request, id):
     recipe = get_object_or_404(Recipe, id=id)
-    #the following is needed to get the "display" tags, since multi-select-field doesn't have that functionality by default unlike charfield
+    # the following is needed to get the "display" tags, since multi-select-field doesn't have that functionality by default unlike charfield
     # Build a lookup dict from the choices and map the stored codes to labels
     choices_dict = dict(Recipe.DIETARY_CHOICES)
     dietary_display = [choices_dict.get(code, code) for code in recipe.dietary_restrictions]
@@ -976,6 +1049,7 @@ def recipe_details(request, id):
         'base_template': base,
     })
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def edit_recipe(request, id):
@@ -989,20 +1063,21 @@ def edit_recipe(request, id):
         form = RecipeForm(request.POST, instance=recipe)
         formset = IngredientFormSet(request.POST, instance=recipe)  # ✅ instance added
 
-        if form.is_valid() and formset.is_valid():           # ✅ both validated
+        if form.is_valid() and formset.is_valid():  # ✅ both validated
             form.save()
             formset.save()
             messages.success(request, 'Recipe updated successfully.')
             return redirect('recipe_details', id=recipe.id)
     else:
         form = RecipeForm(instance=recipe)
-        formset = IngredientFormSet(instance=recipe)         # ✅ GET uses instance, not POST
+        formset = IngredientFormSet(instance=recipe)  # ✅ GET uses instance, not POST
 
     return render(request, 'CUFitness/staff/recipes/edit_recipe.html', {
         'form': form,
-        'formset': formset,   # ✅ formset passed to template
+        'formset': formset,  # ✅ formset passed to template
         'recipe': recipe,
     })
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -1019,6 +1094,8 @@ def delete_recipe(request, id):
         return redirect('staff_recipes')
 
     return HttpResponseNotAllowed(['POST'])
+
+
 # endregion
 
 
@@ -1028,22 +1105,29 @@ def delete_recipe(request, id):
 def staff_workouts(request):
     return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html')
 
+
 def workout_details(request, id):
     return render(request, 'CUFitness/staff/workout_plans/workout_details.html')
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def create_workouts(request):
     return render(request, 'CUFitness/staff/workout_plans/create_workouts.html')
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def edit_workout(request, id):
     return render(request, 'CUFitness/staff/workout_plans/edit_workout.html')
+
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def delete_workout(request, id):
     return render(request, 'CUFitness/staff/workout_plans/delete_workout.html')
+
+
 # endregion
 
 
@@ -1053,27 +1137,30 @@ def delete_workout(request, id):
 def staff_exercises(request):
     return render(request, 'CUFitness/staff/exercises/staff_exercises.html')
 
+
 def exercise_details(request, id):
     return render(request, 'CUFitness/staff/exercises/exercise_details.html')
+
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def create_exercises(request):
     return render(request, 'CUFitness/staff/exercises/create_exercise.html')
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def edit_exercise(request, id):
     return render(request, 'CUFitness/staff/exercises/edit_exercise.html')
+
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def delete_exercise(request, id):
     return render(request, 'CUFitness/staff/exercises/delete_exercise.html')
+
+
 # endregion
-
-
-
-
 
 
 # --- Member Views ---
@@ -1089,6 +1176,7 @@ def coach_list_view(request):
     return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
 
 '''
+
 
 # --- Coach Views ---
 @login_required(login_url='login')
@@ -1115,6 +1203,7 @@ def coach_dashboard(request):
 
     return render(request, 'CUFitness/coach_dashboard.html', context)
 
+
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def manage_availability(request):
@@ -1139,6 +1228,7 @@ def manage_availability(request):
 
     return render(request, 'CUFitness/manage_availability.html', context)
 
+
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def delete_availability(request, slot_id):
@@ -1148,6 +1238,7 @@ def delete_availability(request, slot_id):
         messages.success(request, 'Slot deleted.')
     return redirect('manage_availability')
 
+
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def manage_appointments(request):
@@ -1155,7 +1246,8 @@ def manage_appointments(request):
     pending = (CoachAppointment.objects.filter
                (coach=request.user,
                 status='PENDING'
-                ).order_by('start_time')).select_related('member') # Without (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
+                ).order_by('start_time')).select_related(
+        'member')  # Without (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
 
     if request.method == 'POST':
         appointment_id = request.POST.get('appointment_id')
@@ -1185,6 +1277,7 @@ def manage_appointments(request):
     }
     return render(request, 'CUFitness/manage_appointments.html', context)
 
+
 # ======== Chatbot ===========
 
 @ensure_csrf_cookie
@@ -1212,7 +1305,7 @@ def chatbot(request):
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
-                max_new_tokens=100, # Response length limiter
+                max_new_tokens=100,  # Response length limiter
                 temperature=0.7,
                 do_sample=True,
                 top_p=0.9,
@@ -1231,6 +1324,7 @@ def chatbot(request):
 
     # GET request – just render the empty chat page
     return render(request, 'CUFitness/chatbot.html')
+
 
 # ==========Appointment API ========
 
@@ -1379,6 +1473,7 @@ def user_inbox(request):
         }
     return render(request, 'CUFitness/user/user_inbox.html', context)
 
+
 @login_required(login_url='login')
 @user_passes_test(is_member)
 def api_coach_search(request):
@@ -1390,6 +1485,7 @@ def api_coach_search(request):
         Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query)
     ).values('id', 'first_name', 'last_name', 'email')[:20]
     return JsonResponse(list(coaches), safe=False)
+
 
 @login_required(login_url='login')
 def send_message(request):
@@ -1421,6 +1517,7 @@ def send_message(request):
     messages.success(request, 'Message sent.')
     return redirect('user_inbox')
 
+
 @login_required(login_url='login')
 def reply_message(request, message_id):
     """Coach replies to a message they received."""
@@ -1446,6 +1543,7 @@ def reply_message(request, message_id):
             'original': original
         })
 
+
 @login_required(login_url='login')
 def mark_read(request, message_id):
     """Mark a message as read (AJAX)."""
@@ -1465,6 +1563,7 @@ def ajax_accept_appointment(request, appointment_id):
     appointment.status = 'ACCEPTED'
     appointment.save()
     return JsonResponse({'success': True})
+
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -1490,7 +1589,7 @@ def user_challenges(request):
 
     for challenge in Challenge.objects.all():
         participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
-        
+
         participants = (
             participants_qs
             .select_related('user')
@@ -1505,7 +1604,7 @@ def user_challenges(request):
 
         leaderboard_data.append({
             'challenge': challenge,
-            'participants' : participants,
+            'participants': participants,
             'top_participants': top_participants,
             'count': participants_qs.count()
         })
@@ -1552,6 +1651,7 @@ def update_progress(request, participation_id):
 
     return redirect('user_challenges')
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def create_challenge(request):
@@ -1567,6 +1667,7 @@ def create_challenge(request):
 
     return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form})
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_challenges(request):
@@ -1575,6 +1676,7 @@ def staff_challenges(request):
     return render(request, 'CUFitness/staff/challenges/challenges.html', {
         'challenges': challenges
     })
+
 
 def challenge_detail(request, id):
     challenge = get_object_or_404(Challenge, id=id)
@@ -1614,6 +1716,7 @@ def edit_challenge(request, id):
         'challenge': challenge
     })
 
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def delete_challenge(request, id):
@@ -1628,3 +1731,385 @@ def delete_challenge(request, id):
         return HttpResponseNotAllowed(['POST'])
 
     return redirect('challenge_detail', id=id)
+
+
+# =============================================================================
+# REST API (Django REST Framework) ViewSets – added at the end
+# =============================================================================
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    List, retrieve, update users. Staff can see all; members/coaches see only themselves.
+    """
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['role', 'is_active']
+    search_fields = ['email', 'first_name', 'last_name']
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return CustomUser.objects.none()
+        # Staff can see all
+        if is_staff_user(user):
+            return CustomUser.objects.all()
+        # Others see only themselves (for list, maybe restrict)
+        return CustomUser.objects.filter(id=user.id)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """Get current user's profile."""
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        # Prevent role changes via API unless staff
+        if not is_staff_user(self.request.user):
+            serializer.save(role=self.get_object().role)
+        else:
+            serializer.save()
+
+
+class CoachAvailabilityViewSet(viewsets.ModelViewSet):
+    """
+    Manage availability slots. Coaches can CRUD their own; members can only read unbooked slots.
+    """
+    queryset = CoachAvailability.objects.all()
+    serializer_class = CoachAvailabilitySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_booked', 'start_time', 'end_time', 'coach']
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return CoachAvailability.objects.none()
+        if is_coach(user):
+            return CoachAvailability.objects.filter(coach=user)
+        # Members can see all unbooked slots
+        return CoachAvailability.objects.filter(is_booked=False)
+
+    def perform_create(self, serializer):
+        if not is_coach(self.request.user):
+            raise PermissionError("Only coaches can create availability slots.")
+        serializer.save(coach=self.request.user)
+
+    def perform_update(self, serializer):
+        slot = self.get_object()
+        if slot.is_booked:
+            raise PermissionError("Cannot edit a booked slot.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.is_booked:
+            raise PermissionError("Cannot delete a booked slot.")
+        instance.delete()
+
+
+class CoachAppointmentViewSet(viewsets.ModelViewSet):
+    """
+    Appointments between members and coaches.
+    """
+    queryset = CoachAppointment.objects.all()
+    serializer_class = CoachAppointmentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status', 'coach', 'member', 'start_time', 'end_time']
+
+    def get_queryset(self):
+        user = self.request.user
+        if is_coach(user):
+            return CoachAppointment.objects.filter(coach=user)
+        elif is_member(user):
+            return CoachAppointment.objects.filter(member=user)
+        elif is_staff_user(user):
+            return CoachAppointment.objects.all()
+        return CoachAppointment.objects.none()
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def accept(self, request, pk=None):
+        """Coach accepts a pending appointment."""
+        appointment = self.get_object()
+        if appointment.coach != request.user:
+            return Response({'detail': 'Not your appointment.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status != 'PENDING':
+            return Response({'detail': 'Appointment is not pending.'}, status=status.HTTP_400_BAD_REQUEST)
+        appointment.status = 'ACCEPTED'
+        appointment.save()
+        return Response({'status': 'accepted'})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def reject(self, request, pk=None):
+        """Coach rejects a pending appointment, optionally with a reason."""
+        appointment = self.get_object()
+        if appointment.coach != request.user:
+            return Response({'detail': 'Not your appointment.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status != 'PENDING':
+            return Response({'detail': 'Appointment is not pending.'}, status=status.HTTP_400_BAD_REQUEST)
+        reason = request.data.get('refusal_reason', '')
+        appointment.status = 'REFUSED'
+        appointment.refusal_reason = reason
+        appointment.save()
+        return Response({'status': 'rejected'})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def cancel(self, request, pk=None):
+        """Member cancels an appointment."""
+        appointment = self.get_object()
+        if appointment.member != request.user:
+            return Response({'detail': 'Not your appointment.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.status not in ['PENDING', 'ACCEPTED']:
+            return Response({'detail': 'Cannot cancel this appointment.'}, status=status.HTTP_400_BAD_REQUEST)
+        appointment.status = 'CANCELLED'
+        appointment.save()
+        return Response({'status': 'cancelled'})
+
+
+class ArticleViewSet(viewsets.ModelViewSet):
+    """
+    Articles. Staff can create/update/delete; members can read.
+    """
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'description', 'body']
+
+    def get_queryset(self):
+        # If not logged in, only free articles
+        if not self.request.user.is_authenticated:
+            return Article.objects.filter(locked=False)
+        return Article.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        # Staff only? Check role
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can edit articles.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can delete articles.")
+        instance.delete()
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    """
+    Recipes. Staff can create/update/delete; members can read.
+    """
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'description', 'instructions']
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return Recipe.objects.filter(locked=False)
+        return Recipe.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can edit recipes.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can delete recipes.")
+        instance.delete()
+
+
+class WorkoutPlanViewSet(viewsets.ModelViewSet):
+    """
+    Workout plans. Staff can create/update/delete; members can read.
+    """
+    queryset = WorkoutPlan.objects.all()
+    serializer_class = WorkoutPlanSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'description', 'body']
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return WorkoutPlan.objects.filter(locked=False)
+        return WorkoutPlan.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can edit workouts.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can delete workouts.")
+        instance.delete()
+
+
+class ExerciseViewSet(viewsets.ModelViewSet):
+    """
+    Exercises. Staff can create/update/delete; members can read.
+    """
+    queryset = Exercise.objects.all()
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description', 'instructions']
+    ordering_fields = ['created_at', 'title']
+
+    def perform_create(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can create exercises.")
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can edit exercises.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can delete exercises.")
+        instance.delete()
+
+
+class MessageViewSet(viewsets.ModelViewSet):
+    """
+    Messages between members and coaches.
+    """
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['recipient', 'is_read']
+
+    def get_queryset(self):
+        user = self.request.user
+        # Users see messages they sent or received
+        return Message.objects.filter(
+            Q(sender=user) | Q(recipient=user)
+        ).order_by('-timestamp')
+
+    def perform_create(self, serializer):
+        # Only members can send messages (to coaches)
+        if not is_member(self.request.user):
+            raise PermissionError("Only members can send messages.")
+        # Ensure recipient is a coach
+        recipient = serializer.validated_data.get('recipient')
+        if recipient.role != 'COACH':
+            raise PermissionError("Messages can only be sent to coaches.")
+        serializer.save(sender=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def mark_read(self, request, pk=None):
+        """Mark a received message as read."""
+        message = self.get_object()
+        if message.recipient != request.user:
+            return Response({'detail': 'Not your message.'}, status=status.HTTP_403_FORBIDDEN)
+        message.is_read = True
+        message.save()
+        return Response({'status': 'read'})
+
+
+class ChallengeViewSet(viewsets.ModelViewSet):
+    """
+    Fitness challenges.
+    """
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description']
+    ordering_fields = ['start_date', 'end_date', 'created_at']
+
+    def perform_create(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can create challenges.")
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can edit challenges.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can delete challenges.")
+        instance.delete()
+
+
+class ChallengeParticipationViewSet(viewsets.ModelViewSet):
+    """
+    User participation in challenges.
+    """
+    queryset = ChallengeParticipation.objects.all()
+    serializer_class = ChallengeParticipationSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['challenge']
+
+    def get_queryset(self):
+        user = self.request.user
+        # Users see their own participation; staff see all
+        if is_staff_user(user):
+            return ChallengeParticipation.objects.all()
+        return ChallengeParticipation.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        # Ensure user is authenticated and not already participating
+        challenge = serializer.validated_data.get('challenge')
+        if ChallengeParticipation.objects.filter(user=self.request.user, challenge=challenge).exists():
+            raise PermissionError("Already participating in this challenge.")
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def update_progress(self, request, pk=None):
+        """Increment progress for a participation."""
+        participation = self.get_object()
+        if participation.user != request.user:
+            return Response({'detail': 'Not your participation.'}, status=status.HTTP_403_FORBIDDEN)
+        increment = request.data.get('progress', 0)
+        try:
+            increment = int(increment)
+        except ValueError:
+            return Response({'detail': 'Invalid progress value.'}, status=status.HTTP_400_BAD_REQUEST)
+        participation.progress += increment
+        # Cap at goal
+        if participation.progress > participation.challenge.goal_target:
+            participation.progress = participation.challenge.goal_target
+        participation.save()
+        return Response({'progress': participation.progress, 'percentage': participation.progress_percentage()})
+
+
+class GymInfoViewSet(viewsets.ModelViewSet):
+    """
+    Gym operating hours. Staff can edit; members can view.
+    """
+    queryset = GymInfo.objects.all()
+    serializer_class = GymInfoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can manage gym info.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can manage gym info.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not is_staff_user(self.request.user):
+            raise PermissionError("Only staff can manage gym info.")
+        instance.delete()
