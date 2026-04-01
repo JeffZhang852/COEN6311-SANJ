@@ -20,10 +20,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "COEN6311.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from CUFitness.models import Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise, EquipmentList, Challenge
+from CUFitness.models import (Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise,
+                              EquipmentList, Challenge, GymInfo)
 
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, time
 
 User = get_user_model()
 
@@ -841,7 +842,7 @@ create_recipe(
 # ─────────────────────────────────────────────
 print("\n── Creating Exercises ──")
 
-def create_exercise(title, description, instructions, muscle_group, difficulty, goal, created_by):
+def create_exercise(title, description, instructions, muscle_group, difficulty, goal):
     if Exercise.objects.filter(title=title).exists():
         print(f"  [skip] Exercise already exists: '{title}'")
         return Exercise.objects.get(title=title)
@@ -852,7 +853,6 @@ def create_exercise(title, description, instructions, muscle_group, difficulty, 
         muscle_group=muscle_group,
         difficulty=difficulty,
         goal=goal,
-        created_by=created_by,
     )
     print(f"  [created] Exercise: '{title}'")
     return ex
@@ -872,7 +872,6 @@ bench_press = create_exercise(
     muscle_group = "CHEST",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 incline_db_press = create_exercise(
@@ -888,7 +887,6 @@ incline_db_press = create_exercise(
     muscle_group = "CHEST",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff1,
 )
 
 push_up = create_exercise(
@@ -904,7 +902,6 @@ push_up = create_exercise(
     muscle_group = "CHEST",
     difficulty   = "EASY",
     goal         = "STRENGTH",
-    created_by   = staff2,
 )
 
 # ── BACK ──
@@ -922,7 +919,6 @@ pull_up = create_exercise(
     muscle_group = "BACK",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 bent_over_row = create_exercise(
@@ -939,7 +935,6 @@ bent_over_row = create_exercise(
     muscle_group = "BACK",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 lat_pulldown = create_exercise(
@@ -956,7 +951,6 @@ lat_pulldown = create_exercise(
     muscle_group = "BACK",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff1,
 )
 
 # ── LEGS ──
@@ -974,7 +968,6 @@ barbell_squat = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 romanian_deadlift = create_exercise(
@@ -991,7 +984,6 @@ romanian_deadlift = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 walking_lunge = create_exercise(
@@ -1008,7 +1000,6 @@ walking_lunge = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "EASY",
     goal         = "WEIGHT_LOSS",
-    created_by   = staff1,
 )
 
 leg_press = create_exercise(
@@ -1025,7 +1016,6 @@ leg_press = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 # ── SHOULDERS ──
@@ -1043,7 +1033,6 @@ overhead_press = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 lateral_raise = create_exercise(
@@ -1060,7 +1049,6 @@ lateral_raise = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 face_pull = create_exercise(
@@ -1077,7 +1065,6 @@ face_pull = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "EASY",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 # ── ARMS ──
@@ -1095,7 +1082,6 @@ barbell_curl = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 tricep_dip = create_exercise(
@@ -1112,7 +1098,6 @@ tricep_dip = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 hammer_curl = create_exercise(
@@ -1128,7 +1113,6 @@ hammer_curl = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 # ── CORE ──
@@ -1145,7 +1129,6 @@ plank = create_exercise(
     muscle_group = "CORE",
     difficulty   = "EASY",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 cable_crunch = create_exercise(
@@ -1162,7 +1145,6 @@ cable_crunch = create_exercise(
     muscle_group = "CORE",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 hanging_leg_raise = create_exercise(
@@ -1179,7 +1161,6 @@ hanging_leg_raise = create_exercise(
     muscle_group = "CORE",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 # ── FULL BODY / CARDIO ──
@@ -1197,7 +1178,6 @@ deadlift = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 burpee = create_exercise(
@@ -1214,7 +1194,6 @@ burpee = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "WEIGHT_LOSS",
-    created_by   = staff2,
 )
 
 kettlebell_swing = create_exercise(
@@ -1231,7 +1210,6 @@ kettlebell_swing = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "MEDIUM",
     goal         = "CARDIO",
-    created_by   = staff1,
 )
 
 box_jump = create_exercise(
@@ -1248,7 +1226,6 @@ box_jump = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "MEDIUM",
     goal         = "CARDIO",
-    created_by   = staff2,
 )
 
 mountain_climber = create_exercise(
@@ -1265,7 +1242,6 @@ mountain_climber = create_exercise(
     muscle_group = "CORE",
     difficulty   = "MEDIUM",
     goal         = "CARDIO",
-    created_by   = staff1,
 )
 
 
@@ -1284,7 +1260,6 @@ overhead_arnold_press = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff1,
 )
 
 cable_lateral_raise = create_exercise(
@@ -1301,7 +1276,6 @@ cable_lateral_raise = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 # ── ARMS ──
@@ -1319,7 +1293,6 @@ close_grip_bench = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 preacher_curl = create_exercise(
@@ -1336,7 +1309,6 @@ preacher_curl = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
-    created_by   = staff2,
 )
 
 # ── CORE ──
@@ -1354,7 +1326,6 @@ ab_wheel_rollout = create_exercise(
     muscle_group = "CORE",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = staff1,
 )
 
 dead_bug = create_exercise(
@@ -1371,7 +1342,6 @@ dead_bug = create_exercise(
     muscle_group = "CORE",
     difficulty   = "EASY",
     goal         = "FLEXIBILITY",
-    created_by   = staff2,
 )
 
 # ── FULL BODY ──
@@ -1390,7 +1360,6 @@ turkish_get_up = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "STRENGTH",
-    created_by   = coach1,
 )
 
 farmers_carry = create_exercise(
@@ -1407,7 +1376,6 @@ farmers_carry = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
-    created_by   = coach1,
 )
 
 # ─────────────────────────────────────────────
@@ -1669,42 +1637,66 @@ create_equipment("Pull-Up Station",  "Wall-mounted pull-up and dip station with 
 # ─────────────────────────────────────────────
 print("\n── Creating Challenges ──")
 
-start_date = timezone.make_aware(datetime(2026, 4, 1))
-end_date = timezone.make_aware(datetime(2026, 4, 7))
-end_date_2 = timezone.make_aware(datetime(2026, 4, 14))
-
 Challenge.objects.get_or_create(
     title="7-Day Push-Up Challenge",
     description="Complete 50 push-ups daily for 7 days.",
     goal_target=7,
-    start_date=start_date,
-    end_date=end_date,
+    start_date=timezone.make_aware(datetime(2026, 4, 1)),
+    end_date=timezone.make_aware(datetime(2026, 4, 7)),
     created_by=staff1,
-    created_at=start_date
 )
 
 Challenge.objects.get_or_create(
     title="10K Steps Daily",
     description="Walk 10,000 steps every day for 14 days.",
     goal_target=14,
-    start_date=start_date,
-    end_date=end_date_2,
+    start_date=timezone.make_aware(datetime(2026, 4, 1)),
+    end_date=timezone.make_aware(datetime(2026, 4, 14)),
     created_by=staff2,
-    created_at=start_date
 )
 
+# ─────────────────────────────────────────────
+# 11. Gym Schedule
+# ─────────────────────────────────────────────
+print("\n── Creating Gym Schedule ──")
+
+
+gym_schedule_data = [
+    # (GymInfo.day, open_time, close_time, is_open, is_open_24h),
+    (GymInfo.MONDAY, None, None, True, True),
+    (GymInfo.TUESDAY, None, None, True, True),
+    (GymInfo.WEDNESDAY, None, None, True, True),
+    (GymInfo.THURSDAY, None, None, True, True),
+    (GymInfo.FRIDAY, None, None, True, True),
+    (GymInfo.SATURDAY, time(6, 0), time(18, 0), True, False),
+    (GymInfo.SUNDAY, time(6, 0), time(18, 0), True, False),
+]
+
+for day, open_time, close_time, is_open, is_open_24h in gym_schedule_data:
+    obj, created = GymInfo.objects.get_or_create(day=day)
+    if created:
+        obj.open_time    = open_time
+        obj.close_time   = close_time
+        obj.is_open      = is_open
+        obj.is_open_24h  = is_open_24h
+        obj.save()
+        print(f"  [created] {obj}")
+    else:
+        print(f"  [skip] GymInfo already exists: {obj}")
 
 # ─────────────────────────────────────────────
 # Summary
 # ─────────────────────────────────────────────
 print("\n" + "="*50)
 print("✅ Seed complete! Summary:")
-print(f"   Users        : {User.objects.count()} total")
-print(f"   Articles     : {Article.objects.count()} total")
-print(f"   Recipes      : {Recipe.objects.count()} total")
-print(f"   Exercises    : {Exercise.objects.count()} total")
-print(f"   Workout Plans: {WorkoutPlan.objects.count()} total")
-print(f"   Equipment    : {EquipmentList.objects.count()} total")
+print(f"   Users         : {User.objects.count()} total")
+print(f"   Articles      : {Article.objects.count()} total")
+print(f"   Recipes       : {Recipe.objects.count()} total")
+print(f"   Exercises     : {Exercise.objects.count()} total")
+print(f"   Workout Plans : {WorkoutPlan.objects.count()} total")
+print(f"   Equipment     : {EquipmentList.objects.count()} total")
+print(f"   Challenges    : {Challenge.objects.count()} total")
+print(f"   Gym Schedule  : {GymInfo.objects.count()} days configured")
 print()
 print("Login credentials:")
 print("  Admin  : admin@cufitness.com   / Admin@1234")

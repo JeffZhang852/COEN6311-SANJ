@@ -1131,7 +1131,7 @@ class PublicPageTest(TestCase):
         self.assertEqual(self.client.get(reverse('amenities')).status_code, 200)
 
     def test_schedule_page(self):
-        self.assertEqual(self.client.get(reverse('schedule')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('gym_schedule')).status_code, 200)
 
     def test_register_page(self):
         self.assertEqual(self.client.get(reverse('register')).status_code, 200)

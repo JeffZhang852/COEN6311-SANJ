@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
-from .managers import CustomUserManager
 from multiselectfield import MultiSelectField
 import uuid
 from decimal import Decimal
@@ -39,8 +38,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(_("last name"), max_length=50, default='')
     membership= models.CharField(_("membership"), max_length=50, choices=MEMBERSHIP_CHOICES,default='BASIC')
     phone_number = models.CharField(max_length=20, default='', help_text='e.g. +1 514 555 0123')
-    date_of_birth = models.DateField(null=True, help_text='Format: YYYY-MM-DD')
-    address = models.CharField(max_length=255, default='', blank=True, help_text='Address here')
+    date_of_birth = models.DateField(null=True,)
+    address = models.CharField(max_length=255, default='', blank=True,)
 
     # Profile picture — optional, defaults to the generic silhouette
     #upload_to='profile_pictures/' means uploaded photos go to MEDIA_ROOT/profile_pictures/
@@ -257,7 +256,7 @@ class RecipeIngredient(models.Model):
         base = f'{self.quantity} {self.name}'
         return f'{base} ({self.notes})' if self.notes else base
 
-# WorkoutPlan ──< WorkoutPlanExercise >── Exercise
+# WorkoutPlan <── WorkoutPlanExercise <── Exercise
 
 class Exercise(models.Model):
     DIFFICULTY_CHOICES = [
@@ -288,7 +287,6 @@ class Exercise(models.Model):
     instructions = models.TextField(help_text='Step-by-step instructions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(CustomUser, related_name='exercises', on_delete=models.CASCADE)
 
     muscle_group = models.CharField(choices=MUSCLE_CHOICES, max_length=30, blank=True, null=True)
     difficulty = models.CharField(choices=DIFFICULTY_CHOICES, max_length=25, blank=True, null=True)
@@ -357,7 +355,7 @@ class WorkoutPlanExercise(models.Model):
 #region===============================================
 class GymInfo(models.Model):
     """
-    Stores opening/closing times for each day of the week.
+    opening/closing times for each day of the week.
     One record per day (unique). Admin can configure which days the gym is open
     and what hours. Used by coaches when adding availability slots.
     """
@@ -382,6 +380,7 @@ class GymInfo(models.Model):
     open_time = models.TimeField(null=True, blank=True, help_text='Opening time (leave blank if closed)')
     close_time = models.TimeField(null=True, blank=True, help_text='Closing time (leave blank if closed)')
     is_open = models.BooleanField(default=True, help_text='Uncheck to mark the gym closed all day')
+    is_open_24h = models.BooleanField(default=False, help_text='Check if the gym is open 24 hours on this day')
 
     class Meta:
         ordering = ['day']
@@ -391,7 +390,8 @@ class GymInfo(models.Model):
         day_name = self.get_day_display()
         if not self.is_open:
             return f"{day_name}: Closed"
-        # If open but times missing, show a warning
+        if self.is_open_24h:
+            return f"{day_name}: Open 24 Hours"
         if self.open_time and self.close_time:
             return f"{day_name}: {self.open_time.strftime('%H:%M')} - {self.close_time.strftime('%H:%M')}"
         return f"{day_name}: Open (hours not set)"
@@ -543,6 +543,22 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender} -> {self.recipient}: {self.subject[:20]}"
+
+
+class ContactMessage(models.Model):
+    # no need for sender/recipient because any user can send support messages and all staff can see them
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=250)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 # optional feature: Placeholder

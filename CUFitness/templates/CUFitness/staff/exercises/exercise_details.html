@@ -1,10 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends base_template %}
 
-</body>
-</html>
+{% load static %}
+{% block title %} CUFitness - {{ exercise_obj.title }} {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'general_website/exercise_details.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="ex-detail-page">
+    <a href="{% url 'user_exercises' %}" class="ex-detail-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Exercises
+    </a>
+  <div class="ex-detail-container">
+
+    <!-- Header -->
+    <div class="ex-detail-header">
+      <div class="ex-detail-tag">Exercise</div>
+
+      <div class="title-row">
+        <h1 class="ex-detail-title">{{ exercise_obj.title }}</h1>
+
+        {% if user.is_authenticated and user.role == "STAFF" %}
+        <div class="exercise-actions">
+          <a href="{% url 'edit_exercise' exercise_obj.id %}" class="edit-btn">
+            <span class="material-icons" style="font-size:16px">edit</span> Edit
+          </a>
+          <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+            <span class="material-icons" style="font-size:16px">delete</span> Delete
+          </button>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Badges row -->
+      <div class="ex-badges">
+        {% if exercise_obj.difficulty %}
+        <span class="badge badge-diff badge-{{ exercise_obj.difficulty|lower }}">
+          {{ exercise_obj.get_difficulty_display }}
+        </span>
+        {% endif %}
+        {% if exercise_obj.muscle_group %}
+        <span class="badge badge-muscle">
+          <span class="material-icons" style="font-size:13px;vertical-align:middle">fitness_center</span>
+          {{ exercise_obj.get_muscle_group_display }}
+        </span>
+        {% endif %}
+        {% if exercise_obj.goal %}
+        <span class="badge badge-goal">
+          <span class="material-icons" style="font-size:13px;vertical-align:middle">flag</span>
+          {{ exercise_obj.get_goal_display }}
+        </span>
+        {% endif %}
+      </div>
+
+      <p class="ex-detail-desc">{{ exercise_obj.description }}</p>
+
+      <!-- Equipment -->
+      {% with equipment_list=exercise_obj.equipment.all %}
+      {% if equipment_list %}
+      <div class="ex-equipment">
+        <span class="equip-label">Equipment</span>
+        <div class="equip-tags">
+          {% for item in equipment_list %}
+          <span class="equip-tag">{{ item.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Instructions Body -->
+    <div class="ex-detail-body">
+      <div class="instructions-label">Instructions</div>
+      {{ exercise_obj.instructions|linebreaks }}
+    </div>
+
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+  <div class="modal-box">
+    <h3>Delete Exercise?</h3>
+    <p>This action is permanent and cannot be undone.</p>
+    <div class="modal-actions">
+      <form method="POST" action="{% url 'delete_exercise' exercise_obj.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-confirm-delete">Delete</button>
+      </form>
+      <button class="btn-cancel" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

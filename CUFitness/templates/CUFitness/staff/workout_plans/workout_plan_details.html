@@ -1,0 +1,156 @@
+{% extends base_template %}
+{% load static %}
+{% block title %}CUFitness - {{ workout.title }}{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'general_website/workout_plan_details.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="wd-page">
+
+  <a href="{% url 'workout_plans' %}" class="wd-back">
+    <span class="material-icons" style="font-size:16px">arrow_back</span> Workout Plans
+  </a>
+
+  <div class="wd-container">
+
+    <!-- ===== HEADER CARD ===== -->
+    <div class="wd-header">
+      <div class="wd-tag">
+        Workout Plan
+        <span class="wd-tag-diff diff-{{ workout_plan.difficulty|lower }}">{{ workout_plan.get_difficulty_display }}</span>
+        {% if workout_plan.goal %}<span class="wd-tag-goal">{{ workout_plan.get_goal_display }}</span>{% endif %}
+      </div>
+
+      <div class="title-row">
+        <h1 class="wd-title">{{ workout_plan.title }}</h1>
+
+        {% if user.is_authenticated and user.role == "STAFF" %}
+        <div class="wd-actions">
+          {% if workout.author and user == workout_plan.author %}
+            <a href="{% url 'edit_workout' workout_plan.id %}" class="edit-btn">
+              <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </a>
+            <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+              <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+          {% else %}
+            <button class="edit-btn disabled" disabled title="Only the author can edit">
+              <span class="material-icons" style="font-size:16px">edit</span> Edit
+            </button>
+            <button class="delete-btn disabled" disabled title="Only the author can delete">
+              <span class="material-icons" style="font-size:16px">delete</span> Delete
+            </button>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Author meta -->
+      <div class="wd-meta">
+        <div class="meta-avatar">
+          {{ workout_plan.author.first_name|first|default:"?" }}{{ workout_plan.author.last_name|first|default:"" }}
+        </div>
+        <div class="meta-info">
+          <span class="meta-author">
+            {% if workout_plan.author %}{{ workout_plan.author.first_name }} {{ workout_plan.author.last_name }}{% else %}CUFitness{% endif %}
+          </span>
+          <span class="meta-date">{{ workout_plan.created_at|date:"F d, Y" }}</span>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="wd-stats">
+        {% if workout_plan.duration_minutes %}
+        <div class="wd-stat">
+          <span class="wd-stat-label">Duration</span>
+          <span class="wd-stat-value">{{ workout_plan.duration_minutes }} min</span>
+        </div>
+        {% endif %}
+        <div class="wd-stat">
+          <span class="wd-stat-label">Exercises</span>
+          <span class="wd-stat-value">{{ exercises|length }}</span>
+        </div>
+        <div class="wd-stat">
+          <span class="wd-stat-label">Difficulty</span>
+          <span class="wd-stat-value">{{ workout_plan.get_difficulty_display }}</span>
+        </div>
+        {% if workout_plan.goal %}
+        <div class="wd-stat">
+          <span class="wd-stat-label">Goal</span>
+          <span class="wd-stat-value">{{ workout_plan.get_goal_display }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <p class="wd-desc">{{ workout_plan.description }}</p>
+    </div>
+
+    <!-- ===== OVERVIEW BODY ===== -->
+    <div class="wd-body">
+      <div class="wd-body-text">
+        {{ workout_plan.body|linebreaks }}
+      </div>
+    </div>
+
+    <!-- ===== EXERCISE LIST ===== -->
+    {% if exercises %}
+    <div class="wd-exercises">
+      <h2 class="wd-exercises-title">Exercise Breakdown</h2>
+
+      {% for item in exercises %}
+      <div class="ex-row">
+        <div class="ex-order">{{ item.order|default:forloop.counter }}</div>
+
+        <div class="ex-info">
+          <a href="{% url 'exercise_details' item.exercise.id %}" class="ex-name">
+            {{ item.exercise.title }}
+          </a>
+          {% if item.exercise.muscle_group %}
+            <span class="ex-muscle">{{ item.exercise.get_muscle_group_display }}</span>
+          {% endif %}
+          {% if item.notes %}
+            <p class="ex-notes">{{ item.notes }}</p>
+          {% endif %}
+        </div>
+
+        <div class="ex-chips">
+          {% if item.sets %}
+            <span class="ex-chip">{{ item.sets }} sets</span>
+          {% endif %}
+          {% if item.reps and item.reps != "0" %}
+            <span class="ex-chip">{{ item.reps }} reps</span>
+          {% endif %}
+          {% if item.rest_seconds %}
+            <span class="ex-chip">{{ item.rest_seconds }}s rest</span>
+          {% endif %}
+        </div>
+
+        {% if item.exercise.difficulty %}
+          <span class="ex-diff diff-{{ item.exercise.difficulty|lower }}">{{ item.exercise.get_difficulty_display }}</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+  <div class="modal-box">
+    <h3>Delete Workout Plan?</h3>
+    <p>This action is permanent and cannot be undone.</p>
+    <div class="modal-actions">
+      <form method="POST" action="{% url 'delete_workout' workout_plan.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-confirm-delete">Delete</button>
+      </form>
+      <button class="btn-cancel" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

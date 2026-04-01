@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .forms import CustomUserCreationForm, CoachRequestForm
-from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentList
+from .models import CustomUser,CoachAppointment,CoachAvailability,EquipmentList, ContactMessage
 from .models import Article, Recipe, RecipeIngredient, GymInfo, Challenge, ChallengeParticipation
 
 class CustomUserAdmin(UserAdmin):
@@ -74,8 +74,8 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 @admin.register(GymInfo)
 class GymInfoAdmin(admin.ModelAdmin):
-    list_display = ('day', 'is_open', 'open_time', 'close_time')
-    list_editable = ('is_open', 'open_time', 'close_time')
+    list_display = ('day', 'is_open', 'is_open_24h', 'open_time', 'close_time')
+    list_editable = ('is_open', 'is_open_24h', 'open_time', 'close_time')
     ordering = ('day',)
 
 @admin.register(Challenge)
@@ -97,3 +97,9 @@ class ChallengeParticipationAdmin(admin.ModelAdmin):
         return f"{obj.progress_percentage()}%"
     
     progress_percentage_display.short_description = "Progress (%)"
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'subject', 'created_at', 'is_read']
+    list_filter = ['is_read']
+    search_fields = ['name', 'email', 'subject']

@@ -10,11 +10,11 @@ from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.contrib import messages
 
 from .models import CustomUser, CoachAppointment, CoachAvailability, EquipmentList, Article, Recipe, RecipeIngredient, \
-    GymInfo, Exercise, WorkoutPlan
+    GymInfo, Exercise, WorkoutPlan, ContactMessage
 from .forms import CoachRequestForm, CoachAvailabilityForm, AppointmentRequestForm, AppointmentResponseForm, \
     PrivacySettingsForm, ProfilePictureForm
 from .forms import CustomUserCreationForm, ArticleForm, RecipeForm, IngredientFormSet
-from .forms import UpdateEmailForm, UpdatePasswordForm, ProfilePictureForm
+from .forms import UpdateEmailForm, UpdatePasswordForm, ProfilePictureForm, ContactMessageForm
 
 # for calendar;
 from django.http import JsonResponse
@@ -61,7 +61,7 @@ from .serializers import (
 User = get_user_model()
 
 
-# Role checker. Needed to tell which account it is.
+# region Role checkers
 def is_member(user):
     return user.is_authenticated and user.role == 'MEMBER'
 
@@ -76,8 +76,10 @@ def is_staff_user(user):
 
 def is_admin_user(user):
     return user.is_authenticated and user.role == 'ADMIN'
+# endregion
 
 
+# region General Website Navigation
 def home(request):
     if request.user.is_authenticated and request.user.role == 'STAFF':
 
@@ -101,9 +103,6 @@ def home(request):
         ).order_by("first_name")
         return render(request, 'CUFitness/general_website/home.html', {"active_coaches": active_coaches})
 
-
-# region all navbar pages
-# -----------   Navbar Pages  -----------
 def services(request):
     equipment = EquipmentList.objects.filter(is_active=True).order_by('name')
     total_items = sum(e.quantity for e in equipment)  # total number of equipment units
@@ -113,17 +112,12 @@ def services(request):
     }
     return render(request, 'CUFitness/general_website/navbar/services.html', context)
 
-
+# region Resources-Dropdown Pages
 def user_articles(request):
     free_articles = Article.objects.filter(locked=False)
     locked_articles = Article.objects.filter(locked=True)
     return render(request, 'CUFitness/general_website/navbar/articles.html',
                   {"free_articles": free_articles, "locked_articles": locked_articles})
-
-
-def workout_plans(request):
-    return render(request, 'CUFitness/general_website/navbar/workout_plans.html')
-
 
 def user_recipes(request):
     free_recipes = Recipe.objects.filter(locked=False)
@@ -131,48 +125,145 @@ def user_recipes(request):
     return render(request, "CUFitness/general_website/navbar/recipes.html",
                   {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
 
+def workout_plans(request):
+    free_workouts = WorkoutPlan.objects.filter(locked=False).prefetch_related('exercises')
+    locked_workouts = WorkoutPlan.objects.filter(locked=True).prefetch_related('exercises')
+    return render(request, 'CUFitness/general_website/navbar/workout_plans.html', {
+        'free_workouts': free_workouts,
+        'locked_workouts': locked_workouts,
+    })
 
 def user_exercises(request):
     exercises = Exercise.objects.all().order_by('muscle_group')
     return render(request, "CUFitness/general_website/navbar/exercises.html", {"exercises": exercises})
 
+def user_challenges(request):
+    if request.user.is_authenticated:
+        challenges = Challenge.objects.all()
 
-# -----------   Dropdown Menu Pages  -----------
+        user_participation = ChallengeParticipation.objects.filter(user=request.user)
+        joined_ids = user_participation.values_list('challenge_id', flat=True)
+
+        # leaderboard (top users per challenge)
+        leaderboard_data = []
+
+        for challenge in Challenge.objects.all():
+            participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
+
+            participants = (
+                participants_qs
+                .select_related('user')
+                .order_by('-progress')[:5]
+            )
+
+            top_participants = (
+                participants_qs
+                .select_related('user')
+                .order_by('-progress')[:5]
+            )
+
+            leaderboard_data.append({
+                'challenge': challenge,
+                'participants': participants,
+                'top_participants': top_participants,
+                'count': participants_qs.count()
+            })
+
+        return render(request, 'CUFitness/general_website/navbar/challenges.html', {
+            'leaderboard_data': leaderboard_data,
+            'challenges': challenges,
+            'joined_ids': joined_ids,
+            'participations': user_participation,
+        })
+    else:
+        return render(request, 'CUFitness/general_website/navbar/challenges.html')
+
+@ensure_csrf_cookie
+def chatbot(request):
+    if request.method == 'POST':
+        user_message = request.POST.get('message', '').strip()
+        if not user_message:
+            return JsonResponse({'error': 'Empty message'}, status=400)
+
+        from CUFitness.apps import get_chatbot_model
+        tokenizer, model = get_chatbot_model()
+
+        # Format the message using the model's chat template
+        # TinyLlama chat expects messages in a list of dicts with "role" and "content"
+        messages = [
+            {"role": "user", "content": user_message}
+        ]
+        # Apply the chat template to get the full prompt
+        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+        # Tokenize
+        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+        # Generate
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=100,  # Response length limiter
+                temperature=0.7,
+                do_sample=True,
+                top_p=0.9,
+                repetition_penalty=1.1
+            )
+
+        # Decode only the new tokens (skip the input prompt)
+        new_tokens = outputs[0][inputs['input_ids'].shape[1]:]
+        reply = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+
+        # If reply is empty, provide a fallback
+        if not reply:
+            reply = "I'm not sure how to answer that."
+
+        return JsonResponse({'reply': reply})
+
+    # GET request – just render the empty chat page
+    return render(request, 'CUFitness/general_website/chatbot.html')
+
+# endregion
+
+# region More-Tab Dropdown Pages
 def amenities(request):
     return render(request, 'CUFitness/general_website/dropdown/amenities.html')
 
+def gym_schedule(request):
+    schedule = GymInfo.objects.all().order_by('day')
+    return render(request, 'CUFitness/general_website/dropdown/gym_schedule.html', {"gym_schedule": schedule})
 
-def schedule(request):
-    return render(request, 'CUFitness/general_website/dropdown/schedule.html')
-
-
-def contact(request):
-    return render(request, 'CUFitness/general_website/dropdown/contact.html')
-
+def contact_us(request):
+    if request.method == 'POST':
+        form = ContactMessageForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your message has been sent!')
+            return redirect('contact_us')
+    else:
+        form = ContactMessageForm()
+    return render(request, 'CUFitness/general_website/dropdown/contact_us.html', {"form": form})
 
 def about(request):
     return render(request, 'CUFitness/general_website/dropdown/about.html')
+# endregion
 
-
-# -----------   Footer Pages  -----------
+# region Footer Pages
 def faq(request):
     return render(request, 'CUFitness/general_website/faq.html')
 
-
-def policy(request):
-    return render(request, 'CUFitness/general_website/policy.html')
-
+def privacy_policy(request):
+    return render(request, 'CUFitness/general_website/privacy_policy.html')
+# endregion
 
 # endregion
 
 
-# -----------   User Authentication   -----------
-
+# region User Authentication (no Staff)
 class Register(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
     template_name = "CUFitness/general_website/authentication/register.html"
-
 
 def login_user(request):
     if request.method == 'POST':
@@ -192,12 +283,10 @@ def login_user(request):
     else:
         return render(request, 'CUFitness/general_website/authentication/login.html')
 
-
 def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out')
     return redirect('home')
-
 
 def coach_login(request):
     if request.method == 'POST':
@@ -217,9 +306,10 @@ def coach_login(request):
             return redirect('coach_login')
     else:
         return render(request, 'CUFitness/coach/coach_login.html')  # render the HTML template on first visit
+# endregion
 
 
-# -----------   User Profile & Account   -----------
+# region Logged-In User Pages
 @login_required(login_url='login')
 def user_profile(request):
     # send each user's past/upcoming appointments with coaches
@@ -235,7 +325,6 @@ def user_profile(request):
 
     return render(request, 'CUFitness/user/user_profile.html', context)
 
-
 @login_required(login_url='login')
 @require_POST
 def upload_picture(request):
@@ -243,7 +332,6 @@ def upload_picture(request):
     if form.is_valid():
         form.save()
     return redirect('user_profile')
-
 
 @login_required(login_url='login')
 @require_POST
@@ -255,7 +343,6 @@ def delete_picture(request):
     user.profile_picture = 'defaults/Default_Profile_Picture.jpg'
     user.save()
     return redirect('user_profile')
-
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
@@ -308,98 +395,10 @@ def user_settings(request):
     }
     return render(request, 'CUFitness/user/user_settings.html', context)
 
-
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_inbox(request):
     return render(request, 'CUFitness/user/user_inbox.html')
-
-
-# @login_required(login_url='login')
-# @user_passes_test(lambda user: is_member(user) or is_coach(user))
-# def user_calendar(request):
-#     """
-#      Calendar page for members and coaches.
-#
-#      Members  → see their upcoming coach appointments (accepted & pending).
-#      Coaches  → see their upcoming appointments *and* ALL their availability slots
-#                 (past + future) so the calendar can render them for editing.
-#      """
-#     now = timezone.now()
-#
-#     if is_member(request.user):
-#         upcoming_appointments = CoachAppointment.objects.filter(
-#             member=request.user,
-#             start_time__gte=now,
-#             status__in=['PENDING', 'ACCEPTED'],
-#         ).select_related('coach').order_by('start_time')
-#
-#         past_appointments = CoachAppointment.objects.filter(
-#             member=request.user,
-#             start_time__lt=now,
-#         ).select_related('coach').order_by('-start_time')[:10]
-#
-#         availabilities = []
-#
-#     else:  # COACH
-#         upcoming_appointments = CoachAppointment.objects.filter(
-#             coach=request.user,
-#             start_time__gte=now,
-#             status__in=['PENDING', 'ACCEPTED'],
-#         ).select_related('member').order_by('start_time')
-#
-#         past_appointments = CoachAppointment.objects.filter(
-#             coach=request.user,
-#             start_time__lt=now,
-#         ).select_related('member').order_by('-start_time')[:10]
-#
-#         # ALL slots (past + future) so coaches can see/edit their full history
-#         availabilities = CoachAvailability.objects.filter(
-#             coach=request.user,
-#         ).order_by('start_time')
-#
-#     # ── Build calendar event JSON ──────────────────────────────────
-#     calendar_events = []
-#
-#     for appt in upcoming_appointments:
-#         label = (
-#             f"Session with {appt.member.first_name} {appt.member.last_name}"
-#             if is_coach(request.user)
-#             else f"Session with Coach {appt.coach.first_name} {appt.coach.last_name}"
-#         )
-#         color = '#15803d' if appt.status == 'ACCEPTED' else '#b45309'
-#         calendar_events.append({
-#             'type': 'appointment',
-#             'title': label,
-#             'start': appt.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'end': appt.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'color': color,
-#             'status': appt.status,
-#         })
-#
-#     for slot in availabilities:
-#         calendar_events.append({
-#             'type': 'availability',
-#             'id': slot.id,
-#             'title': 'Open Slot' if not slot.is_booked else 'Booked Slot',
-#             'start': slot.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'end': slot.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'color': '#1d4ed8' if not slot.is_booked else '#6b7280',
-#             'status': 'AVAILABLE' if not slot.is_booked else 'BOOKED',
-#             'is_booked': slot.is_booked,
-#         })
-#
-#     # Upcoming open slots for the sidebar list
-#     upcoming_availabilities = [s for s in availabilities if s.start_time >= now and not s.is_booked]
-#
-#     context = {
-#         'upcoming_appointments': upcoming_appointments,
-#         'past_appointments': past_appointments,
-#         'availabilities': upcoming_availabilities,
-#         'calendar_events_json': json.dumps(calendar_events),
-#         'is_coach': is_coach(request.user),
-#     }
-#     return render(request, 'CUFitness/user_profile/user_calendar.html', context)
 
 @login_required(login_url='login')
 def user_calendar(request):
@@ -450,7 +449,6 @@ def user_calendar(request):
         'is_coach': False,
     }
     return render(request, 'CUFitness/user/user_calendar.html', context)
-
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -530,21 +528,19 @@ def user_coach_schedule(request):
     }
     return render(request, 'CUFitness/user/user_coach_schedule.html', context)
 
-
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_saved_recipes(request):
     return render(request, 'CUFitness/user/user_saved_recipes.html')
 
-
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_saved_workouts(request):
     return render(request, 'CUFitness/user/user_saved_workouts.html')
+# endregion
 
 
-# calendar
-# ── AJAX: add availability slot ───────────────────────────────────
+# region AJAX Calendar
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 @require_POST
@@ -690,7 +686,6 @@ def ajax_add_availability(request):
         'recurrence_group': str(recurrence_group) if recurrence_group else None
     })
 
-
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def ajax_edit_availability(request, slot_id):
@@ -753,7 +748,6 @@ def ajax_edit_availability(request, slot_id):
         'end': slot.end_time.isoformat(),
     })
 
-
 @login_required(login_url='login')
 @user_passes_test(is_coach)
 def ajax_delete_availability(request, slot_id):
@@ -766,7 +760,6 @@ def ajax_delete_availability(request, slot_id):
         return JsonResponse({'error': 'Cannot delete a booked slot'}, status=400)
     slot.delete()
     return JsonResponse({'deleted': slot_id})
-
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -783,9 +776,10 @@ def ajax_cancel_series(request, group_id):
     count = slots.count()
     slots.delete()
     return JsonResponse({'deleted_count': count})
+# endregion
 
 
-# -----------   Staff Pages  -----------
+# region Staff Pages
 def staff_login(request):
     if request.method == 'POST':
         email = request.POST['email']  # change these to whatever fields put in the form
@@ -805,12 +799,10 @@ def staff_login(request):
     else:
         return render(request, 'CUFitness/staff/staff_login.html')  # render the HTML template on first visit
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_profile(request):
     return render(request, 'CUFitness/staff/staff_profile.html')
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -832,7 +824,6 @@ def staff_settings(request):
         'password_form': password_form,
     })
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def coach_requests(request):
@@ -844,7 +835,6 @@ def coach_requests(request):
         'approved_requests': approved,
         'rejected_requests': rejected,
     })
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -889,18 +879,20 @@ def handle_coach_request(request, user_id):
 
     return redirect('coach_requests')
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_reports(request):
     return render(request, 'CUFitness/staff/staff_reports.html')
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_messages(request):
-    return render(request, 'CUFitness/staff/staff_messages.html')
-
+    all_messages = ContactMessage.objects.all()
+    if request.method == 'POST':
+        msg_id = request.POST.get('msg_id')
+        ContactMessage.objects.filter(id=msg_id).update(is_read=True)
+        return redirect('contact_inbox')
+    return render(request, 'CUFitness/staff/staff_messages.html', {'messages': all_messages})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -911,14 +903,12 @@ def staff_user_detail(request, user_id):
         "user_obj": user_obj
     })
 
-
 # region Staff Articles
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_articles(request):
     articles = Article.objects.all()
     return render(request, "CUFitness/staff/articles/staff_articles.html", {"articles": articles})
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -934,7 +924,6 @@ def create_article(request):
     else:
         form = ArticleForm()
     return render(request, "CUFitness/staff/articles/create_article.html", {"form": form})
-
 
 def article_details(request, id):
     article = get_object_or_404(Article, id=id)
@@ -954,7 +943,6 @@ def article_details(request, id):
         'base_template': base,
     })
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def edit_article(request, id):
@@ -971,7 +959,6 @@ def edit_article(request, id):
     else:
         form = ArticleForm(instance=article)
     return render(request, 'CUFitness/staff/articles/edit_article.html', {'form': form, 'article': article})
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -995,14 +982,36 @@ def delete_article(request, id):
 
 # endregion
 
-
 # region Staff Recipes
+
+def recipe_details(request, id):
+    recipe = get_object_or_404(Recipe, id=id)
+    # the following is needed to get the "display" tags, since multi-select-field doesn't have that functionality by default unlike charfield
+    # Build a lookup dict from the choices and map the stored codes to labels
+    choices_dict = dict(Recipe.DIETARY_CHOICES)
+    dietary_display = [choices_dict.get(code, code) for code in recipe.dietary_restrictions]
+
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
+    else:
+        base = 'CUFitness/general_website/base.html'
+
+        # make sure user can't enter the url manually to access the locked recipes
+        # An unauthenticated user can directly hit the URL for a locked/premium recipes and read it without this checker.
+    if recipe.locked and not request.user.is_authenticated:
+        return redirect('login')
+
+    return render(request, 'CUFitness/staff/recipes/recipe_details.html', {
+        'recipe_obj': recipe,
+        'dietary_display': dietary_display,
+        'base_template': base,
+    })
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_recipes(request):
     recipes = Recipe.objects.all()
     return render(request, "CUFitness/staff/recipes/staff_recipes.html", {"recipes": recipes})
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -1024,31 +1033,6 @@ def create_recipe(request):
         formset = IngredientFormSet()
 
     return render(request, 'CUFitness/staff/recipes/create_recipe.html', {'form': form, 'formset': formset})
-
-
-def recipe_details(request, id):
-    recipe = get_object_or_404(Recipe, id=id)
-    # the following is needed to get the "display" tags, since multi-select-field doesn't have that functionality by default unlike charfield
-    # Build a lookup dict from the choices and map the stored codes to labels
-    choices_dict = dict(Recipe.DIETARY_CHOICES)
-    dietary_display = [choices_dict.get(code, code) for code in recipe.dietary_restrictions]
-
-    if request.user.is_authenticated:
-        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
-    else:
-        base = 'CUFitness/general_website/base.html'
-
-        # make sure user can't enter the url manually to access the locked recipes
-        # An unauthenticated user can directly hit the URL for a locked/premium article and read it without this checker.
-    if recipe.locked and not request.user.is_authenticated:
-        return redirect('login')
-
-    return render(request, 'CUFitness/staff/recipes/recipe_details.html', {
-        'recipe_obj': recipe,
-        'dietary_display': dietary_display,
-        'base_template': base,
-    })
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -1078,7 +1062,6 @@ def edit_recipe(request, id):
         'recipe': recipe,
     })
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def delete_recipe(request, id):
@@ -1095,9 +1078,7 @@ def delete_recipe(request, id):
 
     return HttpResponseNotAllowed(['POST'])
 
-
 # endregion
-
 
 # region Staff Workouts
 @login_required(login_url='staff_login')
@@ -1105,22 +1086,34 @@ def delete_recipe(request, id):
 def staff_workouts(request):
     return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html')
 
+def workout_plan_details(request, id):
+    workout_plan = get_object_or_404(WorkoutPlan, id=id)
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
+    else:
+        base = 'CUFitness/general_website/base.html'
 
-def workout_details(request, id):
-    return render(request, 'CUFitness/staff/workout_plans/workout_details.html')
+        # make sure user can't enter the url manually to access the locked recipes
+        # An unauthenticated user can directly hit the URL for a locked/premium recipes and read it without this checker.
+    if workout_plan.locked and not request.user.is_authenticated:
+        return redirect('login')
 
+    exercises = workout_plan.exercises.select_related('exercise').order_by('order')
+    return render(request, 'CUFitness/staff/workout_plans/workout_plan_details.html', {
+        'workout_plan': workout_plan,
+        'exercises': exercises,
+        'base_template': base,
+    })
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def create_workouts(request):
     return render(request, 'CUFitness/staff/workout_plans/create_workouts.html')
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def edit_workout(request, id):
     return render(request, 'CUFitness/staff/workout_plans/edit_workout.html')
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -1130,52 +1123,41 @@ def delete_workout(request, id):
 
 # endregion
 
-
 # region Staff Exercises
+
+def exercise_details(request, id):
+    exercise = get_object_or_404(Exercise, id=id)
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
+    else:
+        base = 'CUFitness/general_website/base.html'
+    return render(request, 'CUFitness/staff/exercises/exercise_details.html', {
+        'exercise_obj': exercise,
+        'base_template': base,
+    })
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_exercises(request):
     return render(request, 'CUFitness/staff/exercises/staff_exercises.html')
-
-
-def exercise_details(request, id):
-    return render(request, 'CUFitness/staff/exercises/exercise_details.html')
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def create_exercises(request):
     return render(request, 'CUFitness/staff/exercises/create_exercise.html')
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def edit_exercise(request, id):
     return render(request, 'CUFitness/staff/exercises/edit_exercise.html')
-
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def delete_exercise(request, id):
     return render(request, 'CUFitness/staff/exercises/delete_exercise.html')
 
-
 # endregion
-
-
-# --- Member Views ---
-
-'''
-# not needed anymore... coach list is displayed in home page
-@login_required(login_url='login')
-@user_passes_test(is_member)
-def coach_list_view(request):
-    coaches = CustomUser.objects.filter(role='COACH', is_active=True)
-
-    # TODO need a html page to display the list of coach. change url if necessary
-    return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
-
-'''
+# endregion
 
 
 # --- Coach Views ---
@@ -1276,54 +1258,6 @@ def manage_appointments(request):
         'response_form': form,
     }
     return render(request, 'CUFitness/manage_appointments.html', context)
-
-
-# ======== Chatbot ===========
-
-@ensure_csrf_cookie
-def chatbot(request):
-    if request.method == 'POST':
-        user_message = request.POST.get('message', '').strip()
-        if not user_message:
-            return JsonResponse({'error': 'Empty message'}, status=400)
-
-        from CUFitness.apps import get_chatbot_model
-        tokenizer, model = get_chatbot_model()
-
-        # Format the message using the model's chat template
-        # TinyLlama chat expects messages in a list of dicts with "role" and "content"
-        messages = [
-            {"role": "user", "content": user_message}
-        ]
-        # Apply the chat template to get the full prompt
-        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-
-        # Tokenize
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-
-        # Generate
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=100,  # Response length limiter
-                temperature=0.7,
-                do_sample=True,
-                top_p=0.9,
-                repetition_penalty=1.1
-            )
-
-        # Decode only the new tokens (skip the input prompt)
-        new_tokens = outputs[0][inputs['input_ids'].shape[1]:]
-        reply = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-
-        # If reply is empty, provide a fallback
-        if not reply:
-            reply = "I'm not sure how to answer that."
-
-        return JsonResponse({'reply': reply})
-
-    # GET request – just render the empty chat page
-    return render(request, 'CUFitness/chatbot.html')
 
 
 # ==========Appointment API ========
@@ -1449,6 +1383,7 @@ def api_request_appointment(request):
 
 
 @login_required(login_url='login')
+@user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_inbox(request):
     """Show inbox for the logged-in user (member or coach)."""
     user = request.user
@@ -1578,46 +1513,6 @@ def ajax_reject_appointment(request, appointment_id):
 
 ## Fitness Challenges
 @login_required(login_url='login')
-def user_challenges(request):
-    challenges = Challenge.objects.all()
-
-    user_participation = ChallengeParticipation.objects.filter(user=request.user)
-    joined_ids = user_participation.values_list('challenge_id', flat=True)
-
-    # leaderboard (top users per challenge)
-    leaderboard_data = []
-
-    for challenge in Challenge.objects.all():
-        participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
-
-        participants = (
-            participants_qs
-            .select_related('user')
-            .order_by('-progress')[:5]
-        )
-
-        top_participants = (
-            participants_qs
-            .select_related('user')
-            .order_by('-progress')[:5]
-        )
-
-        leaderboard_data.append({
-            'challenge': challenge,
-            'participants': participants,
-            'top_participants': top_participants,
-            'count': participants_qs.count()
-        })
-
-    return render(request, 'CUFitness/general_website/navbar/user_challenges.html', {
-        'leaderboard_data': leaderboard_data,
-        'challenges': challenges,
-        'joined_ids': joined_ids,
-        'participations': user_participation,
-    })
-
-
-@login_required(login_url='login')
 def join_challenge(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
 
@@ -1627,7 +1522,6 @@ def join_challenge(request, challenge_id):
     )
 
     return redirect('user_challenges')
-
 
 @login_required(login_url='login')
 def update_progress(request, participation_id):
@@ -1651,7 +1545,6 @@ def update_progress(request, participation_id):
 
     return redirect('user_challenges')
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def create_challenge(request):
@@ -1667,7 +1560,6 @@ def create_challenge(request):
 
     return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form})
 
-
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_challenges(request):
@@ -1678,22 +1570,29 @@ def staff_challenges(request):
     })
 
 
-def challenge_detail(request, id):
+@user_passes_test(lambda user: is_member(user) or is_coach(user) or is_staff_user(user))
+def challenge_details(request, id):
     challenge = get_object_or_404(Challenge, id=id)
 
     if request.user.is_authenticated:
-        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/base.html'
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
     else:
-        base = 'CUFitness/base.html'
+        base = 'CUFitness/general_website/base.html'
 
     participants = ChallengeParticipation.objects.filter(
         challenge=challenge
     ).select_related('user').order_by('-progress')
 
-    return render(request, 'CUFitness/staff/challenges/challenge_detail.html', {
+    is_joined = (
+        request.user.is_authenticated and
+        ChallengeParticipation.objects.filter(user=request.user, challenge=challenge).exists()
+    )
+
+    return render(request, 'CUFitness/staff/challenges/challenge_details.html', {
         'challenge': challenge,
         'participants': participants,
         'base_template': base,
+        'is_joined': is_joined,
     })
 
 

@@ -1,0 +1,46 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+{% block title %} Gym Schedule {% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'general_website/gym_schedule.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="section-header">
+    <div class="section-label">Hours &amp; Availability</div>
+    <h2>Gym <em>Schedule</em></h2>
+    <p>Plan your visit around our weekly opening hours.</p>
+</div>
+
+<div class="schedule-wrapper">
+    {% for day in gym_schedule %}
+    <div class="schedule-row {% if not day.is_open %}closed{% endif %}">
+
+        <div class="schedule-day">
+            <span class="day-name">{{ day.get_day_display }}</span>
+        </div>
+
+        <div class="schedule-hours">
+            {% if not day.is_open %}
+                <span class="badge badge-closed">Closed</span>
+            {% elif day.is_open_24h %}
+                <span class="badge badge-open">Open 24 Hours</span>
+            {% elif day.open_time and day.close_time %}
+                <span class="hours-text">
+                    {{ day.open_time|time:"g:i A" }} &mdash; {{ day.close_time|time:"g:i A" }}
+                </span>
+            {% else %}
+                <span class="badge badge-tbd">Hours TBD</span>
+            {% endif %}
+        </div>
+
+    </div>
+    {% empty %}
+        <p class="empty-msg">No schedule has been set yet. Check back soon.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

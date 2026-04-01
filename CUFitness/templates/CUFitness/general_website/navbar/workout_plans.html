@@ -1,10 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+{% block title %}Workout Plans{% endblock %}
 
-</body>
-</html>
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'general_website/workout_plans.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="wp-hero">
+  <div class="wp-hero-label">Training</div>
+  <h1>Workout<br><em>Plans</em></h1>
+  <p class="wp-hero-sub">Structured programs built by our coaches — from beginner strength to elite cardio. Find your plan and get to work.</p>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-chip active" data-filter-type="goal" data-filter-value="all">All</div>
+  <div class="filter-chip" data-filter-type="goal" data-filter-value="STRENGTH">Strength</div>
+  <div class="filter-chip" data-filter-type="goal" data-filter-value="CARDIO">Cardio</div>
+  <div class="filter-chip" data-filter-type="goal" data-filter-value="FLEXIBILITY">Flexibility</div>
+  <div class="filter-chip" data-filter-type="goal" data-filter-value="WEIGHT_LOSS">Weight Loss</div>
+  <div class="filter-chip" data-filter-type="goal" data-filter-value="MUSCLE_GAIN">Muscle Gain</div>
+
+  <div class="filter-divider"></div>
+
+  <div class="filter-chip" data-filter-type="difficulty" data-filter-value="EASY">Easy</div>
+  <div class="filter-chip" data-filter-type="difficulty" data-filter-value="MEDIUM">Medium</div>
+  <div class="filter-chip" data-filter-type="difficulty" data-filter-value="HARD">Hard</div>
+
+  <div class="filter-divider"></div>
+
+  <div class="filter-chip" data-filter-type="duration" data-filter-value="under30">&#9201; &lt;30 min</div>
+  <div class="filter-chip" data-filter-type="duration" data-filter-value="under60">&#9201; &lt;60 min</div>
+  <div class="filter-chip" data-filter-type="duration" data-filter-value="over60">&#9201; 60+ min</div>
+</div>
+
+<div class="wp-grid">
+
+  {% for workout in free_workouts %}
+  <a href="{% url 'workout_plan_details' workout.id %}" class="wp-card"
+     data-goal="{{ workout.goal }}"
+     data-difficulty="{{ workout.difficulty }}"
+     data-duration="{{ workout.duration_minutes }}">
+    <div class="wp-card-index">{{ forloop.counter }}</div>
+    <div class="wp-card-body">
+      <div class="wp-card-tag">
+        <span class="wp-card-tag-label">Workout Plan</span>
+        <span class="wp-card-diff diff-{{ workout.difficulty|lower }}">{{ workout.get_difficulty_display }}</span>
+        {% if workout.goal %}<span class="wp-card-goal">{{ workout.get_goal_display }}</span>{% endif %}
+      </div>
+      <h3>{{ workout.title }}</h3>
+      <p>{{ workout.description }}</p>
+      <span class="wp-card-meta">
+        {{ workout.exercises.count }} exercise{{ workout.exercises.count|pluralize }}{% if workout.duration_minutes %} &middot; {{ workout.duration_minutes }} min{% endif %} &middot; {{ workout.author.first_name|default:"CUFitness" }} {{ workout.author.last_name|default:"" }}
+      </span>
+    </div>
+    <div class="wp-card-arrow">&#8594;</div>
+  </a>
+  {% empty %}
+  <p style="padding:40px; color:var(--text-muted)">No workout plans yet.</p>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+    {% for workout in locked_workouts %}
+    <a href="{% url 'workout_plan_details' workout.id %}" class="wp-card"
+       data-goal="{{ workout.goal }}"
+       data-difficulty="{{ workout.difficulty }}"
+       data-duration="{{ workout.duration_minutes }}">
+      <div class="wp-card-index">{{ forloop.counter }}</div>
+      <div class="wp-card-body">
+        <div class="wp-card-tag">
+          <span class="wp-card-tag-label">Workout Plan &middot; Members</span>
+          <span class="wp-card-diff diff-{{ workout.difficulty|lower }}">{{ workout.get_difficulty_display }}</span>
+          {% if workout.goal %}<span class="wp-card-goal">{{ workout.get_goal_display }}</span>{% endif %}
+        </div>
+        <h3>{{ workout.title }}</h3>
+        <p>{{ workout.description }}</p>
+        <span class="wp-card-meta">
+          {{ workout.exercises.count }} exercise{{ workout.exercises.count|pluralize }}{% if workout.duration_minutes %} &middot; {{ workout.duration_minutes }} min{% endif %} &middot; {{ workout.author.first_name|default:"CUFitness" }} {{ workout.author.last_name|default:"" }}
+        </span>
+      </div>
+      <div class="wp-card-arrow">&#8594;</div>
+    </a>
+    {% endfor %}
+  {% else %}
+    {% for workout in locked_workouts %}
+    <a href="{% url 'login' %}" class="wp-card locked"
+       data-goal="{{ workout.goal }}"
+       data-difficulty="{{ workout.difficulty }}"
+       data-duration="{{ workout.duration_minutes }}">
+      <div class="wp-card-index">{{ forloop.counter }}</div>
+      <div class="wp-card-body">
+        <div class="wp-card-tag">
+          <span class="wp-card-tag-label">Workout Plan</span>
+          <span class="wp-card-diff diff-{{ workout.difficulty|lower }}">{{ workout.get_difficulty_display }}</span>
+          {% if workout.goal %}<span class="wp-card-goal">{{ workout.get_goal_display }}</span>{% endif %}
+        </div>
+        <h3>{{ workout.title }}</h3>
+        <p>{{ workout.description }}</p>
+        <div class="locked-badge" style="margin-top:4px">&#128274; Log in to view</div>
+      </div>
+      <div class="wp-card-arrow">&#8594;</div>
+    </a>
+    {% endfor %}
+  {% endif %}
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const active = { goal: 'all', difficulty: null, duration: null };
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const type = chip.dataset.filterType;
+      const value = chip.dataset.filterValue;
+
+      if (active[type] === value && value !== 'all') {
+        active[type] = null;
+        chip.classList.remove('active');
+      } else {
+        document.querySelectorAll('.filter-chip[data-filter-type="' + type + '"]')
+          .forEach(c => c.classList.remove('active'));
+        active[type] = value;
+        chip.classList.add('active');
+      }
+
+      applyFilters();
+    });
+  });
+
+  function applyFilters() {
+    document.querySelectorAll('.wp-card').forEach(card => {
+      let show = true;
+
+      if (active.goal && active.goal !== 'all') {
+        if (card.dataset.goal !== active.goal) show = false;
+      }
+      if (active.difficulty) {
+        if (card.dataset.difficulty !== active.difficulty) show = false;
+      }
+      if (active.duration) {
+        const mins = parseInt(card.dataset.duration) || 0;
+        if (active.duration === 'under30' && mins >= 30) show = false;
+        if (active.duration === 'under60' && mins >= 60) show = false;
+        if (active.duration === 'over60'  && mins < 60)  show = false;
+      }
+
+      card.style.display = show ? '' : 'none';
+    });
+  }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,303 @@
+  :root {
+    --cu-red:      hsl(349, 61%, 50%);
+    --cu-red-dim:  hsl(349, 61%, 35%);
+    --cu-red-glow: hsla(349, 61%, 50%, 0.15);
+    --surface-0: #0d0d0d;
+    --surface-1: #141414;
+    --surface-2: #1c1c1c;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --text-primary: #f0ede8;
+    --text-secondary: #9a9490;
+    --text-muted: #5a5753;
+    --radius-lg: 20px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .inbox-hero {
+    position: relative;
+    padding: 72px 80px 48px;
+    overflow: hidden;
+  }
+  .inbox-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 120% at 0% 50%, hsla(349,61%,20%,0.25) 0%, transparent 70%),
+      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.01) 40px, rgba(255,255,255,0.01) 41px);
+    pointer-events: none;
+  }
+  .inbox-hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .inbox-hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--cu-red);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .inbox-hero-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--cu-red);
+  }
+  .inbox-hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin: 0;
+  }
+  .inbox-hero h1 em {
+    font-style: italic;
+    color: var(--cu-red);
+  }
+  .inbox-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cu-red);
+    background: var(--cu-red-glow);
+    border: 1px solid hsla(349,61%,50%,0.25);
+    padding: 6px 14px;
+    border-radius: 100px;
+  }
+
+  /* ── MESSAGE LIST ── */
+  .inbox-wrap {
+    margin: 0 80px 80px;
+  }
+
+  .inbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .msg-card {
+    background: var(--surface-1);
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+  }
+  .msg-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--cu-red);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.25s ease;
+  }
+  .msg-card:hover { background: var(--surface-2); }
+  .msg-card:hover::before { transform: scaleY(1); }
+
+  .msg-card.is-read {
+    opacity: 0.6;
+  }
+  .msg-card.is-read::before {
+    background: var(--text-muted);
+  }
+
+  /* Card header row */
+  .msg-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .msg-sender {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .msg-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--cu-red);
+    flex-shrink: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .msg-card:hover .msg-avatar {
+    border-color: var(--cu-red);
+    background: var(--cu-red-glow);
+  }
+  .msg-sender-info { display: flex; flex-direction: column; gap: 3px; }
+  .msg-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .msg-email {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .msg-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .msg-status-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  /* Subject */
+  .msg-subject {
+    font-family: 'DM Serif Display', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+
+  /* Divider */
+  .msg-divider {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Body */
+  .msg-body {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+
+  /* Mark as read button */
+  .msg-actions form { margin: 0; }
+  .btn-mark-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-lg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-hover);
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .btn-mark-read:hover {
+    border-color: var(--cu-red);
+    color: var(--cu-red);
+    background: var(--cu-red-glow);
+  }
+
+  /* ── EMPTY STATE ── */
+  .inbox-empty {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 64px 36px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .inbox-empty-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+  .inbox-empty h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+  .inbox-empty p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  /* ── ACCESS DENIED ── */
+  .access-denied {
+    margin: 80px;
+    background: hsla(349,61%,50%,0.08);
+    border: 1px solid hsla(349,61%,50%,0.2);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .access-denied h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--cu-red);
+  }
+  .access-denied p {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .inbox-hero   { padding: 48px 20px 32px; }
+    .inbox-wrap   { margin: 0 20px 48px; }
+    .msg-card     { padding: 24px 20px; }
+    .msg-header   { flex-direction: column; align-items: flex-start; }
+    .access-denied { margin: 20px; padding: 32px 20px; }
+  }

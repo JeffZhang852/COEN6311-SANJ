@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap');
+
+:root {
+  --cu-red:      hsl(349, 61%, 50%);
+  --cu-red-dim:  hsl(349, 61%, 35%);
+  --cu-red-glow: hsla(349, 61%, 50%, 0.15);
+  --surface-0: #0d0d0d;
+  --surface-1: #141414;
+  --surface-2: #1c1c1c;
+  --surface-3: #222222;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.14);
+  --text-primary: #f0ede8;
+  --text-secondary: #9a9490;
+  --text-muted: #5a5753;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ================= UPSELL (logged-out state) ================= */
+.challenge-upsell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 4rem 1rem;
+  gap: 1rem;
+}
+.challenge-upsell h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 400;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+  line-height: 1.15;
+}
+.challenge-upsell h2 em { font-style: italic; color: var(--cu-red); }
+.challenge-upsell p {
+  color: var(--text-secondary);
+  max-width: 460px;
+  line-height: 1.7;
+  font-size: 15px;
+  margin: 0 0 1rem;
+}
+.cb-upsell-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cu-red);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 28px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.cb-upsell-btn:hover  { opacity: 0.85; transform: translateY(-1px); color: #fff; }
+.cb-upsell-btn:active { transform: scale(0.97); }
+
+/* ================= HERO (matches .art-hero) ================= */
+.chal-hero {
+  position: relative;
+  padding: 80px 80px 60px;
+  overflow: hidden;
+}
+.chal-hero--sub {
+  padding-top: 56px;
+  padding-bottom: 40px;
+}
+.chal-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 80% at 80% 50%, hsl(349,61%,20%,0.25) 0%, transparent 70%),
+    repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+}
+.chal-hero--sub::before { display: none; }
+
+.chal-hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--cu-red);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.chal-hero-label::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--cu-red);
+}
+
+.chal-hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text-primary);
+  max-width: 540px;
+  margin-bottom: 20px;
+}
+.chal-hero h1 em { font-style: italic; color: var(--cu-red); }
+
+.chal-hero-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 420px;
+  line-height: 1.7;
+}
+
+/* ================= CARD LIST (matches .art-grid) ================= */
+.chal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 80px 64px;
+}
+
+/* ================= CARD (matches .art-card) ================= */
+.chal-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 36px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left accent bar — slides up on hover (mirrors art-card::before) */
+.chal-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--cu-red);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.25s ease;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+.chal-card:hover {
+  border-color: var(--border-hover);
+  transform: translateX(4px);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+}
+.chal-card:hover::before { transform: scaleY(1); }
+
+/* ================= INDEX NUMBER ================= */
+.chal-card-index {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--border-hover);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 44px;
+  text-align: right;
+  transition: color 0.2s;
+}
+.chal-card:hover .chal-card-index { color: var(--cu-red); }
+
+/* Leaderboard uses emoji — keep it normal size */
+.chal-card--lb .chal-card-index { font-size: 24px; width: 44px; }
+
+/* ================= BODY ================= */
+.chal-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chal-card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.chal-card-title-link { text-decoration: none; }
+.chal-card-body h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin: 0;
+}
+.chal-card-body p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+.chal-card-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ================= ACTION AREA (right side) ================= */
+.chal-card-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Joined / Done badge */
+.joined-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--cu-red);
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid var(--cu-red-glow);
+  border-radius: 100px;
+  background: var(--cu-red-glow);
+}
+
+/* Join button */
+.btn-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-hover);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-join:hover {
+  border-color: var(--cu-red);
+  color: var(--cu-red);
+  background: var(--cu-red-glow);
+}
+
+/* +1 progress button */
+.btn-progress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-hover);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-progress:hover {
+  border-color: var(--cu-red);
+  color: var(--cu-red);
+  background: var(--cu-red-glow);
+}
+
+/* ================= PROGRESS BAR ================= */
+.progress-bar {
+  height: 5px;
+  background: var(--surface-3);
+  border-radius: 100px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--cu-red);
+  border-radius: 100px;
+  transition: width 0.4s ease;
+}
+
+/* ================= LEADERBOARD ROWS ================= */
+.participant-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.lb-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 4px;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+.lb-row:last-child { border-bottom: none; }
+
+.lb-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 18px;
+  flex-shrink: 0;
+}
+.lb-name  { flex: 1; color: var(--text-primary); }
+.lb-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--cu-red);
+}
+
+/* Leaderboard grid — allow wider cards */
+.chal-grid--leaderboard .chal-card {
+  align-items: flex-start;
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .chal-hero        { padding: 48px 20px 36px; }
+  .chal-hero--sub   { padding-top: 40px; }
+  .chal-grid        { margin: 0 20px 48px; }
+  .chal-card        { padding: 20px; gap: 16px; }
+  .chal-card-index  { display: none; }
+}
