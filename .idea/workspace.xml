@@ -1,37 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/CUFitness/static/staff/staff_user_details.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/staff_create_article.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/staff_edit_article.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/staff_create_recipe.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/staff_edit_recipe.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/staff_user_details.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/general_website/workout_plans.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/general_website/workout_plans.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/staff/staff_create_article.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/staff/staff_create_article.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/staff/staff_create_recipe.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/staff/staff_create_recipe.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/staff/staff_home.css" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/static/staff/staff_home.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/static/staff/user_detail.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/article_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/article_details.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/create_article.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/edit_article.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/staff_articles.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/articles/staff_articles.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/create_recipe.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/edit_recipe.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/staff_create_workout.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/recipe_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/recipe_details.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/staff_recipes.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/recipes/staff_recipes.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/staff_home.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/staff_home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/user_detail.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/create_workout.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/staff_edit_workout.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/edit_workout.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/staff_workouts.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/staff_workouts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/workout_plan_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/templates/CUFitness/staff/workout_plans/workout_plan_details.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUFitness/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/CUFitness/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -190,7 +160,7 @@
       <workItem from="1774800570146" duration="19145000" />
       <workItem from="1775014525493" duration="2499000" />
       <workItem from="1775054325446" duration="12933000" />
-      <workItem from="1775071096780" duration="16293000" />
+      <workItem from="1775071096780" duration="16626000" />
     </task>
     <servers />
   </component>
