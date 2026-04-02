@@ -12,9 +12,15 @@
 
 {% block content %}
 <div class="art-detail-page">
-  <a href="{% url 'user_articles' %}" class="art-detail-back">
-    <span class="material-icons" style="font-size:16px">arrow_back</span> Articles
-  </a>
+    {% if user.is_authenticated and user.role == "STAFF" %}
+      <a href="{% url 'staff_articles' %}" class="art-detail-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Articles
+      </a>
+    {% else %}
+        <a href="{% url 'user_articles' %}" class="art-detail-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Articles
+      </a>
+    {% endif %}
   <div class="art-detail-container">
 
     <!-- Header -->
@@ -27,7 +33,7 @@
         {% if user.is_authenticated and user.role == "STAFF" %}
         <div class="article-actions">
           {% if article_obj.author and user == article_obj.author %}
-            <a href="{% url 'edit_article' article_obj.id %}" class="edit-btn">
+            <a href="{% url 'staff_edit_article' article_obj.id %}" class="edit-btn">
               <span class="material-icons" style="font-size:16px">edit</span> Edit
             </a>
             <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
@@ -74,7 +80,7 @@
     <h3>Delete Article?</h3>
     <p>This action is permanent and cannot be undone.</p>
     <div class="modal-actions">
-      <form method="POST" action="{% url 'delete_article' article_obj.id %}">
+      <form method="POST" action="{% url 'staff_delete_article' article_obj.id %}">
         {% csrf_token %}
         <button type="submit" class="btn-confirm-delete">Delete</button>
       </form>

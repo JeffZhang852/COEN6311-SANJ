@@ -498,7 +498,7 @@ class AccessControlTest(TestCase):
 
     def test_member_cannot_create_article(self):
         self.client.force_login(self.member)
-        response = self.client.get(reverse('create_article'))
+        response = self.client.get(reverse('staff_create_article'))
         self.assertNotEqual(response.status_code, 200)
 
     # --- Staff can access staff pages ---
@@ -510,7 +510,7 @@ class AccessControlTest(TestCase):
 
     def test_staff_can_access_create_article(self):
         self.client.force_login(self.staff)
-        response = self.client.get(reverse('create_article'))
+        response = self.client.get(reverse('staff_create_article'))
         self.assertEqual(response.status_code, 200)
 
     def test_staff_cannot_access_member_settings(self):
@@ -544,7 +544,7 @@ class ArticleViewTest(TestCase):
 
     def test_author_can_edit_article(self):
         self.client.force_login(self.staff)
-        response = self.client.post(reverse('edit_article', args=[self.article.id]), {
+        response = self.client.post(reverse('staff_edit_article', args=[self.article.id]), {
             'title': 'Updated Title',
             'description': 'Updated description.',
             'body': 'Updated body.',
@@ -555,7 +555,7 @@ class ArticleViewTest(TestCase):
 
     def test_non_author_cannot_edit_article(self):
         self.client.force_login(self.other_staff)
-        self.client.post(reverse('edit_article', args=[self.article.id]), {
+        self.client.post(reverse('staff_edit_article', args=[self.article.id]), {
             'title': 'Hacked Title',
             'description': 'x',
             'body': 'x',
@@ -566,18 +566,18 @@ class ArticleViewTest(TestCase):
 
     def test_author_can_delete_article(self):
         self.client.force_login(self.staff)
-        self.client.post(reverse('delete_article', args=[self.article.id]))
+        self.client.post(reverse('staff_delete_article', args=[self.article.id]))
         self.assertFalse(Article.objects.filter(id=self.article.id).exists())
 
     def test_non_author_cannot_delete_article(self):
         self.client.force_login(self.other_staff)
-        self.client.post(reverse('delete_article', args=[self.article.id]))
+        self.client.post(reverse('staff_delete_article', args=[self.article.id]))
         self.assertTrue(Article.objects.filter(id=self.article.id).exists())
 
     def test_create_article_saves_author(self):
         """Author should be set to the logged-in staff user, not from the form."""
         self.client.force_login(self.staff)
-        self.client.post(reverse('create_article'), {
+        self.client.post(reverse('staff_create_article'), {
             'title': 'Brand New Article',
             'description': 'Some description.',
             'body': 'Some body.',
@@ -1119,13 +1119,13 @@ class PublicPageTest(TestCase):
         self.assertEqual(self.client.get(reverse('faq')).status_code, 200)
 
     def test_policy_page(self):
-        self.assertEqual(self.client.get(reverse('policy')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('privacy_policy')).status_code, 200)
 
     def test_about_page(self):
         self.assertEqual(self.client.get(reverse('about')).status_code, 200)
 
     def test_contact_page(self):
-        self.assertEqual(self.client.get(reverse('contact')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('contact_us')).status_code, 200)
 
     def test_amenities_page(self):
         self.assertEqual(self.client.get(reverse('amenities')).status_code, 200)
@@ -1608,7 +1608,7 @@ class RecipeViewTest(TestCase):
     def test_create_recipe_saves_author(self):
         """Author should be set to the logged-in staff user, not from the form."""
         self.client.force_login(self.staff)
-        self.client.post(reverse('create_recipe'), {
+        self.client.post(reverse('staff_create_recipe'), {
             'title': 'New Recipe',
             'description': 'A test description.',
             'difficulty': 'EASY',
@@ -1627,14 +1627,14 @@ class RecipeViewTest(TestCase):
 
     def test_member_cannot_create_recipe(self):
         self.client.force_login(self.member)
-        response = self.client.get(reverse('create_recipe'))
+        response = self.client.get(reverse('staff_create_recipe'))
         self.assertNotEqual(response.status_code, 200)
 
     # --- edit_recipe ---
 
     def test_author_can_edit_recipe(self):
         self.client.force_login(self.staff)
-        self.client.post(reverse('edit_recipe', args=[self.recipe.id]), {
+        self.client.post(reverse('staff_edit_recipe', args=[self.recipe.id]), {
             'title': 'Updated Recipe',
             'description': 'Updated description.',
             'difficulty': 'HARD',
@@ -1653,7 +1653,7 @@ class RecipeViewTest(TestCase):
 
     def test_non_author_cannot_edit_recipe(self):
         self.client.force_login(self.other_staff)
-        self.client.post(reverse('edit_recipe', args=[self.recipe.id]), {
+        self.client.post(reverse('staff_edit_recipe', args=[self.recipe.id]), {
             'title': 'Hacked Title',
             'description': 'x',
             'difficulty': 'EASY',
@@ -1674,12 +1674,12 @@ class RecipeViewTest(TestCase):
 
     def test_author_can_delete_recipe(self):
         self.client.force_login(self.staff)
-        self.client.post(reverse('delete_recipe', args=[self.recipe.id]))
+        self.client.post(reverse('staff_delete_recipe', args=[self.recipe.id]))
         self.assertFalse(Recipe.objects.filter(id=self.recipe.id).exists())
 
     def test_non_author_cannot_delete_recipe(self):
         self.client.force_login(self.other_staff)
-        self.client.post(reverse('delete_recipe', args=[self.recipe.id]))
+        self.client.post(reverse('staff_delete_recipe', args=[self.recipe.id]))
         self.assertTrue(Recipe.objects.filter(id=self.recipe.id).exists())
 
 # ══════════════════════════════════════════════════

@@ -1,51 +1,85 @@
 {% extends 'CUFitness/staff/staff_base.html' %}
 {% load static %}
-{% block title %} CUFitness {% endblock %}
+{% block title %} CUFitness Staff Dashboard {% endblock %}
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'staff/staff_home.css' %}"/>
 {% endblock %}
 {% block content %}
 {% if user.role == "STAFF" %}
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>CUFitness Staff Dashboard</h1>
-    </div>
-    <div class="dashboard-grid">
-        <!-- Active Members -->
-        <div>
-            <h2 class="section-title">Active Members ({{ active_members|length }})</h2>
-            <ul class="user-list">
-                {% for user in active_members %}
-                <li class="user-item">
-                    <a href="{% url 'staff_user_detail' user.id %}" class="user-link">
-                    <span>{{ user.first_name }} {{ user.last_name }}</span>
-                    <span class="user-email">{{ user.email }}</span>
-                    </a>
-                </li>
-                {% empty %}
-                <li>No active members.</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <!-- Active Coaches -->
-        <div>
-            <h2 class="section-title">Active Coaches ({{ active_coaches|length }})</h2>
-            <ul class="user-list">
-                {% for user in active_coaches %}
-                <li class="user-item">
-                    <a href="{% url 'staff_user_detail' user.id %}" class="user-link">
-                    <span>{{ user.first_name }} {{ user.last_name }}</span>
-                    <span class="user-email">{{ user.email }}</span>
-                    </a>
-                </li>
-                {% empty %}
-                <li>No active coaches.</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
+
+<!-- ===== HERO ===== -->
+<div class="staff-hero">
+  <div class="staff-hero-label">Staff Portal</div>
+  <h1>Staff <em>Dashboard</em></h1>
+  <p class="staff-hero-sub">Manage members and coaches, view profiles, and keep the gym running smoothly.</p>
 </div>
+
+<!-- ===== GRID ===== -->
+<div class="staff-grid">
+
+  <!-- Active Members -->
+  <div class="staff-panel">
+    <div class="panel-header">
+      <div class="panel-label">Members</div>
+      <h2>Active Members <span class="panel-count">{{ active_members|length }}</span></h2>
+    </div>
+    <ul class="staff-list">
+      {% for member in active_members %}
+      <li class="staff-item">
+        <a href="{% url 'staff_user_details' member.id %}" class="staff-link">
+          <div class="staff-avatar">
+            {% if member.profile_picture %}
+              <img src="{{ member.profile_picture.url }}" alt="{{ member.first_name }}">
+            {% else %}
+              {{ member.first_name|slice:":1" }}{{ member.last_name|slice:":1" }}
+            {% endif %}
+          </div>
+          <div class="staff-info">
+            <span class="staff-name">{{ member.first_name }} {{ member.last_name }}</span>
+            <span class="staff-email">{{ member.email }}</span>
+          </div>
+          <div class="staff-arrow">→</div>
+        </a>
+      </li>
+      {% empty %}
+      <li class="staff-empty">No active members.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Active Coaches -->
+  <div class="staff-panel">
+    <div class="panel-header">
+      <div class="panel-label">Coaches</div>
+      <h2>Active Coaches <span class="panel-count">{{ active_coaches|length }}</span></h2>
+    </div>
+    <ul class="staff-list">
+      {% for coach in active_coaches %}
+      <li class="staff-item">
+        <a href="{% url 'staff_user_details' coach.id %}" class="staff-link">
+          <div class="staff-avatar">
+            {% if coach.profile_picture %}
+              <img src="{{ coach.profile_picture.url }}" alt="{{ coach.first_name }}">
+            {% else %}
+              {{ coach.first_name|slice:":1" }}{{ coach.last_name|slice:":1" }}
+            {% endif %}
+          </div>
+          <div class="staff-info">
+            <span class="staff-name">{{ coach.first_name }} {{ coach.last_name }}</span>
+            <span class="staff-email">{{ coach.email }}</span>
+          </div>
+          <div class="staff-arrow">→</div>
+        </a>
+      </li>
+      {% empty %}
+      <li class="staff-empty">No active coaches.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+
 {% else %}
-<p> not a staff member </p>
+<p style="padding:80px;color:var(--text-muted);text-align:center;">Access restricted to staff members.</p>
 {% endif %}
 {% endblock %}

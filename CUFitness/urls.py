@@ -70,26 +70,26 @@ urlpatterns = [
     path('staff_messages/', views.staff_messages, name='staff_messages'),
     path('staff_settings/', views.staff_settings, name='staff_settings'),
     # path to user profiles from staff_home page
-    path("staff_user_detail/<int:user_id>/", views.staff_user_detail, name="staff_user_detail"),
+    path("staff_user_details/<int:user_id>/", views.staff_user_details, name="staff_user_details"),
 
     # region Article Pages
     path("article_details/<int:id>/", views.article_details, name="article_details"),
  # -----------  Staff Article Pages  -----------
     path('staff_articles/', views.staff_articles, name='staff_articles'),
-    path('create_article/', views.create_article, name='create_article'),
+    path('staff_create_article/', views.staff_create_article, name='staff_create_article'),
     # path to edit article page from article_details page
-    path("edit_article/<int:id>/edit/", views.edit_article, name="edit_article"),
-    path("delete_article/<int:id>/delete/", views.delete_article, name="delete_article"),
+    path("staff_edit_article/<int:id>/edit/", views.staff_edit_article, name="staff_edit_article"),
+    path("staff_delete_article/<int:id>/delete/", views.staff_delete_article, name="staff_delete_article"),
     # endregion
 
     # region Recipe Pages
     path("recipe_details/<int:id>/", views.recipe_details, name="recipe_details"),
 # -----------  Staff Recipe Pages  -----------
     path("staff_recipes/", views.staff_recipes, name='staff_recipes'),
-    path('create_recipe/', views.create_recipe, name='create_recipe'),
+    path('staff_create_recipe/', views.staff_create_recipe, name='staff_create_recipe'),
     # path to edit recipe page from recipe_details page
-    path("recipe/<int:id>/edit/", views.edit_recipe, name="edit_recipe"),
-    path("recipe/<int:id>/delete/", views.delete_recipe, name="delete_recipe"),
+    path("staff_edit_recipe/<int:id>/edit/", views.staff_edit_recipe, name="staff_edit_recipe"),
+    path("staff_delete_recipe/<int:id>/delete/", views.staff_delete_recipe, name="staff_delete_recipe"),
     # endregion
 
     # region Exercise Pages
@@ -106,10 +106,10 @@ urlpatterns = [
     path("workout_plan_details/<int:id>/", views.workout_plan_details, name="workout_plan_details"),
     # -----------  Staff Workout Pages  -----------
     path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
-    path('create_workouts/', views.create_workouts, name='create_workouts'),
+    path('staff_create_workout/', views.staff_create_workout, name='staff_create_workout'),
     # path to edit workout page from workout_details page
-    path("workout/<int:id>/edit/", views.edit_workout, name="edit_workout"),
-    path("workout/<int:id>/delete/", views.delete_workout, name="delete_workout"),
+    path("staff_edit_workout/<int:id>/edit/", views.staff_edit_workout, name="staff_edit_workout"),
+    path("staff_delete_workout/<int:id>/delete/", views.staff_delete_workout, name="staff_delete_workout"),
     # endregion
 
     # region Challenges Pages

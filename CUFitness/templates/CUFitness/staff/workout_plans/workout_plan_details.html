@@ -8,10 +8,15 @@
 
 {% block content %}
 <div class="wd-page">
-
-  <a href="{% url 'workout_plans' %}" class="wd-back">
-    <span class="material-icons" style="font-size:16px">arrow_back</span> Workout Plans
-  </a>
+    {% if user.is_authenticated and user.role == "STAFF" %}
+      <a href="{% url 'staff_workouts' %}" class="wd-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Workout Plans
+      </a>
+    {% else %}
+        <a href="{% url 'workout_plans' %}" class="rec-detail-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Recipes
+      </a>
+    {% endif %}
 
   <div class="wd-container">
 
@@ -29,7 +34,7 @@
         {% if user.is_authenticated and user.role == "STAFF" %}
         <div class="wd-actions">
           {% if workout.author and user == workout_plan.author %}
-            <a href="{% url 'edit_workout' workout_plan.id %}" class="edit-btn">
+            <a href="{% url 'staff_edit_workout' workout_plan.id %}" class="edit-btn">
               <span class="material-icons" style="font-size:16px">edit</span> Edit
             </a>
             <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
@@ -144,7 +149,7 @@
     <h3>Delete Workout Plan?</h3>
     <p>This action is permanent and cannot be undone.</p>
     <div class="modal-actions">
-      <form method="POST" action="{% url 'delete_workout' workout_plan.id %}">
+      <form method="POST" action="{% url 'staff_delete_workout' workout_plan.id %}">
         {% csrf_token %}
         <button type="submit" class="btn-confirm-delete">Delete</button>
       </form>

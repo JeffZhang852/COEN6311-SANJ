@@ -896,10 +896,10 @@ def staff_messages(request):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def staff_user_detail(request, user_id):
+def staff_user_details(request, user_id):
     user_obj = get_object_or_404(User, id=user_id)
 
-    return render(request, "CUFitness/staff/user_detail.html", {
+    return render(request, "CUFitness/staff/staff_user_details.html", {
         "user_obj": user_obj
     })
 
@@ -912,7 +912,7 @@ def staff_articles(request):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def create_article(request):
+def staff_create_article(request):
     if request.method == "POST":
         form = ArticleForm(request.POST)
         if form.is_valid():
@@ -923,7 +923,7 @@ def create_article(request):
             return redirect('staff_articles')
     else:
         form = ArticleForm()
-    return render(request, "CUFitness/staff/articles/create_article.html", {"form": form})
+    return render(request, "CUFitness/staff/articles/staff_create_article.html", {"form": form})
 
 def article_details(request, id):
     article = get_object_or_404(Article, id=id)
@@ -945,7 +945,7 @@ def article_details(request, id):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def edit_article(request, id):
+def staff_edit_article(request, id):
     article = get_object_or_404(Article, id=id)
     if request.user != article.author:
         messages.error(request, 'You do not have permission to edit this article.')
@@ -958,11 +958,11 @@ def edit_article(request, id):
             return redirect('article_details', id=article.id)
     else:
         form = ArticleForm(instance=article)
-    return render(request, 'CUFitness/staff/articles/edit_article.html', {'form': form, 'article': article})
+    return render(request, 'CUFitness/staff/articles/staff_edit_article.html', {'form': form, 'article': article})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def delete_article(request, id):
+def staff_delete_article(request, id):
     article = get_object_or_404(Article, id=id)
 
     if request.user != article.author:
@@ -1015,7 +1015,7 @@ def staff_recipes(request):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def create_recipe(request):
+def staff_create_recipe(request):
     if request.method == 'POST':
         form = RecipeForm(request.POST)
         formset = IngredientFormSet(request.POST)
@@ -1032,11 +1032,11 @@ def create_recipe(request):
         form = RecipeForm()
         formset = IngredientFormSet()
 
-    return render(request, 'CUFitness/staff/recipes/create_recipe.html', {'form': form, 'formset': formset})
+    return render(request, 'CUFitness/staff/recipes/staff_create_recipe.html', {'form': form, 'formset': formset})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def edit_recipe(request, id):
+def staff_edit_recipe(request, id):
     recipe = get_object_or_404(Recipe, id=id)
 
     if request.user != recipe.author:
@@ -1056,7 +1056,7 @@ def edit_recipe(request, id):
         form = RecipeForm(instance=recipe)
         formset = IngredientFormSet(instance=recipe)  # ✅ GET uses instance, not POST
 
-    return render(request, 'CUFitness/staff/recipes/edit_recipe.html', {
+    return render(request, 'CUFitness/staff/recipes/staff_edit_recipe.html', {
         'form': form,
         'formset': formset,  # ✅ formset passed to template
         'recipe': recipe,
@@ -1064,7 +1064,7 @@ def edit_recipe(request, id):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def delete_recipe(request, id):
+def staff_delete_recipe(request, id):
     recipe = get_object_or_404(Recipe, id=id)
 
     if request.user != recipe.author:
@@ -1084,7 +1084,9 @@ def delete_recipe(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_workouts(request):
-    return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html')
+    all_workout_plans = WorkoutPlan.objects.all()
+
+    return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html', {'workout_plans': all_workout_plans})
 
 def workout_plan_details(request, id):
     workout_plan = get_object_or_404(WorkoutPlan, id=id)
@@ -1107,17 +1109,17 @@ def workout_plan_details(request, id):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def create_workouts(request):
-    return render(request, 'CUFitness/staff/workout_plans/create_workouts.html')
+def staff_create_workout(request):
+    return render(request, 'CUFitness/staff/workout_plans/staff_create_workout.html')
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def edit_workout(request, id):
-    return render(request, 'CUFitness/staff/workout_plans/edit_workout.html')
+def staff_edit_workout(request, id):
+    return render(request, 'CUFitness/staff/workout_plans/staff_edit_workout.html')
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def delete_workout(request, id):
+def staff_delete_workout(request, id):
     return render(request, 'CUFitness/staff/workout_plans/delete_workout.html')
 
 
