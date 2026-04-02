@@ -5,7 +5,7 @@
 
 {% block extra_styles %}
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'chatbot.css' %}"/>
+    <link rel="stylesheet" href="{% static 'general_website/chatbot.css' %}"/>
 {% endblock %}
 
 {% block content %}
@@ -15,7 +15,10 @@
     <h2>Meet Your <em>AI-Powered</em> Fitness Assistant</h2>
     <p>Get a membership now and enjoy our state-of-the-art AI powered fitness assistant —
        available 24/7 to answer your training, nutrition, and recovery questions.</p>
-    <a href="{% url 'register' %}" class="cb-upsell-btn">Get a Membership</a>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <a href="{% url 'login' %}" class="cb-upsell-btn">Log In</a>
+      <a href="{% url 'register' %}" class="cb-upsell-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-secondary);">Get a Membership</a>
+    </div>
   </div>
 {% else %}
 <div class="cb-page">

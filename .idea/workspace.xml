@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="209fffce-d1a5-40c6-9e06-97f88678bf66" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -47,28 +44,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Python tests.Python tests for CUFitness.tests.UsersManagersTests.executor": "Run",
-    "Python.manage.executor": "Run",
-    "Python.views.executor": "Run",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "95ae69eb",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/media/defaults",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "two.files.diff.last.used.file": "C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/CUFitness/static/articles.css",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Python tests.Python tests for CUFitness.tests.UsersManagersTests.executor&quot;: &quot;Run&quot;,
+    &quot;Python.manage.executor&quot;: &quot;Run&quot;,
+    &quot;Python.views.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;frontend__redesign__2&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/media/defaults&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;two.files.diff.last.used.file&quot;: &quot;C:/Users/mimo/Desktop/Concordia/COEN6311-SANJ/CUFitness/static/articles.css&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\media\defaults" />
@@ -78,9 +75,9 @@
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\templates\CUFitness\staff_profile\workout_plans" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\static\staff" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\static\general_website" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\templates\CUFitness\general_website" />
+      <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\static\staff" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\templates\CUFitness" />
       <recent name="C:\Users\mimo\Desktop\Concordia\COEN6311-SANJ\CUFitness\templates\general_website" />
     </key>
@@ -161,6 +158,9 @@
       <workItem from="1774709907759" duration="13811000" />
       <workItem from="1774730955667" duration="4952000" />
       <workItem from="1774800570146" duration="19145000" />
+      <workItem from="1775014525493" duration="2499000" />
+      <workItem from="1775054325446" duration="12933000" />
+      <workItem from="1775071096780" duration="16626000" />
     </task>
     <servers />
   </component>

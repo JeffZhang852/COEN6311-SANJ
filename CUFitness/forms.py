@@ -1,7 +1,7 @@
 from django import forms
 
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import CustomUser,CoachAppointment,CoachAvailability
+from .models import CustomUser,CoachAppointment,CoachAvailability, ContactMessage
 from .models import Article, Recipe, RecipeIngredient, GymInfo, Message, Challenge
 from django.forms import inlineformset_factory
 from django.core.exceptions import ValidationError
@@ -155,6 +155,12 @@ class MessageForm(forms.ModelForm):
         widgets = {
             'body': forms.Textarea(attrs={'rows': 5, 'maxlength': 5000}),
         }
+
+class ContactMessageForm(forms.ModelForm):
+    class Meta:
+        model = ContactMessage
+        fields = ['name', 'email', 'subject', 'message']
+        widgets = {'message': forms.Textarea(attrs={'rows': 5}),}
 
 class ChallengeForm(forms.ModelForm):
     class Meta:

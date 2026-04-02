@@ -1,0 +1,68 @@
+{% extends 'CUFitness/staff/staff_base.html' %}
+{% load static %}
+{% block title %} Create Recipe — CUFitness {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'staff/staff_create_recipe.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO ===== -->
+<div class="ca-hero">
+  <a href="{% url 'staff_recipes' %}" class="ca-back">← Recipes</a>
+  <div class="ca-hero-label">Staff Portal</div>
+  <h1>Create <em>Recipe</em></h1>
+  <p class="ca-hero-sub">Add a new recipe to the CUFitness nutrition library.</p>
+</div>
+
+<!-- ===== FORM ===== -->
+<div class="ca-body">
+  <form method="post" class="ca-form">
+    {% csrf_token %}
+
+    <!-- Recipe Details -->
+    <div class="ca-section-header">Recipe Details</div>
+    {% for field in form %}
+    <div class="ca-field {% if field.field.widget.input_type == 'checkbox' %}ca-field--checkbox{% endif %}">
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.errors %}
+        <div class="ca-errors">
+          {% for error in field.errors %}
+            <span>{{ error }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- Ingredients -->
+    <div class="ca-section-header">Ingredients</div>
+    {{ formset.management_form }}
+    {% for ingredient_form in formset %}
+    <div class="ca-ingredient-row">
+      {% for field in ingredient_form %}
+      <div class="ca-field {% if field.field.widget.input_type == 'checkbox' %}ca-field--checkbox{% endif %}">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}
+          <div class="ca-errors">
+            {% for error in field.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="ca-actions">
+      <button type="submit" class="ca-submit">Save Recipe</button>
+      <a href="{% url 'staff_recipes' %}" class="ca-cancel">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

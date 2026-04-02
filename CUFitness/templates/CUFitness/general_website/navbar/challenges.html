@@ -1,0 +1,142 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'general_website/challenges.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if not user.is_authenticated %}
+  <div class="challenge-upsell">
+    <h2>Rise to the <em>Challenge.</em></h2>
+    <p>Join now and unlock fitness challenges built to push your limits. Compete with fellow gym members,
+        track your progress, and climb the leaderboard.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <a href="{% url 'login' %}" class="cb-upsell-btn">Log In</a>
+      <a href="{% url 'register' %}" class="cb-upsell-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-secondary);">Get a Membership</a>
+    </div>
+  </div>
+
+{% else %}
+
+<!-- ===== HERO ===== -->
+<div class="chal-hero">
+  <div class="chal-hero-label">Active Challenges</div>
+  <h1>Fitness <em>Challenges</em></h1>
+  <p class="chal-hero-sub">Push your limits, track your progress, and compete with fellow members — all in one place.</p>
+</div>
+
+<!-- ===== CHALLENGES LIST ===== -->
+<div class="chal-grid">
+  {% for challenge in challenges %}
+  <div class="chal-card {% if challenge.id in joined_ids %}chal-card--joined{% endif %}">
+
+    <div class="chal-card-index">{{ forloop.counter }}</div>
+
+    <div class="chal-card-body">
+      <div class="chal-card-tag">Challenge</div>
+      <a href="{% url 'challenge_details' challenge.id %}" class="chal-card-title-link">
+        <h3>{{ challenge.title }}</h3>
+      </a>
+      <p>{{ challenge.description }}</p>
+      <span class="chal-card-meta">Goal: {{ challenge.goal_target }}</span>
+    </div>
+
+    <div class="chal-card-action">
+      {% if user.role == "MEMBER" %}
+        {% if challenge.id in joined_ids %}
+          <span class="joined-badge">✓ Joined</span>
+        {% else %}
+          <form method="POST" action="{% url 'join_challenge' challenge.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-join">Join</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+
+  </div>
+  {% empty %}
+  <p style="padding:40px;color:var(--text-muted)">No challenges available.</p>
+  {% endfor %}
+</div>
+
+<!-- ===== YOUR PROGRESS ===== -->
+<div class="chal-hero chal-hero--sub">
+  <div class="chal-hero-label">Your Journey</div>
+  <h1>Your <em>Progress</em></h1>
+  <p class="chal-hero-sub">Track how far you've come on each challenge you've joined.</p>
+</div>
+
+<div class="chal-grid">
+  {% for p in participations %}
+  <div class="chal-card chal-card--progress">
+
+    <div class="chal-card-index">{{ forloop.counter }}</div>
+
+    <div class="chal-card-body">
+      <div class="chal-card-tag">Progress</div>
+      <h3>{{ p.challenge.title }}</h3>
+      <p>{{ p.progress }} / {{ p.challenge.goal_target }} &mdash; {{ p.progress_percentage }}% complete</p>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:{{ p.progress_percentage }}%;"></div>
+      </div>
+    </div>
+
+    <div class="chal-card-action">
+      {% if p.progress < p.challenge.goal_target %}
+        <form method="POST" action="{% url 'update_progress' p.id %}">
+          {% csrf_token %}
+          <button name="progress" value="1" class="btn-progress">+1</button>
+        </form>
+      {% else %}
+        <span class="joined-badge">✓ Done</span>
+      {% endif %}
+    </div>
+
+  </div>
+  {% empty %}
+  <p style="padding:40px;color:var(--text-muted)">You haven't joined any challenges yet.</p>
+  {% endfor %}
+</div>
+
+<!-- ===== LEADERBOARD ===== -->
+<div class="chal-hero chal-hero--sub">
+  <div class="chal-hero-label">Rankings</div>
+  <h1>Leader<em>board</em></h1>
+  <p class="chal-hero-sub">See who's leading each challenge and where you stand.</p>
+</div>
+
+<div class="chal-grid chal-grid--leaderboard">
+  {% for item in leaderboard_data %}
+  <div class="chal-card chal-card--lb">
+
+    <div class="chal-card-index">🏆</div>
+
+    <div class="chal-card-body">
+      <div class="chal-card-tag">Leaderboard</div>
+      <h3>{{ item.challenge.title }}</h3>
+      <p class="participant-count">
+        {% if item.count > 0 %}{{ item.count }} joined{% else %}No participants yet{% endif %}
+      </p>
+
+      <div class="lb-rows">
+        {% for entry in item.top_participants %}
+        <div class="lb-row">
+          <span class="lb-rank">{{ forloop.counter }}</span>
+          <span class="lb-name">{{ entry.user.first_name }}</span>
+          <span class="lb-score">{{ entry.progress }} / {{ item.challenge.goal_target }}</span>
+        </div>
+        {% empty %}
+        <div class="lb-row" style="color:var(--text-muted)">No participants yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %}
+{% endblock %}

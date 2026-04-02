@@ -29,11 +29,9 @@
   {% endfor %}
 {% endif %}
 
-<!-- ══════════════════════════════════════
-     NAVBAR
-══════════════════════════════════════ -->
+<!-- Navbar -->
 <header class="nav-header" id="nav-header">
-  <a href="/CUFitness/static" class="nav-logo">CU<span>Fitness</span></a>
+  <a href="{% url 'home' %}" class="nav-logo">CU<span>Fitness</span></a>
 
   <nav class="nav-links">
 
@@ -52,7 +50,7 @@
         <a href="{% url 'user_recipes' %}">
           <span class="material-icons">restaurant</span> Recipes
         </a>
-        <a href="">
+        <a href="{% url 'workout_plans' %}">
           <span class="material-icons">fitness_center</span> Workout Plans
         </a>
         <a href="{% url 'user_exercises' %}">
@@ -77,10 +75,10 @@
         <a href="{% url 'amenities' %}">
           <span class="material-icons">star</span> Amenities
         </a>
-        <a href="{% url 'schedule' %}">
+        <a href="{% url 'gym_schedule' %}">
           <span class="material-icons">calendar_month</span> Gym Schedule
         </a>
-        <a href="{% url 'contact' %}">
+        <a href="{% url 'contact_us' %}">
           <span class="material-icons">mail</span> Contact Us
         </a>
         <a href="{% url 'about' %}">
@@ -161,7 +159,7 @@
   <a href="{% url 'user_recipes' %}">Recipes</a>
   <a href="{% url 'chatbot' %}">AI Chatbot</a>
   <a href="{% url 'amenities' %}">Amenities</a>
-  <a href="{% url 'contact' %}">Contact</a>
+  <a href="{% url 'contact_us' %}">Contact</a>
   {% if user.is_authenticated %}
     <a href="{% url 'user_profile' %}">Profile</a>
     <a href="{% url 'logout' %}">Log Out</a>
@@ -214,8 +212,8 @@
 
   // ── Mobile drawer ──
   const hamburger = document.getElementById('nav-hamburger');
-  const drawer    = document.getElementById('nav-drawer');
-  const overlay   = document.getElementById('nav-overlay');
+  const drawer = document.getElementById('nav-drawer');
+  const overlay = document.getElementById('nav-overlay');
   function toggleDrawer() {
     drawer.classList.toggle('nav-drawer--open');
     overlay.classList.toggle('nav-overlay--show');

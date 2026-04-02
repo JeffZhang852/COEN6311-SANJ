@@ -243,9 +243,15 @@ function renderCalendar(date) {
     grid.appendChild(cell);
   }
 }
-
-document.getElementById('prev-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(currentDate); });
-document.getElementById('next-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(currentDate); });
+<!-- normalize the day to 1 when navigating, so overflow can never happen -->
+document.getElementById('prev-month').addEventListener('click', () => {
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    renderCalendar(currentDate);
+});
+document.getElementById('next-month').addEventListener('click', () => {
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    renderCalendar(currentDate);
+});
 renderCalendar(currentDate);
 
 // ── Toast ──

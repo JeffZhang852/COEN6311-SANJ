@@ -1,0 +1,79 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% block title %}Contact Us{% endblock %}
+{% load static %}
+
+{% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'general_website/contact_us.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="contact-hero">
+  <div class="contact-hero-content">
+    <div class="contact-hero-label">Support</div>
+    <h1>Get in <em>Touch</em></h1>
+    <p>Have a question or need help? Our team is here for you.<br>We'll get back to you as soon as possible.</p>
+  </div>
+</section>
+
+<div class="contact-wrap">
+
+  <!-- Left: Info cards -->
+  <div class="contact-info">
+    <div class="contact-info-card">
+      <div class="contact-info-icon">📍</div>
+      <div class="contact-info-tag">Location</div>
+      <h3>Find Us</h3>
+      <p>1455 De Maisonneuve Blvd W<br>Montréal, QC H3G 1M8</p>
+    </div>
+    <div class="contact-info-card">
+      <div class="contact-info-icon">📩</div>
+      <div class="contact-info-tag">Response Time</div>
+      <h3>Quick Reply</h3>
+      <p>We typically respond within<br>1–2 business days.</p>
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="contact-form-card">
+    <div class="form-section-label">Send a Message</div>
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="contact-success">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-row">
+        <p>
+          <label for="id_name">Name</label>
+          {{ form.name }}
+        </p>
+        <p>
+          <label for="id_email">Email</label>
+          {{ form.email }}
+        </p>
+      </div>
+
+      <p>
+        <label for="id_subject">Subject</label>
+        {{ form.subject }}
+      </p>
+
+      <p>
+        <label for="id_message">Message</label>
+        {{ form.message }}
+      </p>
+
+      <button type="submit" class="contact-submit">Send Message &rarr;</button>
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

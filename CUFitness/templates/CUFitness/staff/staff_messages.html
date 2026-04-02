@@ -1,18 +1,89 @@
 {% extends 'CUFitness/staff/staff_base.html' %}
 {% load static %}
-{% block title %} CUFitness {% endblock %}
+{% block title %}CUFitness — Messages{% endblock %}
 
 {% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'staff/staff_messages.css' %}"/>
 {% endblock %}
 
 {% block content %}
 
 {% if user.role == "STAFF" %}
 
-    
+  <!-- ── HERO ── -->
+  <div class="inbox-hero">
+    <div class="inbox-hero-content">
+      <div>
+        <div class="inbox-hero-label">Staff Panel</div>
+        <h1>Message <em>Inbox</em></h1>
+      </div>
+      {% with unread_count=messages|length %}
+        {% if unread_count %}
+          <div class="inbox-badge">&#9679; {{ unread_count }} message{{ unread_count|pluralize }}</div>
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <!-- ── MESSAGE LIST ── -->
+  <div class="inbox-wrap">
+    <div class="inbox-list">
+      {% for msg in messages %}
+
+        <div class="msg-card {% if msg.is_read %}is-read{% endif %}">
+
+          <div class="msg-header">
+            <div class="msg-sender">
+              <div class="msg-avatar">{{ msg.name|first|upper }}</div>
+              <div class="msg-sender-info">
+                <span class="msg-name">{{ msg.name }}</span>
+                <span class="msg-email">{{ msg.email }}</span>
+              </div>
+            </div>
+            <div class="msg-meta">
+              <span class="msg-date">{{ msg.created_at|date:"M d, Y · g:i A" }}</span>
+              {% if msg.is_read %}
+                <span class="msg-status-read">✓ Read</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="msg-subject">{{ msg.subject }}</div>
+          <div class="msg-divider"></div>
+          <div class="msg-body">{{ msg.message }}</div>
+
+          {% if not msg.is_read %}
+            <div class="msg-actions">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                <button type="submit" class="btn-mark-read">&#10003; Mark as Read</button>
+              </form>
+            </div>
+          {% endif %}
+
+        </div>
+
+      {% empty %}
+
+        <div class="inbox-empty">
+          <div class="inbox-empty-icon">📭</div>
+          <h3>All Caught Up</h3>
+          <p>No messages yet. They'll show up here when users reach out.</p>
+        </div>
+
+      {% endfor %}
+    </div>
+  </div>
 
 {% else %}
-    <p> not a staff member </p>
+
+  <div class="access-denied">
+    <h3>Access Restricted</h3>
+    <p>You need staff privileges to view this page.</p>
+  </div>
+
 {% endif %}
 
 {% endblock %}
