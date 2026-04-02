@@ -344,8 +344,6 @@ class Exercise(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # Who created the exercise (staff only). Cascade delete – remove exercises if creator deleted
-    created_by = models.ForeignKey(CustomUser, related_name='exercises', on_delete=models.CASCADE)
 
     # Optional categorization fields
     muscle_group = models.CharField(choices=MUSCLE_CHOICES, max_length=30, blank=True, null=True)
