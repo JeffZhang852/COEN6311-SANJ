@@ -92,6 +92,21 @@
 }
 .make-appt-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: auto;
+}
+.cancel-btn:hover {
+    background: #c82333;
+}
+
 /* ================= LEGEND ================= */
 .cal-legend {
   display: flex;
