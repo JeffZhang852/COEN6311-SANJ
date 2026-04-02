@@ -89,7 +89,6 @@ urlpatterns = [
     # Public Details Pages
     path('article_details/<int:id>/', views.article_details, name='article_details'),
     path('recipe_details/<int:id>/', views.recipe_details, name='recipe_details'),
-    path('workout_details/<int:id>/', views.workout_details, name='workout_details'),
     path('exercise_details/<int:id>/', views.exercise_details, name='exercise_details'),
     path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
     path('workout_plan_details/<int:id>/', views.workout_plan_details, name='workout_plan_details'),
@@ -165,4 +164,5 @@ urlpatterns = [
     # path('staff_challenges/', views.staff_challenges, name='staff_challenges'),  # duplicate
     # path('challenge/<int:id>/', views.challenge_detail, name='challenge_detail'),
     # path('user_challenges/', views.user_challenges, name='user_challenges'),
+    #path('workout_details/<int:id>/', views.workout_details, name='workout_details'),
 ]

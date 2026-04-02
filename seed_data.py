@@ -842,7 +842,7 @@ create_recipe(
 # ─────────────────────────────────────────────
 print("\n── Creating Exercises ──")
 
-def create_exercise(title, description, instructions, muscle_group, difficulty, goal):
+def create_exercise(title, description, instructions, muscle_group, difficulty, goal, created_by):
     if Exercise.objects.filter(title=title).exists():
         print(f"  [skip] Exercise already exists: '{title}'")
         return Exercise.objects.get(title=title)
@@ -853,9 +853,13 @@ def create_exercise(title, description, instructions, muscle_group, difficulty, 
         muscle_group=muscle_group,
         difficulty=difficulty,
         goal=goal,
+        created_by=created_by,   # <-- FIX: assign a valid user
     )
     print(f"  [created] Exercise: '{title}'")
     return ex
+
+# Use the first staff user as the creator for all exercises
+exercise_creator = staff1   # staff1 is already defined earlier in the script
 
 # ── CHEST ──
 bench_press = create_exercise(
@@ -872,6 +876,7 @@ bench_press = create_exercise(
     muscle_group = "CHEST",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 incline_db_press = create_exercise(
@@ -887,6 +892,7 @@ incline_db_press = create_exercise(
     muscle_group = "CHEST",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 push_up = create_exercise(
@@ -902,6 +908,7 @@ push_up = create_exercise(
     muscle_group = "CHEST",
     difficulty   = "EASY",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 # ── BACK ──
@@ -919,6 +926,7 @@ pull_up = create_exercise(
     muscle_group = "BACK",
     difficulty   = "HARD",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 bent_over_row = create_exercise(
@@ -935,6 +943,7 @@ bent_over_row = create_exercise(
     muscle_group = "BACK",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 lat_pulldown = create_exercise(
@@ -951,6 +960,7 @@ lat_pulldown = create_exercise(
     muscle_group = "BACK",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 # ── LEGS ──
@@ -968,6 +978,7 @@ barbell_squat = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "HARD",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 romanian_deadlift = create_exercise(
@@ -984,6 +995,7 @@ romanian_deadlift = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 walking_lunge = create_exercise(
@@ -1000,6 +1012,7 @@ walking_lunge = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "EASY",
     goal         = "WEIGHT_LOSS",
+    created_by   = exercise_creator,
 )
 
 leg_press = create_exercise(
@@ -1016,6 +1029,7 @@ leg_press = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 # ── SHOULDERS ──
@@ -1033,6 +1047,7 @@ overhead_press = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 lateral_raise = create_exercise(
@@ -1049,6 +1064,7 @@ lateral_raise = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 face_pull = create_exercise(
@@ -1065,6 +1081,7 @@ face_pull = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "EASY",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 # ── ARMS ──
@@ -1082,6 +1099,7 @@ barbell_curl = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 tricep_dip = create_exercise(
@@ -1098,6 +1116,7 @@ tricep_dip = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 hammer_curl = create_exercise(
@@ -1113,6 +1132,7 @@ hammer_curl = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 # ── CORE ──
@@ -1129,6 +1149,7 @@ plank = create_exercise(
     muscle_group = "CORE",
     difficulty   = "EASY",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 cable_crunch = create_exercise(
@@ -1145,6 +1166,7 @@ cable_crunch = create_exercise(
     muscle_group = "CORE",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 hanging_leg_raise = create_exercise(
@@ -1161,6 +1183,7 @@ hanging_leg_raise = create_exercise(
     muscle_group = "CORE",
     difficulty   = "HARD",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 # ── FULL BODY / CARDIO ──
@@ -1178,6 +1201,7 @@ deadlift = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 burpee = create_exercise(
@@ -1194,6 +1218,7 @@ burpee = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "WEIGHT_LOSS",
+    created_by   = exercise_creator,
 )
 
 kettlebell_swing = create_exercise(
@@ -1210,6 +1235,7 @@ kettlebell_swing = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "MEDIUM",
     goal         = "CARDIO",
+    created_by   = exercise_creator,
 )
 
 box_jump = create_exercise(
@@ -1226,6 +1252,7 @@ box_jump = create_exercise(
     muscle_group = "LEGS",
     difficulty   = "MEDIUM",
     goal         = "CARDIO",
+    created_by   = exercise_creator,
 )
 
 mountain_climber = create_exercise(
@@ -1242,10 +1269,10 @@ mountain_climber = create_exercise(
     muscle_group = "CORE",
     difficulty   = "MEDIUM",
     goal         = "CARDIO",
+    created_by   = exercise_creator,
 )
 
-
-# ── SHOULDERS ──
+# ── SHOULDERS (additional) ──
 overhead_arnold_press = create_exercise(
     title        = "Arnold Press",
     description  = "A dumbbell shoulder press variation that hits all three deltoid heads through rotation.",
@@ -1260,6 +1287,7 @@ overhead_arnold_press = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "MEDIUM",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
 cable_lateral_raise = create_exercise(
@@ -1276,9 +1304,10 @@ cable_lateral_raise = create_exercise(
     muscle_group = "SHOULDERS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
-# ── ARMS ──
+# ── ARMS (additional) ──
 close_grip_bench = create_exercise(
     title        = "Close-Grip Bench Press",
     description  = "A barbell pressing variation that shifts the emphasis to the triceps.",
@@ -1293,6 +1322,7 @@ close_grip_bench = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 preacher_curl = create_exercise(
@@ -1309,9 +1339,10 @@ preacher_curl = create_exercise(
     muscle_group = "ARMS",
     difficulty   = "EASY",
     goal         = "MUSCLE_GAIN",
+    created_by   = exercise_creator,
 )
 
-# ── CORE ──
+# ── CORE (additional) ──
 ab_wheel_rollout = create_exercise(
     title        = "Ab Wheel Rollout",
     description  = "One of the most effective core exercises, training anti-extension strength of the entire trunk.",
@@ -1326,6 +1357,7 @@ ab_wheel_rollout = create_exercise(
     muscle_group = "CORE",
     difficulty   = "HARD",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 dead_bug = create_exercise(
@@ -1342,9 +1374,10 @@ dead_bug = create_exercise(
     muscle_group = "CORE",
     difficulty   = "EASY",
     goal         = "FLEXIBILITY",
+    created_by   = exercise_creator,
 )
 
-# ── FULL BODY ──
+# ── FULL BODY (additional) ──
 turkish_get_up = create_exercise(
     title        = "Turkish Get-Up",
     description  = "A complex full-body movement that builds shoulder stability, core strength, and mobility simultaneously.",
@@ -1360,6 +1393,7 @@ turkish_get_up = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "HARD",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 farmers_carry = create_exercise(
@@ -1376,6 +1410,7 @@ farmers_carry = create_exercise(
     muscle_group = "FULL_BODY",
     difficulty   = "MEDIUM",
     goal         = "STRENGTH",
+    created_by   = exercise_creator,
 )
 
 # ─────────────────────────────────────────────
