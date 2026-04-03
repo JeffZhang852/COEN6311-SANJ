@@ -144,7 +144,7 @@
                         <button class="btn-icon" onclick="acceptRequest({{ req.id }})" title="Accept">
                             <span class="material-icons">check_circle</span>
                         </button>
-                        <button class="btn-icon" onclick="rejectRequest({{ req.id }})" title="Reject">
+                        <button class="btn-icon" onclick="openRejectModal({{ req.id }})" title="Reject">
                             <span class="material-icons">cancel</span>
                         </button>
                     </div>
@@ -276,6 +276,28 @@
                     <span class="material-icons">save</span>Save
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Rejection Reason Modal ── -->
+<div id="reject-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Reject Appointment</h2>
+            <button class="modal-close" id="reject-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <label for="refusal-reason">Reason for refusal <span style="color:#c00;">*</span></label>
+                <textarea id="refusal-reason" rows="4" maxlength="500" placeholder="Please explain why you cannot accept this appointment..." required></textarea>
+                <small>Maximum 500 characters.</small>
+            </div>
+            <div id="reject-modal-error" class="modal-error" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" id="reject-modal-cancel">Cancel</button>
+            <button class="btn-modal-save" id="reject-modal-confirm">Confirm Reject</button>
         </div>
     </div>
 </div>
@@ -638,12 +660,34 @@ async function acceptRequest(reqId) {
     }
 }
 
-async function rejectRequest(reqId) {
-    if (!confirm('Reject this appointment request?')) return;
+let currentRejectId = null;
+
+function openRejectModal(reqId) {
+    currentRejectId = reqId;
+    document.getElementById('refusal-reason').value = '';
+    document.getElementById('reject-modal-error').style.display = 'none';
+    document.getElementById('reject-modal').classList.add('open');
+}
+
+function closeRejectModal() {
+    document.getElementById('reject-modal').classList.remove('open');
+    currentRejectId = null;
+}
+
+async function confirmReject() {
+    const reason = document.getElementById('refusal-reason').value.trim();
+    if (!reason) {
+        document.getElementById('reject-modal-error').textContent = 'Please provide a reason for rejection.';
+        document.getElementById('reject-modal-error').style.display = 'block';
+        return;
+    }
+    const reqId = currentRejectId;
+    document.getElementById('reject-modal-confirm').disabled = true;
     try {
         const res = await fetch(`/api/appointment/${reqId}/reject/`, {
             method: 'POST',
-            headers: { 'X-CSRFToken': CSRF },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify({ refusal_reason: reason })
         });
         const data = await res.json();
         if (data.success) {
@@ -651,10 +695,13 @@ async function rejectRequest(reqId) {
             document.getElementById(`req-${reqId}`)?.remove();
             setTimeout(() => location.reload(), 1000);
         } else {
-            showToast('Error rejecting appointment', 'error');
+            showToast(data.error || 'Error rejecting appointment', 'error');
         }
     } catch {
         showToast('Network error', 'error');
+    } finally {
+        document.getElementById('reject-modal-confirm').disabled = false;
+        closeRejectModal();
     }
 }
 
@@ -666,6 +713,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') hideModal();
 document.getElementById('modal-save-btn').addEventListener('click', saveAvailability);
 document.getElementById('modal-delete-btn').addEventListener('click', function() {
     if (editingId) deleteSlot(editingId);
+});
+
+document.getElementById('reject-modal-close').addEventListener('click', closeRejectModal);
+document.getElementById('reject-modal-cancel').addEventListener('click', closeRejectModal);
+document.getElementById('reject-modal-confirm').addEventListener('click', confirmReject);
+document.getElementById('reject-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('reject-modal')) closeRejectModal();
 });
 
 // Month navigation
@@ -683,7 +737,9 @@ window.openEditModal = openEditModal;
 window.deleteSlot = deleteSlot;
 window.cancelSeries = cancelSeries;
 window.acceptRequest = acceptRequest;
-window.rejectRequest = rejectRequest;
+window.openRejectModal = openRejectModal;
+window.confirmReject = confirmReject;
+window.closeRejectModal = closeRejectModal;
 
 // Initial render
 renderCalendar(currentDate);

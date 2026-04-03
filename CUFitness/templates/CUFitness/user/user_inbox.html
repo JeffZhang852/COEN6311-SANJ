@@ -11,7 +11,7 @@
 {% block content %}
 <div class="inbox-wrap">
 
-  {% if is_member %}
+  {% if user.role == 'MEMBER' %}
   <!-- ================= SIDEBAR — COMPOSE ================= -->
   <aside class="inbox-sidebar">
     <div>
@@ -58,7 +58,7 @@
     </div>
 
     <div class="messages-list">
-      {% for msg in messages %}
+      {% for msg in message_list %}
       <div class="message-item {% if not msg.is_read and msg.recipient == user %}unread{% endif %}" id="msg-{{ msg.id }}">
 
         <div class="message-meta">

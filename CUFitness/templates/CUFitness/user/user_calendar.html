@@ -148,6 +148,9 @@
         <div class="appt-time">{{ appt.start_time|date:"N j, Y" }} &nbsp;&middot;&nbsp; {{ appt.start_time|time:"g:i A" }}</div>
       </div>
       <span class="appt-badge {{ appt.status|lower }}">{{ appt.get_status_display }}</span>
+      {% if appt.status == 'REFUSED' and appt.refusal_reason %}
+      <div class="refusal-reason">Reason: {{ appt.refusal_reason }}</div>
+      {% endif %}
       {% if appt.can_review %}
       <button class="review-btn" data-appointment-id="{{ appt.id }}" data-coach-name="{{ appt.coach.first_name }} {{ appt.coach.last_name }}">Write Review</button>
       {% elif appt.has_review %}
@@ -158,6 +161,41 @@
     <div class="appt-empty">No past appointments yet.</div>
     {% endfor %}
   </div>
+</section>
+
+<!-- ================= REJECTED APPOINTMENTS ================= -->
+<section class="appt-section">
+  <div class="section-header">
+    <div class="section-label">Rejected</div>
+    <h2>Declined <em>Sessions</em></h2>
+    <p>Appointments that were not accepted by the coach.</p>
+  </div>
+
+  <div class="appt-list">
+    {% for appt in rejected_appointments %}
+    <div class="appt-row refused" id="appt-{{ appt.id }}">
+      <div class="appt-date-block">
+        <span class="appt-day">{{ appt.start_time|date:"d" }}</span>
+        <span class="appt-month">{{ appt.start_time|date:"M" }}</span>
+      </div>
+      <div class="appt-info">
+        <div class="appt-coach">Coach {{ appt.coach.first_name }} {{ appt.coach.last_name }}</div>
+        <div class="appt-time">{{ appt.start_time|date:"N j, Y" }} &nbsp;&middot;&nbsp; {{ appt.start_time|time:"g:i A" }}</div>
+        {% if appt.refusal_reason %}
+        <div class="refusal-reason">Reason: {{ appt.refusal_reason }}</div>
+        {% endif %}
+      </div>
+      <span class="appt-badge refused">{{ appt.get_status_display }}</span>
+      {% if appt.can_review %}
+      <button class="review-btn" data-appointment-id="{{ appt.id }}" data-coach-name="{{ appt.coach.first_name }} {{ appt.coach.last_name }}">Write Review</button>
+      {% elif appt.has_review %}
+      <span class="reviewed-badge">Reviewed</span>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div class="appt-empty">No rejected appointments.</div>
+    {% endfor %}
+</div>
 </section>
 
 <!-- ================= REVIEW MODAL ================= -->
@@ -451,23 +489,36 @@ function showModalError(msg, elementId) {
 async function cancelAppointment(appointmentId) {
     if (!confirm('Cancel this appointment request?')) return;
     try {
-        const res = await fetch(`/api/appointment/${appointmentId}/cancel/`, {
+        const response = await fetch(`/api/appointment/${appointmentId}/cancel/`, {
             method: 'POST',
             headers: { 'X-CSRFToken': CSRF },
         });
-        const data = await res.json();
-        if (data.success) {
+
+        // Try to parse JSON, but fallback to text if it fails
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            showToast('Server error. Please try again.', 'error');
+            return;
+        }
+
+        if (response.ok && data.success) {
             showToast('Appointment cancelled', 'success');
             // Remove the cancelled appointment row from DOM
             const row = document.getElementById(`appt-${appointmentId}`);
             if (row) row.remove();
-            // Optionally, reload the calendar events (optional)
+            // Optionally, reload the calendar events (or just reload the page)
             setTimeout(() => location.reload(), 1000);
         } else {
             showToast(data.error || 'Error cancelling appointment', 'error');
         }
-    } catch {
-        showToast('Network error', 'error');
+    } catch (err) {
+        console.error('Cancel error:', err);
+        showToast('Network error. Please check your connection.', 'error');
     }
 }
 // Character counter for review comment
@@ -546,12 +597,24 @@ function selectChip(groupId, btn) {
 async function fetchCoaches()                      { return (await fetch('/api/coaches/')).json(); }
 async function fetchCoachAvailability(id, s, e)    { return (await fetch(`/api/coach-availability/?coach_id=${id}&start=${s}&end=${e}`)).json(); }
 async function fetchAllAvailability(date)           { return (await fetch(`/api/all-availability/?date=${date}`)).json(); }
-async function sendAppointmentRequest(cId, s, e)   {
-  return (await fetch('/api/request-appointment/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-    body: JSON.stringify({ coach_id: cId, start_time: s, end_time: e })
-  })).json();
+async function sendAppointmentRequest(cId, s, e) {
+    const response = await fetch('/api/request-appointment/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ coach_id: cId, start_time: s, end_time: e })
+    });
+    let data;
+    try {
+        data = await response.json();
+    } catch (e) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned invalid response');
+    }
+    if (!response.ok) {
+        throw new Error(data.error || 'Request failed');
+    }
+    return data;
 }
 
 // ========== BY COACH MODE (with timezone fix) ==========

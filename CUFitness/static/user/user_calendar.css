@@ -92,6 +92,23 @@
 }
 .make-appt-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
+.refusal-reason {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #dc3545;
+    background: #fff5f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    display: inline-block;
+}
+.appt-badge.refused {
+    background: #dc3545;
+    color: white;
+}
+.appt-row.refused {
+    border-left-color: #dc3545;
+}
+
 .cancel-btn {
     background: #dc3545;
     color: white;
