@@ -1,10 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/staff/staff_base.html' %}
+{% load static %}
+{% block title %} Exercises — CUFitness {% endblock %}
 
-</body>
-</html>
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'general_website/exercises.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+  <div class="ex-hero">
+    <div class="ex-hero-label">Movement Library</div>
+    <h1>Manage &amp; Edit<br><em>Exercises</em></h1>
+    <p class="ex-hero-sub">Create, update, and organise the exercise library used across the platform — visible to all members and coaches.</p>
+  </div>
+
+  <div class="create">
+    <a href="{% url 'staff_create_exercise' %}" class="create-btn">+ New Exercise</a>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-chip active">All</div>
+    <div class="filter-chip">Strength</div>
+    <div class="filter-chip">Cardio</div>
+    <div class="filter-chip">Flexibility</div>
+    <div class="filter-chip">Recovery</div>
+  </div>
+
+  {% regroup exercises by muscle_group as muscle_groups %}
+
+  {% if not exercises %}
+    <p style="padding: 40px 80px; color: var(--text-muted);">No exercises yet.</p>
+  {% endif %}
+
+  {% for group in muscle_groups %}
+  <div class="ex-section">
+    <button class="ex-section-header" onclick="toggleSection(this)" aria-expanded="true">
+      <div class="ex-section-title">
+        <span class="ex-section-name">{{ group.grouper|default:"Uncategorized" }}</span>
+        <span class="ex-section-count">{{ group.list|length }} exercise{{ group.list|length|pluralize }}</span>
+      </div>
+      <div class="ex-section-chevron">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.5 6.75L9 11.25L13.5 6.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </button>
+
+    <div class="ex-grid">
+      {% for exercise in group.list %}
+      <a href="{% url 'exercise_details' exercise.id %}" class="ex-card">
+        <div class="ex-card-index">{{ forloop.counter }}</div>
+        <div class="ex-card-body">
+          <div class="ex-card-tag">Exercise</div>
+          <h3>{{ exercise.name }}</h3>
+          <p>{{ exercise.description }}</p>
+          {% if exercise.difficulty %}
+          <span class="ex-card-meta">{{ exercise.difficulty }}</span>
+          {% endif %}
+        </div>
+        <div class="ex-card-arrow">→</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+<script>
+  function toggleSection(btn) {
+    const grid = btn.nextElementSibling;
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    grid.style.display = expanded ? 'none' : 'flex';
+  }
+</script>
+
+{% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_styles %}
-<link rel="stylesheet" href="{% static 'create_challenge.css' %}">
+<link rel="stylesheet" href="{% static 'staff/staff_create_challenge.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
 <div class="challenge-page">
     <div class="challenge-container">
 
-        <h2>Create Challenge</h2>
+        <h2>Edit Challenge</h2>
 
         <form method="POST">
             {% csrf_token %}
@@ -22,16 +22,12 @@
                 </div>
             {% endfor %}
             <div class="form-actions">
-                <button type="submit" class="btn-primary">
-                    {% if challenge %}Update{% else %}Create{% endif %}
-                </button>
-
+                <button type="submit" class="btn-primary">Update</button>
                 <button type="button"
                     class="btn-secondary"
-                    onclick="window.location.href='{% if challenge %}{% url 'challenge_detail' challenge.id %}{% else %}{% url 'staff_challenges' %}{% endif %}'">
+                    onclick="window.location.href='{% url 'challenge_details' challenge.id %}'">
                     Cancel
                 </button>
-
             </div>
         </form>
 

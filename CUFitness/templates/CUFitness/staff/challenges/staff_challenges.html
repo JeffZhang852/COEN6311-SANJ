@@ -12,7 +12,7 @@
 </div>
 
 <div class="create">
-    <a href="{% url 'create_challenge' %}" class="create-btn">
+    <a href="{% url 'staff_create_challenge' %}" class="create-btn">
         Create Challenge
         <span class="material-icons">add</span>
     </a>
@@ -24,7 +24,7 @@
     {% for challenge in challenges %}
     <div class="challenge-card">
         
-        <a href="{% url 'challenge_detail' challenge.id %}" class="art-card">
+        <a href="{% url 'challenge_details' challenge.id %}" class="art-card">
             <div class="art-card-index">{{ forloop.counter }}</div>
 
             <div class="art-card-body">

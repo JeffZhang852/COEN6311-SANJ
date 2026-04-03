@@ -9,93 +9,112 @@ router.register(r'users', views.UserViewSet)
 router.register(r'reviews', views.CoachReviewViewSet)
 
 urlpatterns = [
-    # Home
-    path('', views.home, name='home'),
 
-    # Navbar Pages
-    path('services/', views.services, name='services'),
-    path('articles/', views.user_articles, name='user_articles'),
-    path('user_recipes/', views.user_recipes, name='user_recipes'),
-    path('workout_plans/', views.workout_plans, name='workout_plans'),
-    path('user_exercises/', views.user_exercises, name='user_exercises'),
-    path('challenges/', views.user_challenges, name='user_challenges'),
+# region General Website Navigation
+    path('', views.home, name='home'),
+    path("services/", views.services, name='services'),
+
+    # -----------   Resources-Dropdown Pages  -----------
+    path("articles/", views.user_articles, name='user_articles'),
+    path("recipes/", views.user_recipes, name='user_recipes'),
+    path("workout_plans/", views.workout_plans, name='workout_plans'),
+    path("exercises/", views.user_exercises, name='user_exercises'),
+    path("challenges/", views.user_challenges, name='user_challenges'),
     path('fitness_assistant/', views.chatbot, name='chatbot'),
 
-    # Dropdown Menu Pages
-    path('amenities/', views.amenities, name='amenities'),
-    path('schedule/', views.gym_schedule, name='gym_schedule'),
-    path('contact/', views.contact_us, name='contact_us'),
-    path('about/', views.about, name='about'),
+    # -----------   More-Tab Dropdown Pages  ----------
+    path("amenities/", views.amenities, name='amenities'),
+    path("schedule/", views.gym_schedule, name='gym_schedule'),
+    path("contact/", views.contact_us, name='contact_us'),
+    path("about/", views.about, name='about'),
 
-    # Footer Pages
-    path('faq/', views.faq, name='faq'),
-    path('privacy_policy/', views.privacy_policy, name='privacy_policy'),
+    # -----------   Footer Pages  -----------
+    path("faq/", views.faq, name='faq'),
+    path("privacy_policy/", views.privacy_policy, name='privacy_policy'),
+# endregion
 
-    # User Authentication
-    path('register/', views.Register.as_view(), name='register'),
-    path('login/', views.login_user, name='login'),
-    path('coach login/', views.coach_login, name='coach_login'),
+# region User Authentication
+    path("register/", views.Register.as_view(), name="register"),
+    path("login/", views.login_user, name='login'),
+    path("coach_login/", views.coach_login, name='coach_login'),
     path('logout/', views.logout_user, name='logout'),
+# endregion
 
-    # User Profile & Settings
+# region Logged-In User Pages
     path('user_profile/', views.user_profile, name='user_profile'),
-    path('user_profile/upload_picture/', views.upload_picture, name='upload_picture'),
+    path("user_profile/upload_picture/", views.upload_picture, name='upload_picture'),
     path('user_profile/delete-picture/', views.delete_picture, name='delete_picture'),
     path('user_settings/', views.user_settings, name='user_settings'),
     path('user_inbox/', views.user_inbox, name='user_inbox'),
     path('user_calendar/', views.user_calendar, name='user_calendar'),
     path('user_saved_recipes/', views.user_saved_recipes, name='user_saved_recipes'),
     path('user_saved_workouts/', views.user_saved_workouts, name='user_saved_workouts'),
+# endregion
 
-    # Staff Pages
+# region Staff/Employee Pages
     path('staff_login/', views.staff_login, name='staff_login'),
     path('staff_profile/', views.staff_profile, name='staff_profile'),
     path('coach_requests/', views.coach_requests, name='coach_requests'),
     path('staff_reports/', views.staff_reports, name='staff_reports'),
     path('staff_messages/', views.staff_messages, name='staff_messages'),
     path('staff_settings/', views.staff_settings, name='staff_settings'),
-    path('staff_user_details/<int:user_id>/', views.staff_user_details, name='staff_user_details'),
+    # path to user profiles from staff_home page
+    path("staff_user_details/<int:user_id>/", views.staff_user_details, name="staff_user_details"),
 
-    # Staff Article Pages
+    # region Article Pages
+    path("article_details/<int:id>/", views.article_details, name="article_details"),
+ # -----------  Staff Article Pages  -----------
     path('staff_articles/', views.staff_articles, name='staff_articles'),
     path('staff_create_article/', views.staff_create_article, name='staff_create_article'),
-    path('staff_edit_article/<int:id>/edit/', views.staff_edit_article, name='staff_edit_article'),
-    path('staff_delete_article/<int:id>/delete/', views.staff_delete_article, name='staff_delete_article'),
+    # path to edit article page from article_details page
+    path("staff_edit_article/<int:id>/edit/", views.staff_edit_article, name="staff_edit_article"),
+    path("staff_delete_article/<int:id>/delete/", views.staff_delete_article, name="staff_delete_article"),
+    # endregion
 
-    # Staff Recipe Pages
-    path('staff_recipes/', views.staff_recipes, name='staff_recipes'),
+    # region Recipe Pages
+    path("recipe_details/<int:id>/", views.recipe_details, name="recipe_details"),
+# -----------  Staff Recipe Pages  -----------
+    path("staff_recipes/", views.staff_recipes, name='staff_recipes'),
     path('staff_create_recipe/', views.staff_create_recipe, name='staff_create_recipe'),
-    path('staff_edit_recipe/<int:id>/edit/', views.staff_edit_recipe, name='staff_edit_recipe'),
-    path('staff_delete_recipe/<int:id>/delete/', views.staff_delete_recipe, name='staff_delete_recipe'),
+    # path to edit recipe page from recipe_details page
+    path("staff_edit_recipe/<int:id>/edit/", views.staff_edit_recipe, name="staff_edit_recipe"),
+    path("staff_delete_recipe/<int:id>/delete/", views.staff_delete_recipe, name="staff_delete_recipe"),
+    # endregion
 
-    # Staff Workout Pages
-    path('staff_workouts/', views.staff_workouts, name='staff_workouts'),
+    # region Exercise Pages
+    path("exercise_details/<int:id>/", views.exercise_details, name="exercise_details"),
+# -----------   Exercise Pages  -----------
+    path("staff_exercises/", views.staff_exercises, name='staff_exercises'),
+    path('staff_create_exercise/', views.staff_create_exercise, name='staff_create_exercise'),
+    # path to edit exercise page from exercise_details page
+    path("staff_edit_exercise/<int:id>/edit/", views.staff_edit_exercise, name="staff_edit_exercise"),
+    path("staff_delete_exercise/<int:id>/delete/", views.staff_delete_exercise, name="staff_delete_exercise"),
+    # endregion
+
+    # region Workout-Plans Pages
+    path("workout_plan_details/<int:id>/", views.workout_plan_details, name="workout_plan_details"),
+    # -----------  Staff Workout Pages  -----------
+    path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
     path('staff_create_workout/', views.staff_create_workout, name='staff_create_workout'),
-    path('staff_edit_workout/<int:id>/edit/', views.staff_edit_workout, name='staff_edit_workout'),
-    path('staff_delete_workout/<int:id>/delete/', views.staff_delete_workout, name='staff_delete_workout'),
+    # path to edit workout page from workout_details page
+    path("staff_edit_workout/<int:id>/edit/", views.staff_edit_workout, name="staff_edit_workout"),
+    path("staff_delete_workout/<int:id>/delete/", views.staff_delete_workout, name="staff_delete_workout"),
+    # endregion
 
-    # Staff Exercise Pages
-    path('staff_exercises/', views.staff_exercises, name='staff_exercises'),
-    path('create_exercises/', views.create_exercises, name='create_exercises'),
-    path('exercise/<int:id>/edit/', views.edit_exercise, name='edit_exercise'),
-    path('exercise/<int:id>/delete/', views.delete_exercise, name='delete_exercise'),
+    # region Challenges Pages
+    path("challenge_details/<int:id>/", views.challenge_details, name="challenge_details"),
+    # -----------  Staff Challenges Pages  -----------
+    path("staff_challenges/", views.staff_challenges, name='staff_challenges'),
+    path("staff_create_challenge/", views.staff_create_challenge, name='staff_create_challenge'),
+    path("staff_edit_challenge/<int:id>/", views.staff_edit_challenge, name="staff_edit_challenge"),
+    path("staff_delete_challenge/<int:id>/", views.staff_delete_challenge, name="staff_delete_challenge"),
+    # -----------  System Challenges Pages  -----------
+    path("join_challenge/<int:challenge_id>/", views.join_challenge, name='join_challenge'),
+    path("update_progress/<int:participation_id>/", views.update_progress, name='update_progress'),
+    # endregion
 
-    # Staff Challenge Pages
-    path('staff_challenges/', views.staff_challenges, name='staff_challenges'),
-    path('create_challenge/', views.create_challenge, name='create_challenge'),
-    path('edit_challenge/<int:id>/', views.edit_challenge, name='edit_challenge'),
-    path('delete_challenge/<int:id>/', views.delete_challenge, name='delete_challenge'),
+# endregion
 
-    # Public Details Pages
-    path('article_details/<int:id>/', views.article_details, name='article_details'),
-    path('recipe_details/<int:id>/', views.recipe_details, name='recipe_details'),
-    path('exercise_details/<int:id>/', views.exercise_details, name='exercise_details'),
-    path('challenge_details/<int:id>/', views.challenge_details, name='challenge_details'),
-    path('workout_plan_details/<int:id>/', views.workout_plan_details, name='workout_plan_details'),
-
-    # System Challenge Actions
-    path('join_challenge/<int:challenge_id>/', views.join_challenge, name='join_challenge'),
-    path('update_progress/<int:participation_id>/', views.update_progress, name='update_progress'),
 
     # Coach Schedule & Availability AJAX
     path('user_coach_schedule/', views.user_coach_schedule, name='user_coach_schedule'),
@@ -123,7 +142,7 @@ urlpatterns = [
     path('mark_read/<int:message_id>/', views.mark_read, name='mark_read'),
 
     # Coach Profile
-    path('coach/profile/', views.coach_profile_page, name='coach_profile'),
+    path('coach_profile/', views.coach_profile_page, name='coach_profile'),
 
     # REST API endpoints
     path('api/', include(router.urls)),

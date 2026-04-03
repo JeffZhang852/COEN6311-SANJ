@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from .forms import (
     ArticleForm, ChallengeForm, ContactMessageForm, CustomUserCreationForm,
     IngredientFormSet, PrivacySettingsForm, ProfilePictureForm, RecipeForm,
-    UpdateEmailForm, UpdatePasswordForm
+    UpdateEmailForm, UpdatePasswordForm, ChallengeForm,
 )
 from .models import (
     Article, Challenge, ChallengeParticipation, CoachAppointment, CoachAvailability,
@@ -683,21 +683,22 @@ def exercise_details(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_exercises(request):
-    return render(request, 'CUFitness/staff/exercises/staff_exercises.html')
+    exercises = Exercise.objects.all().order_by('muscle_group')
+    return render(request, 'CUFitness/staff/exercises/staff_exercises.html', {'exercises': exercises})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def create_exercises(request):
-    return render(request, 'CUFitness/staff/exercises/create_exercise.html')
+def staff_create_exercise(request):
+    return render(request, 'CUFitness/staff/exercises/staff_create_exercise.html')
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def edit_exercise(request, id):
-    return render(request, 'CUFitness/staff/exercises/edit_exercise.html')
+def staff_edit_exercise(request, id):
+    return render(request, 'CUFitness/staff/exercises/staff_edit_exercise.html')
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def delete_exercise(request, id):
+def staff_delete_exercise(request, id):
     return render(request, 'CUFitness/staff/exercises/delete_exercise.html')
 # endregion
 
@@ -855,7 +856,7 @@ def update_progress(request, participation_id):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def create_challenge(request):
+def staff_create_challenge(request):
     if request.method == "POST":
         form = ChallengeForm(request.POST)
         if form.is_valid():
@@ -865,7 +866,7 @@ def create_challenge(request):
             return redirect('staff_challenges')
     else:
         form = ChallengeForm()
-    return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form})
+    return render(request, 'CUFitness/staff/challenges/staff_create_challenge.html', {'form': form})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -891,7 +892,7 @@ def challenge_details(request, id):
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def edit_challenge(request, id):
+def staff_edit_challenge(request, id):
     challenge = get_object_or_404(Challenge, id=id)
     if request.method == 'POST':
         form = ChallengeForm(request.POST, instance=challenge)
@@ -901,11 +902,11 @@ def edit_challenge(request, id):
             return redirect('challenge_details', id=challenge.id)
     else:
         form = ChallengeForm(instance=challenge)
-    return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form, 'challenge': challenge})
+    return render(request, 'CUFitness/staff/challenges/staff_edit_challenge.html', {'form': form, 'challenge': challenge})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
-def delete_challenge(request, id):
+def staff_delete_challenge(request, id):
     challenge = get_object_or_404(Challenge, id=id)
     if request.method == 'POST':
         challenge.delete()

@@ -9,39 +9,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
-- 	Contac_us:
-	- ContactMessage model -> migrations
-	- ContactMessageForm
-	- designed contact_us page
-	- designed staff-facing support messages page
-	- register model in admin
+
 
 ### Changed
-- redesigned the "challenges" page to fit the theme - landing page to encourage registration
-- designed "challenge_details" page to fit the theme
-- redesigned the "gym_schedule" page to display gym schedule
-- designed the "exercise_details" page to fit the theme
-- "challenges" are now clickable -> "challenge_details"
-- added back button to "article_details" page
-- designed "workout_plans" page to fit the theme
-- edited the "GymInfo" model to have "open 24hrs" as option - open 24hrs except weekends
-- created/designed the "workout_plan_details" page
-- added back button to "recipe_details" page
-- redesigned the "staff_home" page
-- redesigned the "user_details" page
-- redesigned the "staff_create_article" page
-- redesigned the "staff_edit_article" page
-- redesigned the "staff_create_recipe" page
-- redesigned the "staff_edit_recipe" page
-- designed the "staff_workouts" page
-- "seed_data.py" now also populates the gym schedule
-- re-arranged some of the urls to fit into folding regions
+- redesigned the "staff_settings" page - can only update password
+- designed the "staff_profile" page - can only upload/remove profile picture
+- desgined the "staff_exercises" page
+- designed the "staff_edit_challenge" page
 
 ### Fixed
 
 ### Removed
-- deleted extra "user_inbox" function in views.py
-- removed the "filter" from the "articles" page - not working anyways - they are not in model
 ---
 
 ## [0.1.0] - 2026-03-10
