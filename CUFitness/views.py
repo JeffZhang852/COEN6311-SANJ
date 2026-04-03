@@ -205,25 +205,57 @@ def user_settings(request):
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_inbox(request):
-    return render(request, 'CUFitness/user/user_inbox.html')
+    user = request.user
+    # Get messages where user is sender or recipient
+    message_list = Message.objects.filter(
+        Q(sender=user) | Q(recipient=user)
+    ).select_related('sender', 'recipient').order_by('-timestamp')
+
+    if is_member(user):
+        coaches = CustomUser.objects.filter(role='COACH', is_active=True).order_by('first_name')
+        context = {
+            'message_list': message_list,
+            'coaches': coaches,
+            'is_member': True,
+        }
+    else:
+        context = {
+            'message_list': message_list,
+            'is_member': False,
+        }
+    return render(request, 'CUFitness/user/user_inbox.html', context)
 
 @login_required(login_url='login')
 def user_calendar(request):
     if is_coach(request.user):
         return redirect('user_coach_schedule')
+
     now = timezone.now()
+
     upcoming_appointments = CoachAppointment.objects.filter(
         member=request.user,
         start_time__gte=now,
         status__in=['PENDING', 'ACCEPTED'],
     ).select_related('coach').order_by('start_time')
+
     past_appointments = CoachAppointment.objects.filter(
         member=request.user,
         start_time__lt=now,
     ).select_related('coach').order_by('-start_time')[:10]
+
+    # Add refused appointments (any time)
+    rejected_appointments = CoachAppointment.objects.filter(
+        member=request.user,
+        status='REFUSED'
+    ).select_related('coach').order_by('-start_time')[:10]
+
     for appt in past_appointments:
         appt.can_review = (appt.status == 'ACCEPTED' and not hasattr(appt, 'review'))
         appt.has_review = hasattr(appt, 'review')
+    for appt in rejected_appointments:
+        appt.can_review = not hasattr(appt, 'review')
+        appt.has_review = hasattr(appt, 'review')
+
     calendar_events = []
     for appt in upcoming_appointments:
         appt.can_review = (appt.status == 'ACCEPTED' and not hasattr(appt, 'review'))
@@ -238,9 +270,11 @@ def user_calendar(request):
             'color': color,
             'status': appt.status,
         })
+
     context = {
         'upcoming_appointments': upcoming_appointments,
         'past_appointments': past_appointments,
+        'rejected_appointments': rejected_appointments,
         'calendar_events_json': json.dumps(calendar_events),
         'is_coach': False,
     }
@@ -271,10 +305,16 @@ def user_coach_schedule(request):
         weekday = day.weekday()
         try:
             g = GymInfo.objects.get(day=weekday)
+            if g.is_open and g.is_open_24h:
+                open_time_str = "00:00"
+                close_time_str = "24:00"
+            else:
+                open_time_str = g.open_time.isoformat() if g.open_time else None
+                close_time_str = g.close_time.isoformat() if g.close_time else None
             gym_info[day.isoformat()] = {
                 'is_open': g.is_open,
-                'open_time': g.open_time.isoformat() if g.open_time else None,
-                'close_time': g.close_time.isoformat() if g.close_time else None,
+                'open_time': open_time_str,
+                'close_time': close_time_str,
             }
         except GymInfo.DoesNotExist:
             gym_info[day.isoformat()] = {'is_open': False}
@@ -961,8 +1001,9 @@ class CoachReviewViewSet(viewsets.ModelViewSet):
             raise PermissionError("Appointment not found.")
         if appointment.member != user:
             raise PermissionError("You can only review your own appointments.")
-        if appointment.status != 'ACCEPTED':
-            raise PermissionError("You can only review accepted appointments.")
+        # Allow review for ACCEPTED or REFUSED appointments (for testing)
+        if appointment.status not in ['ACCEPTED', 'REFUSED']:
+            raise PermissionError("You can only review accepted or refused appointments.")
         if hasattr(appointment, 'review'):
             raise PermissionError("This appointment has already been reviewed.")
         serializer.save(member=user, coach=appointment.coach, appointment=appointment)
@@ -1028,8 +1069,10 @@ def ajax_add_availability(request):
         gym = gym_info_cache.get(weekday)
         if not gym or not gym.is_open:
             return JsonResponse({'error': f'Gym closed on {local_start.strftime("%A")}'}, status=400)
-        if local_start.time() < gym.open_time or local_end.time() > gym.close_time:
-            return JsonResponse({'error': f'Slot {local_start.time()} outside gym hours'}, status=400)
+        # Skip time check for 24h days
+        if not gym.is_open_24h:
+            if local_start.time() < gym.open_time or local_end.time() > gym.close_time:
+                return JsonResponse({'error': f'Slot {local_start.time()} outside gym hours'}, status=400)
         if recurrence == 'none':
             overlapping = CoachAvailability.objects.filter(
                 coach=request.user,
@@ -1204,11 +1247,14 @@ def api_request_appointment(request):
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
     coach_id = data.get('coach_id')
     start_time_str = data.get('start_time')
     end_time_str = data.get('end_time')
+
     if not coach_id or not start_time_str or not end_time_str:
         return JsonResponse({'error': 'Missing fields'}, status=400)
+
     try:
         start_dt = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
         end_dt = datetime.fromisoformat(end_time_str.replace('Z', '+00:00'))
@@ -1218,6 +1264,8 @@ def api_request_appointment(request):
             end_dt = timezone.make_aware(end_dt)
     except ValueError:
         return JsonResponse({'error': 'Invalid datetime format'}, status=400)
+
+    # Check that the slot exists and is not booked
     try:
         availability = CoachAvailability.objects.get(
             coach_id=coach_id,
@@ -1227,6 +1275,12 @@ def api_request_appointment(request):
         )
     except CoachAvailability.DoesNotExist:
         return JsonResponse({'error': 'This time slot is no longer available'}, status=400)
+
+    # Double-check that there is no active appointment for this slot (optional safety)
+    if CoachAppointment.objects.filter(availability=availability, status__in=['PENDING', 'ACCEPTED']).exists():
+        return JsonResponse({'error': 'This slot is already booked or pending'}, status=400)
+
+    # Create the appointment
     appointment = CoachAppointment.objects.create(
         coach_id=coach_id,
         member=request.user,
@@ -1235,8 +1289,10 @@ def api_request_appointment(request):
         status='PENDING',
         availability=availability
     )
+
     availability.is_booked = True
     availability.save()
+
     return JsonResponse({'success': True, 'appointment_id': appointment.id})
 
 @login_required(login_url='login')
@@ -1251,14 +1307,26 @@ def ajax_accept_appointment(request, appointment_id):
 @login_required(login_url='login')
 @require_POST
 def ajax_cancel_appointment(request, appointment_id):
-    appointment = get_object_or_404(CoachAppointment, id=appointment_id, member=request.user)
+    """Cancel a pending appointment (member only)."""
+    try:
+        appointment = get_object_or_404(CoachAppointment, id=appointment_id, member=request.user)
+    except CoachAppointment.DoesNotExist:
+        return JsonResponse({'error': 'Appointment not found.'}, status=404)
+
     if appointment.status not in ['PENDING', 'ACCEPTED']:
         return JsonResponse({'error': 'This appointment cannot be cancelled.'}, status=400)
+
+    # Free the linked availability slot BEFORE changing appointment status
+    if appointment.availability:
+        availability = appointment.availability
+        availability.is_booked = False
+        availability.save()
+        # Remove the link to avoid any future confusion
+        appointment.availability = None
+
     appointment.status = 'CANCELLED'
     appointment.save()
-    if appointment.availability:
-        appointment.availability.is_booked = False
-        appointment.availability.save()
+
     return JsonResponse({'success': True})
 
 @login_required(login_url='login')
@@ -1266,8 +1334,22 @@ def ajax_cancel_appointment(request, appointment_id):
 @require_POST
 def ajax_reject_appointment(request, appointment_id):
     appointment = get_object_or_404(CoachAppointment, id=appointment_id, coach=request.user, status='PENDING')
+    try:
+        data = json.loads(request.body)
+        reason = data.get('refusal_reason', '').strip()
+    except json.JSONDecodeError:
+        reason = ''
+    if not reason:
+        return JsonResponse({'error': 'Refusal reason is required.'}, status=400)
+    if len(reason) > 500:
+        return JsonResponse({'error': 'Reason must be 500 characters or less.'}, status=400)
     appointment.status = 'REFUSED'
+    appointment.refusal_reason = reason
     appointment.save()
+    # Free the linked availability slot so it can be booked again
+    if appointment.availability:
+        appointment.availability.is_booked = False
+        appointment.availability.save()
     return JsonResponse({'success': True})
 
 @login_required(login_url='login')
