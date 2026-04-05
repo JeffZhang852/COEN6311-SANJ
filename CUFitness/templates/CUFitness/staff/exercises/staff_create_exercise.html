@@ -1,10 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'CUFitness/staff/staff_base.html' %}
+{% load static %}
+{% block title %} Create Exercise — CUFitness {% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'staff/staff_create_article.css' %}"/>
+{% endblock %}
+{% block content %}
 
-</body>
-</html>
+{% if user.role == "STAFF" and user.is_authenticated %}
+
+<!-- ===== HERO ===== -->
+<div class="ca-hero">
+  <a href="{% url 'staff_exercises' %}" class="ca-back">← Exercises</a>
+  <div class="ca-hero-label">Staff Portal</div>
+  <h1>Create <em>Exercise</em></h1>
+  <p class="ca-hero-sub">Add a new exercise to the CUFitness library.</p>
+</div>
+
+<!-- ===== FORM ===== -->
+<div class="ca-body">
+  <form method="post" class="ca-form">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div class="ca-field {% if field.field.widget.input_type == 'checkbox' %}ca-field--checkbox{% endif %}">
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.errors %}
+        <div class="ca-errors">
+          {% for error in field.errors %}
+            <span>{{ error }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="ca-actions">
+      <button type="submit" class="ca-submit">Save Exercise</button>
+      <a href="{% url 'staff_exercises' %}" class="ca-cancel">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+{% else %}
+<p style="padding:80px;color:var(--text-muted);text-align:center;">Access restricted to staff members.</p>
+{% endif %}
+{% endblock %}

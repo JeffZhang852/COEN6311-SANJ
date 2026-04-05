@@ -6,7 +6,8 @@ from django.forms import inlineformset_factory
 # Local
 from .models import (
     Article, Challenge, CoachReview,
-    ContactMessage, CustomUser, Message, Recipe, RecipeIngredient
+    ContactMessage, CustomUser, Exercise, Message, Recipe, RecipeIngredient,
+    WorkoutPlan
 )
 
 # Registration form for new members
@@ -49,6 +50,31 @@ class ArticleForm(forms.ModelForm):
         fields = ['title', 'description', 'body', 'locked']
         exclude = ["author"]
         widgets = {}
+
+# Create or edit an exercise
+class ExerciseForm(forms.ModelForm):
+    class Meta:
+        model = Exercise
+        fields = [
+            'title', 'description', 'instructions',
+            'muscle_group', 'difficulty', 'goal', 'equipment',
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'instructions': forms.Textarea(attrs={'rows': 6}),
+            'equipment': forms.CheckboxSelectMultiple(),
+        }
+
+# Create or edit a workout plan (author set manually in view)
+class WorkoutPlanForm(forms.ModelForm):
+    class Meta:
+        model = WorkoutPlan
+        fields = ['title', 'description', 'body', 'difficulty', 'duration_minutes', 'goal', 'locked']
+        exclude = ['author']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'body': forms.Textarea(attrs={'rows': 6}),
+        }
 
 # Create or edit a recipe
 class RecipeForm(forms.ModelForm):

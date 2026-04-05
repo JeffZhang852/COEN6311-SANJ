@@ -1,6 +1,6 @@
 {% extends base_template %}
 {% load static %}
-{% block title %}CUFitness - {{ workout.title }}{% endblock %}
+{% block title %}CUFitness - {{ workout_plan.title }}{% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'general_website/workout_plan_details.css' %}">
@@ -14,7 +14,7 @@
       </a>
     {% else %}
         <a href="{% url 'workout_plans' %}" class="rec-detail-back">
-        <span class="material-icons" style="font-size:16px">arrow_back</span> Recipes
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Workout Plans
       </a>
     {% endif %}
 
@@ -33,7 +33,7 @@
 
         {% if user.is_authenticated and user.role == "STAFF" %}
         <div class="wd-actions">
-          {% if workout.author and user == workout_plan.author %}
+          {% if workout_plan.author and user == workout_plan.author %}
             <a href="{% url 'staff_edit_workout' workout_plan.id %}" class="edit-btn">
               <span class="material-icons" style="font-size:16px">edit</span> Edit
             </a>

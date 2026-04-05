@@ -143,18 +143,17 @@
 
 .staff-empty {
   padding: 32px;
-  font-size: 14px;
-  color: var(--text-muted);
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   letter-spacing: 0.06em;
+  color: var(--text-muted);
 }
 
 /* ================= ROW LINK ================= */
 .staff-link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   padding: 16px 32px;
   text-decoration: none;
@@ -177,10 +176,10 @@
 }
 .staff-link:hover::before { transform: scaleY(1); }
 
-/* Avatar initials */
+/* ================= AVATAR ================= */
 .staff-avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--surface-3);
   border: 1px solid var(--border-hover);
@@ -193,6 +192,7 @@
   flex-shrink: 0;
   text-transform: uppercase;
   transition: border-color 0.2s, color 0.2s;
+  margin-top: 2px;
 }
 .staff-link:hover .staff-avatar {
   border-color: var(--cu-red);
@@ -206,11 +206,12 @@
   display: block;
 }
 
+/* ================= INFO COLUMN ================= */
 .staff-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -231,7 +232,99 @@
   text-overflow: ellipsis;
 }
 
-/* Arrow */
+/* ================= COACH RATING ================= */
+.coach-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* CSS partial-fill stars */
+.stars {
+  position: relative;
+  display: inline-flex;
+  gap: 1px;
+  font-size: 13px;
+  line-height: 1;
+}
+.stars .star { color: var(--text-muted); }
+.stars::after {
+  content: '★★★★★';
+  position: absolute;
+  inset: 0;
+  color: hsl(42, 95%, 55%);
+  overflow: hidden;
+  width: calc(var(--fill) / 5 * 100%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.rating-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.review-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ================= REVIEW CHIPS ================= */
+.coach-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.no-reviews {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.review-chip {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  transition: border-color 0.2s;
+}
+.staff-link:hover .review-chip {
+  border-color: var(--border-hover);
+}
+
+.review-stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.review-stars .star-on  { color: hsl(42, 95%, 55%); }
+.review-stars .star-off { color: var(--text-muted); }
+
+.review-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  flex: 1;
+  min-width: 0;
+}
+
+.review-author {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ================= ARROW ================= */
 .staff-arrow {
   width: 32px;
   height: 32px;
@@ -244,6 +337,7 @@
   font-size: 14px;
   flex-shrink: 0;
   transition: all 0.2s;
+  margin-top: 2px;
 }
 .staff-link:hover .staff-arrow {
   border-color: var(--cu-red);
@@ -253,6 +347,6 @@
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 900px) {
-  .staff-hero  { padding: 48px 20px 36px; }
-  .staff-grid  { grid-template-columns: 1fr; margin: 0 20px 48px; }
+  .staff-hero { padding: 48px 20px 36px; }
+  .staff-grid { grid-template-columns: 1fr; margin: 0 20px 48px; }
 }

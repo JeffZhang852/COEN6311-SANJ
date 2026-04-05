@@ -47,8 +47,6 @@ urlpatterns = [
     path('user_settings/', views.user_settings, name='user_settings'),
     path('user_inbox/', views.user_inbox, name='user_inbox'),
     path('user_calendar/', views.user_calendar, name='user_calendar'),
-    path('user_saved_recipes/', views.user_saved_recipes, name='user_saved_recipes'),
-    path('user_saved_workouts/', views.user_saved_workouts, name='user_saved_workouts'),
 # endregion
 
 # region Staff/Employee Pages

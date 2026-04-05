@@ -16,10 +16,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - designed the "staff_profile" page - can only upload/remove profile picture
 - desgined the "staff_exercises" page
 - designed the "staff_edit_challenge" page
+- re-formatted the test file
+- display coach rating & reviews on "home" page
+- display coach rating & reviews on "staff_home" page
+- display coach rating & reviews on "staff_user_details" page
+- designed the "staff_create_exercise" page
+- designed the "staff_edit_exercise" page
+- designed the "staff_create_workout" page
+- designed the "staff_edit_workout" page
 
 ### Fixed
 
 ### Removed
+- removed the "user_saved_workouts" page (urls/views/html/css)
+- removed the "user_saved_recipes" page (urls/views/html/css)
 ---
 
 ## [0.1.0] - 2026-03-10

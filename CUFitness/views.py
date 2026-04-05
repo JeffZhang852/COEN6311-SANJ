@@ -29,8 +29,8 @@ from rest_framework.response import Response
 # Local import
 from .forms import (
     ArticleForm, ChallengeForm, ContactMessageForm, CustomUserCreationForm,
-    IngredientFormSet, PrivacySettingsForm, ProfilePictureForm, RecipeForm,
-    UpdateEmailForm, UpdatePasswordForm, ChallengeForm,
+    ExerciseForm, IngredientFormSet, PrivacySettingsForm, ProfilePictureForm,
+    RecipeForm, UpdateEmailForm, UpdatePasswordForm, ChallengeForm, WorkoutPlanForm,
 )
 from .models import (
     Article, Challenge, ChallengeParticipation, CoachAppointment, CoachAvailability,
@@ -349,15 +349,6 @@ def user_coach_schedule(request):
     }
     return render(request, 'CUFitness/user/user_coach_schedule.html', context)
 
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_member(user) or is_coach(user))
-def user_saved_recipes(request):
-    return render(request, 'CUFitness/user/user_saved_recipes.html')
-
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_member(user) or is_coach(user))
-def user_saved_workouts(request):
-    return render(request, 'CUFitness/user/user_saved_workouts.html')
 # endregion
 
 # region ----------- Coach Views -----------
@@ -478,7 +469,7 @@ def staff_messages(request):
     if request.method == 'POST':
         msg_id = request.POST.get('msg_id')
         ContactMessage.objects.filter(id=msg_id).update(is_read=True)
-        return redirect('contact_inbox')
+        return redirect('staff_messages')
     return render(request, 'CUFitness/staff/staff_messages.html', {'messages': all_messages})
 
 @login_required(login_url='staff_login')
@@ -549,9 +540,7 @@ def staff_delete_article(request, id):
         article.delete()
         messages.success(request, 'Article deleted successfully.')
         return redirect('staff_articles')
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    return redirect('article_details', id=id)
+    return HttpResponseNotAllowed(['POST'])
 
 # Staff Recipes
 def recipe_details(request, id):
@@ -656,17 +645,47 @@ def workout_plan_details(request, id):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_create_workout(request):
-    return render(request, 'CUFitness/staff/workout_plans/staff_create_workout.html')
+    if request.method == 'POST':
+        form = WorkoutPlanForm(request.POST)
+        if form.is_valid():
+            workout = form.save(commit=False)
+            workout.author = request.user
+            workout.save()
+            messages.success(request, 'Workout plan created successfully.')
+            return redirect('staff_workouts')
+    else:
+        form = WorkoutPlanForm()
+    return render(request, 'CUFitness/staff/workout_plans/staff_create_workout.html', {'form': form})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_edit_workout(request, id):
-    return render(request, 'CUFitness/staff/workout_plans/staff_edit_workout.html')
+    workout = get_object_or_404(WorkoutPlan, id=id)
+    if request.user != workout.author:
+        messages.error(request, 'You do not have permission to edit this workout plan.')
+        return redirect('staff_workouts')
+    if request.method == 'POST':
+        form = WorkoutPlanForm(request.POST, instance=workout)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Workout plan updated successfully.')
+            return redirect('workout_plan_details', id=workout.id)
+    else:
+        form = WorkoutPlanForm(instance=workout)
+    return render(request, 'CUFitness/staff/workout_plans/staff_edit_workout.html', {'form': form, 'workout': workout})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_delete_workout(request, id):
-    return render(request, 'CUFitness/staff/workout_plans/delete_workout.html')
+    workout = get_object_or_404(WorkoutPlan, id=id)
+    if request.user != workout.author:
+        messages.error(request, 'You do not have permission to delete this workout plan.')
+        return redirect('staff_workouts')
+    if request.method == 'POST':
+        workout.delete()
+        messages.success(request, 'Workout plan deleted successfully.')
+        return redirect('staff_workouts')
+    return HttpResponseNotAllowed(['POST'])
 
 # Staff Exercises
 def exercise_details(request, id):
@@ -689,17 +708,41 @@ def staff_exercises(request):
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_create_exercise(request):
-    return render(request, 'CUFitness/staff/exercises/staff_create_exercise.html')
+    if request.method == 'POST':
+        form = ExerciseForm(request.POST)
+        if form.is_valid():
+            exercise = form.save(commit=False)
+            exercise.created_by = request.user
+            exercise.save()
+            messages.success(request, 'Exercise created successfully.')
+            return redirect('staff_exercises')
+    else:
+        form = ExerciseForm()
+    return render(request, 'CUFitness/staff/exercises/staff_create_exercise.html', {'form': form})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_edit_exercise(request, id):
-    return render(request, 'CUFitness/staff/exercises/staff_edit_exercise.html')
+    exercise = get_object_or_404(Exercise, id=id)
+    if request.method == 'POST':
+        form = ExerciseForm(request.POST, instance=exercise)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Exercise updated successfully.')
+            return redirect('exercise_details', id=exercise.id)
+    else:
+        form = ExerciseForm(instance=exercise)
+    return render(request, 'CUFitness/staff/exercises/staff_edit_exercise.html', {'form': form, 'exercise': exercise})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_delete_exercise(request, id):
-    return render(request, 'CUFitness/staff/exercises/delete_exercise.html')
+    exercise = get_object_or_404(Exercise, id=id)
+    if request.method == 'POST':
+        exercise.delete()
+        messages.success(request, 'Exercise deleted successfully.')
+        return redirect('staff_exercises')
+    return HttpResponseNotAllowed(['POST'])
 # endregion
 
 
@@ -757,7 +800,7 @@ def user_challenges(request):
         user_participation = ChallengeParticipation.objects.filter(user=request.user)
         joined_ids = user_participation.values_list('challenge_id', flat=True)
         leaderboard_data = []
-        for challenge in Challenge.objects.all():
+        for challenge in challenges:
             participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
             participants = participants_qs.select_related('user').order_by('-progress')[:5]
             top_participants = participants_qs.select_related('user').order_by('-progress')[:5]
@@ -872,7 +915,7 @@ def staff_create_challenge(request):
 @user_passes_test(is_staff_user)
 def staff_challenges(request):
     challenges = Challenge.objects.all()
-    return render(request, 'CUFitness/staff/challenges/challenges.html', {'challenges': challenges})
+    return render(request, 'CUFitness/staff/challenges/staff_challenges.html', {'challenges': challenges})
 
 @user_passes_test(lambda user: is_member(user) or is_coach(user) or is_staff_user(user))
 def challenge_details(request, id):
@@ -912,9 +955,7 @@ def staff_delete_challenge(request, id):
         challenge.delete()
         messages.success(request, 'Challenge deleted successfully.')
         return redirect('staff_challenges')
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    return redirect('challenge_details', id=id)
+    return HttpResponseNotAllowed(['POST'])
 # endregion
 
 
@@ -1435,9 +1476,7 @@ def mark_read(request, message_id):
 #         'form': form,
 #         'slots': slots,
 #     }
-#
-#     # TODO New url needed
-#
+##
 #     return render(request, 'CUFitness/manage_availability.html', context)
 
 # @login_required(login_url='login')
@@ -1486,8 +1525,6 @@ def mark_read(request, message_id):
 # @user_passes_test(is_member)
 # def coach_list_view(request):
 #     coaches = CustomUser.objects.filter(role='COACH', is_active=True)
-#
-#     # TODO need a html page to display the list of coach. change url if necessary
 #     return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
 #
 # '''
