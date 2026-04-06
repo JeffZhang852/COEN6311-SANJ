@@ -1,19 +1,158 @@
 {% extends 'CUFitness/staff/staff_base.html' %}
 {% load static %}
-{% block title %} CUFitness {% endblock %}
+{% block title %} Profile — CUFitness {% endblock %}
 
 {% block extra_styles %}
-    <link rel="stylesheet" href="{% static 'general_website/authentication.css' %}">
+  <link rel="stylesheet" href="{% static 'user/user_profile.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 
 {% if user.role == "STAFF" %}
 
-    
+<!---------------- Profile Hero ---------------->
+<section class="profile-hero">
+  <div class="profile-hero-inner">
+
+    <!-- Avatar -->
+    <div class="avatar-wrap">
+      <div class="avatar-placeholder">
+        {% if user.profile_picture %}
+          <img src="{{ user.profile_picture.url }}" alt="Profile picture">
+        {% endif %}
+      </div>
+      <form method="post" action="{% url 'upload_picture' %}" enctype="multipart/form-data" id="avatar-form">
+        {% csrf_token %}
+        <input type="file" id="avatar-upload" name="profile_picture" accept="image/*" style="display:none;">
+        <label for="avatar-upload" class="avatar-upload-btn">&#8593; Upload Photo</label>
+      </form>
+      {% if user.profile_picture.name != 'defaults/Default_Profile_Picture.jpg' %}
+        <form method="post" action="{% url 'delete_picture' %}">
+          {% csrf_token %}
+          <button type="submit" class="avatar-delete-btn">✕ Remove Photo</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <!-- Name & meta -->
+    <div class="profile-meta">
+
+      <div class="profile-eyebrow">
+        <span class="profile-role-tag">Staff</span>
+        <span class="profile-divider">·</span>
+        <span class="profile-since">CUFitness Team</span>
+      </div>
+
+      <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+
+      <div class="profile-tier-badge" style="color:#d1d5db; background:rgba(55,65,81,0.4); border-color:rgba(209,213,219,0.2);">
+        Staff Account
+      </div>
+
+      <div class="profile-contact-grid">
+        <div class="profile-contact-field">
+          <span class="profile-contact-label">Email</span>
+          <span class="profile-contact-value">{{ user.email }}</span>
+        </div>
+        <div class="profile-contact-field">
+          <span class="profile-contact-label">Phone</span>
+          {% if user.phone_number %}
+            <span class="profile-contact-value">{{ user.phone_number }}</span>
+          {% else %}
+            <span class="profile-contact-value profile-contact-empty">No phone on file</span>
+          {% endif %}
+        </div>
+        <div class="profile-contact-field">
+          <span class="profile-contact-label">Address</span>
+          {% if user.address %}
+            <span class="profile-contact-value">{{ user.address }}</span>
+          {% else %}
+            <span class="profile-contact-value profile-contact-empty">No address on file</span>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Edit button -->
+    <div class="profile-actions">
+      <a href="{% url 'staff_settings' %}" class="profile-edit-btn">Edit Profile &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<!---------------- Account Information ---------------->
+<section class="sessions-section">
+  <div class="section-header">
+    <div class="section-label">Details</div>
+    <h2>Account <em>Information</em></h2>
+    <p>Your staff account details on record.</p>
+  </div>
+
+  <div class="sessions-list" style="margin-bottom: 56px;">
+
+    <div class="session-row">
+      <div class="session-info">
+        <div class="session-detail">Full Name</div>
+        <div class="session-type">{{ user.first_name }} {{ user.last_name }}</div>
+      </div>
+    </div>
+
+    <div class="session-row">
+      <div class="session-info">
+        <div class="session-detail">Email Address</div>
+        <div class="session-type">{{ user.email }}</div>
+      </div>
+    </div>
+
+    <div class="session-row">
+      <div class="session-info">
+        <div class="session-detail">Phone Number</div>
+        <div class="session-type">
+          {% if user.phone_number %}
+            {{ user.phone_number }}
+          {% else %}
+            <span style="color:var(--text-muted); font-style:italic; font-family:'DM Sans',sans-serif; font-size:15px;">Not provided</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="session-row">
+      <div class="session-info">
+        <div class="session-detail">Address</div>
+        <div class="session-type">
+          {% if user.address %}
+            {{ user.address }}
+          {% else %}
+            <span style="color:var(--text-muted); font-style:italic; font-family:'DM Sans',sans-serif; font-size:15px;">Not provided</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="session-row">
+      <div class="session-info">
+        <div class="session-detail">Account Role</div>
+        <div class="session-type">Staff</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  document.getElementById('avatar-upload').addEventListener('change', function () {
+    document.getElementById('avatar-form').submit();
+  });
+</script>
 
 {% else %}
-    <p> not a staff member </p>
+<div class="profile-unauthenticated">
+  <p>You do not have permission to view this page.</p>
+</div>
 {% endif %}
 
 {% endblock %}

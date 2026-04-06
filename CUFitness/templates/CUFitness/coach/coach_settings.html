@@ -1,6 +1,7 @@
-{% extends 'CUFitness/staff/staff_base.html' %}
+{% extends 'CUFitness/general_website/base.html' %}
 {% load static %}
 {% block title %} Settings — CUFitness {% endblock %}
+
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'user/user_settings.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
@@ -12,9 +13,9 @@
 <section class="settings-hero">
   <div class="settings-hero-inner">
     <div>
-      <div class="section-label">Staff Account</div>
+      <div class="section-label">Account</div>
       <h1 class="settings-title">Account <em>Settings</em></h1>
-      <p class="settings-subtitle">Manage your staff credentials and security preferences.</p>
+      <p class="settings-subtitle">Manage your privacy, credentials, and membership preferences.</p>
     </div>
 
     <!-- User banner -->
@@ -26,14 +27,47 @@
         <span class="user-name">{{ request.user.first_name }} {{ request.user.last_name }}</span>
         <span class="user-email">{{ request.user.email }}</span>
       </div>
-      <span class="membership-badge" style="color:#d1d5db; border-color:rgba(209,213,219,0.3); background:rgba(55,65,81,0.4);">Staff</span>
+      <span class="membership-badge {{ request.user.membership|lower }}">
+        {{ request.user.get_membership_display }}
+      </span>
     </div>
   </div>
 </section>
 
 <!-- ================= SETTINGS GRID ================= -->
 <div class="settings-body">
-  <div class="settings-grid" style="grid-template-columns: 1fr; max-width: 560px;">
+  <div class="settings-grid">
+
+    <!-- ── Email Card ── -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">&#9993;</div>
+        <div>
+          <div class="card-eyebrow">Credentials</div>
+          <h2 class="card-title">Email Address</h2>
+          <p class="card-desc">Update your login email address.</p>
+        </div>
+      </div>
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-fields">
+          <div class="form-field">
+            <div class="field-label">Current Email</div>
+            <div class="field-static">{{ request.user.email }}</div>
+          </div>
+          <div class="form-field">
+            <div class="field-label">New Email Address</div>
+            <input type="email" name="email" id="id_email"
+                   class="field-input" placeholder="Enter new email address" required>
+            {% if email_form.email.errors %}
+              <span class="field-error">{{ email_form.email.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <button type="submit" name="email_submit" class="settings-btn">Update Email &rarr;</button>
+      </form>
+    </div>
 
     <!-- ── Password Card ── -->
     <div class="settings-card">
@@ -74,7 +108,7 @@
             {% endif %}
           </div>
         </div>
-        <button type="submit" name="password_submit" class="settings-btn" style="margin-top: 8px;">Update Password &rarr;</button>
+        <button type="submit" name="password_submit" class="settings-btn">Update Password &rarr;</button>
       </form>
     </div>
 

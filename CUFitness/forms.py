@@ -6,7 +6,8 @@ from django.forms import inlineformset_factory
 # Local
 from .models import (
     Article, Challenge, CoachReview,
-    ContactMessage, CustomUser, Message, Recipe, RecipeIngredient
+    ContactMessage, CustomUser, Exercise, Message, Recipe, RecipeIngredient,
+    WorkoutPlan
 )
 
 # Registration form for new members
@@ -49,6 +50,31 @@ class ArticleForm(forms.ModelForm):
         fields = ['title', 'description', 'body', 'locked']
         exclude = ["author"]
         widgets = {}
+
+# Create or edit an exercise
+class ExerciseForm(forms.ModelForm):
+    class Meta:
+        model = Exercise
+        fields = [
+            'title', 'description', 'instructions',
+            'muscle_group', 'difficulty', 'goal', 'equipment',
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'instructions': forms.Textarea(attrs={'rows': 6}),
+            'equipment': forms.CheckboxSelectMultiple(),
+        }
+
+# Create or edit a workout plan (author set manually in view)
+class WorkoutPlanForm(forms.ModelForm):
+    class Meta:
+        model = WorkoutPlan
+        fields = ['title', 'description', 'body', 'difficulty', 'duration_minutes', 'goal', 'locked']
+        exclude = ['author']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'body': forms.Textarea(attrs={'rows': 6}),
+        }
 
 # Create or edit a recipe
 class RecipeForm(forms.ModelForm):
@@ -139,95 +165,3 @@ class ReviewForm(forms.ModelForm):
             return rating_int
         except (TypeError, ValueError):
             raise forms.ValidationError('Invalid rating value.')
-
-
-
-
-
-
-
-# =================================================================================================================
-# ============Potentially Not used Functions===========
-# # Coach request notifications
-# class CoachRequestForm(forms.ModelForm):
-#     class Meta:
-#         model = CustomUser
-#         fields = []
-#
-# # Coach accepts/refuses a pending appointment
-# class AppointmentResponseForm(forms.ModelForm):
-#     class Meta:
-#         model = CoachAppointment
-#         fields = ['status', 'refusal_reason']
-#         widgets = {
-#             'refusal_reason': forms.Textarea(attrs={'rows': 3}),
-#         }
-#
-#     def clean(self):
-#         status = self.cleaned_data.get('status')
-#         reason = self.cleaned_data.get('refusal_reason')
-#         if status == 'REFUSED' and not reason:
-#             raise forms.ValidationError("Please provide a reason for refusal.")
-#         return self.cleaned_data
-#
-# # Send a message (member to coach)
-# class MessageForm(forms.ModelForm):
-#     class Meta:
-#         model = Message
-#         fields = ['subject', 'body']
-#         widgets = {
-#             'body': forms.Textarea(attrs={'rows': 5, 'maxlength': 5000}),
-#         }
-#
-# # Coach availability slot (used in legacy manage_availability view)
-# class CoachAvailabilityForm(forms.ModelForm):
-#     class Meta:
-#         model = CoachAvailability
-#         fields = ['start_time', 'end_time', 'is_recurring']
-#
-#     def __init__(self, *args, **kwargs):
-#         self.coach = kwargs.pop('coach', None)
-#         self.selected_date = kwargs.pop('selected_date', None)
-#         super().__init__(*args, **kwargs)
-#
-#     def clean(self):
-#         cleaned = super().clean()
-#         start = cleaned.get('start_time')
-#         end = cleaned.get('end_time')
-#         if start and end:
-#             # Must be same day and exactly one hour
-#             if start.date() != end.date():
-#                 raise ValidationError("Start and end must be on the same day.")
-#             if (end - start) != timedelta(hours=1):
-#                 raise ValidationError("Slot must be exactly one hour.")
-#             # Check against gym hours
-#             weekday = start.weekday()
-#             try:
-#                 gym_day = GymInfo.objects.get(day=weekday)
-#                 if not gym_day.is_open:
-#                     raise ValidationError("Gym is closed on this day.")
-#                 if start.time() < gym_day.open_time or end.time() > gym_day.close_time:
-#                     raise ValidationError("Slot must be within gym operating hours.")
-#             except GymInfo.DoesNotExist:
-#                 raise ValidationError("Gym hours not configured for this day.")
-#         return cleaned
-#
-#
-# # Member requests an appointment (not actively used – handled by API)
-# class AppointmentRequestForm(forms.ModelForm):
-#     class Meta:
-#         model = CoachAppointment
-#         fields = ['start_time', 'end_time']
-#         widgets = {
-#             'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-#             'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-#         }
-#
-#     def __init__(self, *args, **kwargs):
-#         self.coach = kwargs.pop('coach', None)
-#         super().__init__(*args, **kwargs)
-#
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         # Validation is handled in the view (API provides only available slots)
-#         return cleaned_data

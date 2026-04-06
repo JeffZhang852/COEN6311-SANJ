@@ -52,7 +52,6 @@
     <h3>AI Assistant</h3>
     <p>Available 24/7 to answer your training, nutrition, and recovery questions.</p>
   </div>
-
 </div>
 
 <!-- ================= TRAINERS ================= -->
@@ -63,16 +62,59 @@
     <p>Certified professionals dedicated to helping you reach your potential.</p>
   </div>
 
-    <div class="trainers-grid">
-        {% for coach in active_coaches %}
-            <div class="trainer-row">
-                <div class="trainer-info">
-                    <span>{{ coach.first_name }} {{ coach.last_name }}</span>
-                </div>
+  <div class="trainers-grid">
+    {% for coach in active_coaches %}
+      {% with avg=coach.average_rating reviews=coach.latest_reviews total=coach.total_reviews_count %}
+      <div class="trainer-row">
+
+        <!-- profile pic -->
+        <img
+          class="trainer-avatar"
+          src="{{ coach.profile_picture.url }}"
+          alt="{{ coach.first_name }} {{ coach.last_name }}"
+        >
+
+        <!-- name + stars + review count -->
+        <div class="trainer-info">
+          <span class="trainer-name">{{ coach.first_name }} {{ coach.last_name }}</span>
+
+          <div class="trainer-rating">
+            <div class="stars" style="--fill: {{ avg }}">
+              {% for i in "12345" %}
+                <span class="star">★</span>
+              {% endfor %}
             </div>
-        {% empty %}
-        {% endfor %}
-    </div>
+            <span class="rating-value">{{ avg }}</span>
+            <span class="review-count">({{ total }} review{{ total|pluralize }})</span>
+          </div>
+        </div>
+
+        <!-- latest reviews -->
+        {% if reviews %}
+        <div class="trainer-reviews">
+          {% for review in reviews %}
+          <div class="review-chip">
+            <span class="review-stars">
+              {% for i in "12345" %}
+                <span class="{% if forloop.counter <= review.rating %}star-on{% else %}star-off{% endif %}">★</span>
+              {% endfor %}
+            </span>
+            {% if review.comment %}
+              <span class="review-text">&ldquo;{{ review.comment|truncatechars:80 }}&rdquo;</span>
+            {% endif %}
+            <span class="review-author">— {{ review.member.first_name }} {{ review.member.last_name|slice:":1" }}.</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="trainer-reviews no-reviews">No reviews yet.</div>
+        {% endif %}
+
+      </div>
+      {% endwith %}
+    {% empty %}
+    {% endfor %}
+  </div>
 </section>
 
 <!-- ================= PRICING ================= -->
@@ -96,7 +138,7 @@
       <li>Gym floor access</li>
       <li>Locker room access</li>
       <li>2 group classes/month</li>
-        <li>Nutrition articles access</li>
+      <li>Nutrition articles access</li>
     </ul>
     <a href="{% url 'register' %}" class="pricing-cta">Get Started &rarr;</a>
   </div>
@@ -111,10 +153,10 @@
     </div>
     <div class="pricing-divider"></div>
     <ul class="pricing-features">
-        <li>Everything in Basic</li>
-        <li>Unlimited group classes</li>
-        <li>1 PT session/month</li>
-        <li>Recipes access</li>
+      <li>Everything in Basic</li>
+      <li>Unlimited group classes</li>
+      <li>1 PT session/month</li>
+      <li>Recipes access</li>
     </ul>
     <a href="{% url 'register' %}" class="pricing-cta">Get Started &rarr;</a>
   </div>

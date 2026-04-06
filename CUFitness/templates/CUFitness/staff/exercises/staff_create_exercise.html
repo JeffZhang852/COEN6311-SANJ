@@ -1,6 +1,6 @@
 {% extends 'CUFitness/staff/staff_base.html' %}
 {% load static %}
-{% block title %} Create Workout Plan — CUFitness {% endblock %}
+{% block title %} Create Exercise — CUFitness {% endblock %}
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'staff/staff_create_article.css' %}"/>
 {% endblock %}
@@ -10,10 +10,10 @@
 
 <!-- ===== HERO ===== -->
 <div class="ca-hero">
-  <a href="{% url 'staff_workouts' %}" class="ca-back">← Workout Plans</a>
+  <a href="{% url 'staff_exercises' %}" class="ca-back">← Exercises</a>
   <div class="ca-hero-label">Staff Portal</div>
-  <h1>Create <em>Workout Plan</em></h1>
-  <p class="ca-hero-sub">Build and publish a new workout plan for CUFitness members.</p>
+  <h1>Create <em>Exercise</em></h1>
+  <p class="ca-hero-sub">Add a new exercise to the CUFitness library.</p>
 </div>
 
 <!-- ===== FORM ===== -->
@@ -36,8 +36,8 @@
     {% endfor %}
 
     <div class="ca-actions">
-      <button type="submit" class="ca-submit">Publish Workout Plan</button>
-      <a href="{% url 'staff_workouts' %}" class="ca-cancel">Cancel</a>
+      <button type="submit" class="ca-submit">Save Exercise</button>
+      <a href="{% url 'staff_exercises' %}" class="ca-cancel">Cancel</a>
     </div>
 
   </form>

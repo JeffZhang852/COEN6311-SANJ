@@ -8,10 +8,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="ex-detail-page">
-    <a href="{% url 'user_exercises' %}" class="ex-detail-back">
-        <span class="material-icons" style="font-size:16px">arrow_back</span> Exercises
-    </a>
+    <div class="ex-detail-page">
+    {% if user.is_authenticated and user.role == "STAFF"%}
+        <a href="{% url 'staff_exercises' %}" class="ex-detail-back">
+            <span class="material-icons" style="font-size:16px">arrow_back</span> Exercises
+        </a>
+    {% else %}
+        <a href="{% url 'user_exercises' %}" class="ex-detail-back">
+            <span class="material-icons" style="font-size:16px">arrow_back</span> Exercises
+        </a>
+    {% endif %}
   <div class="ex-detail-container">
 
     <!-- Header -->
@@ -22,14 +28,14 @@
         <h1 class="ex-detail-title">{{ exercise_obj.title }}</h1>
 
         {% if user.is_authenticated and user.role == "STAFF" %}
-        <div class="exercise-actions">
-          <a href="{% url 'edit_exercise' exercise_obj.id %}" class="edit-btn">
-            <span class="material-icons" style="font-size:16px">edit</span> Edit
-          </a>
-          <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
-            <span class="material-icons" style="font-size:16px">delete</span> Delete
-          </button>
-        </div>
+            <div class="exercise-actions">
+              <a href="{% url 'staff_edit_exercise' exercise_obj.id %}" class="edit-btn">
+                <span class="material-icons" style="font-size:16px">edit</span> Edit
+              </a>
+              <button class="delete-btn" onclick="document.getElementById('delete-modal').style.display='flex'">
+                <span class="material-icons" style="font-size:16px">delete</span> Delete
+              </button>
+            </div>
         {% endif %}
       </div>
 
@@ -86,7 +92,7 @@
     <h3>Delete Exercise?</h3>
     <p>This action is permanent and cannot be undone.</p>
     <div class="modal-actions">
-      <form method="POST" action="{% url 'delete_exercise' exercise_obj.id %}">
+      <form method="POST" action="{% url 'staff_delete_exercise' exercise_obj.id %}">
         {% csrf_token %}
         <button type="submit" class="btn-confirm-delete">Delete</button>
       </form>

@@ -1,0 +1,41 @@
+{% extends 'CUFitness/staff/staff_base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'staff/staff_create_challenge.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="challenge-page">
+    <div class="challenge-container">
+
+        <h2>Create Challenge</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    {% if challenge %}Update{% else %}Create{% endif %}
+                </button>
+
+                <button type="button"
+                    class="btn-secondary"
+                    onclick="window.location.href='{% if challenge %}{% url 'challenge_details' challenge.id %}{% else %}{% url 'staff_challenges' %}{% endif %}'">
+                    Cancel
+                </button>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

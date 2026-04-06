@@ -29,6 +29,7 @@
 <!-- ===== CONTENT ===== -->
 <div class="detail-body">
 
+  <!-- ===== ACCOUNT PANEL ===== -->
   <div class="detail-panel">
     <div class="detail-panel-header">
       <div class="detail-panel-label">Account Information</div>
@@ -73,6 +74,86 @@
       <span class="detail-value">{{ user_obj.last_login }}</span>
     </div>
   </div>
+
+  <!-- ===== COACH RATINGS PANEL (coaches only) ===== -->
+  {% if user_obj.role == "COACH" %}
+  <div class="detail-panel detail-panel--reviews">
+
+    <!-- Header with average rating summary -->
+    <div class="detail-panel-header reviews-header">
+      <div class="detail-panel-label">Coach Ratings &amp; Reviews</div>
+      <div class="reviews-summary">
+        <div class="reviews-avg">
+          <span class="reviews-avg-score">{{ user_obj.average_rating }}</span>
+          <div class="reviews-avg-right">
+            <div class="reviews-stars" aria-label="{{ user_obj.average_rating }} out of 5 stars">
+              {% with avg=user_obj.average_rating %}
+                {% for i in "12345" %}
+                  {% if forloop.counter <= avg %}
+                    <span class="star star--full">★</span>
+                  {% else %}
+                    <span class="star star--empty">★</span>
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+            </div>
+            <span class="reviews-count">{{ user_obj.total_reviews_count }} review{{ user_obj.total_reviews_count|pluralize }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Individual review cards -->
+    {% with reviews=user_obj.received_reviews.all %}
+      {% if reviews %}
+        <ul class="review-list">
+          {% for review in reviews %}
+          <li class="review-card {% if forloop.last %}review-card--last{% endif %}">
+
+            <!-- Reviewer avatar + meta -->
+            <div class="review-card-top">
+              <div class="review-avatar">
+                {% if review.member.profile_picture %}
+                  <img src="{{ review.member.profile_picture.url }}" alt="{{ review.member.first_name }}">
+                {% else %}
+                  {{ review.member.first_name|slice:":1" }}{{ review.member.last_name|slice:":1" }}
+                {% endif %}
+              </div>
+              <div class="review-meta">
+                <span class="review-name">{{ review.member.first_name }} {{ review.member.last_name }}</span>
+                <span class="review-date">{{ review.created_at|date:"M j, Y" }}</span>
+              </div>
+              <div class="review-stars" aria-label="{{ review.rating }} out of 5">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= review.rating %}
+                    <span class="star star--full">★</span>
+                  {% else %}
+                    <span class="star star--empty">★</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Comment (if any) -->
+            {% if review.comment %}
+              <p class="review-comment">{{ review.comment }}</p>
+            {% else %}
+              <p class="review-comment review-comment--empty">No comment left.</p>
+            {% endif %}
+
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="reviews-empty">
+          <span class="reviews-empty-icon">★</span>
+          <p>No reviews yet for this coach.</p>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+  </div>
+  {% endif %}
 
 </div>
 

@@ -25,12 +25,13 @@ from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied, ValidationError as DRFValidationError
 
 # Local import
 from .forms import (
     ArticleForm, ChallengeForm, ContactMessageForm, CustomUserCreationForm,
-    IngredientFormSet, PrivacySettingsForm, ProfilePictureForm, RecipeForm,
-    UpdateEmailForm, UpdatePasswordForm
+    ExerciseForm, IngredientFormSet, PrivacySettingsForm, ProfilePictureForm,
+    RecipeForm, UpdateEmailForm, UpdatePasswordForm, ChallengeForm, WorkoutPlanForm,
 )
 from .models import (
     Article, Challenge, ChallengeParticipation, CoachAppointment, CoachAvailability,
@@ -75,6 +76,154 @@ def is_staff_user(user):
 def is_admin_user(user):
     return user.is_authenticated and user.role == 'ADMIN'
 
+def login_required_any_role(view_func):
+    """
+    Blocks anonymous users only. Any authenticated role (MEMBER, COACH, STAFF, ADMIN)
+    is allowed through. Anonymous users are redirected to the member login page.
+    Use this instead of @login_required on views that are role-agnostic.
+    """
+    return login_required(view_func, login_url='login')
+
+
+
+# =================================================================================================================
+# ============================================== FUNCTIONALITY ====================================================
+# =================================================================================================================
+
+# region ----------- General Website Navigation -----------
+def home(request):
+    if request.user.is_authenticated and request.user.role == 'STAFF':
+        active_members = CustomUser.objects.filter(role="MEMBER", is_active=True).order_by("first_name")
+        active_coaches = CustomUser.objects.filter(role="COACH", is_active=True).order_by("first_name")
+        return render(request, "CUFitness/staff/staff_home.html",
+                      {"active_members": active_members, "active_coaches": active_coaches})
+    elif request.user.is_authenticated and request.user.role == 'COACH':
+        return redirect('coach_home')
+    else:
+        active_coaches = CustomUser.objects.filter(role="COACH", is_active=True).order_by("first_name")
+        return render(request, 'CUFitness/general_website/home.html', {"active_coaches": active_coaches})
+
+def services(request):
+    equipment = EquipmentList.objects.filter(is_active=True).order_by('name')
+    total_items = sum(e.quantity for e in equipment)
+    context = {
+        'equipment_list': equipment,
+        'total_equipment_items': total_items,
+    }
+    return render(request, 'CUFitness/general_website/navbar/services.html', context)
+
+# region -----------   Resources-Dropdown Pages  -----------
+def user_articles(request):
+    free_articles = Article.objects.filter(locked=False)
+    locked_articles = Article.objects.filter(locked=True)
+    return render(request, 'CUFitness/general_website/navbar/articles.html',
+                  {"free_articles": free_articles, "locked_articles": locked_articles})
+
+def user_recipes(request):
+
+    free_recipes = Recipe.objects.filter(locked=False)
+    locked_recipes = Recipe.objects.filter(locked=True)
+
+    return render(request, "CUFitness/general_website/navbar/recipes.html",
+                  {"free_recipes": free_recipes, "locked_recipes": locked_recipes,})
+
+def workout_plans(request):
+    free_workouts = WorkoutPlan.objects.filter(locked=False).prefetch_related('exercises')
+    locked_workouts = WorkoutPlan.objects.filter(locked=True).prefetch_related('exercises')
+    return render(request, 'CUFitness/general_website/navbar/workout_plans.html', {
+        'free_workouts': free_workouts,
+        'locked_workouts': locked_workouts,
+    })
+
+def user_exercises(request):
+    exercises = Exercise.objects.all().order_by('muscle_group')
+    return render(request, "CUFitness/general_website/navbar/exercises.html", {"exercises": exercises})
+
+def user_challenges(request):
+    if request.user.is_authenticated:
+        challenges = Challenge.objects.all()
+        user_participation = ChallengeParticipation.objects.filter(user=request.user)
+        joined_ids = user_participation.values_list('challenge_id', flat=True)
+        leaderboard_data = []
+        for challenge in challenges:
+            participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
+            participants = participants_qs.select_related('user').order_by('-progress')[:5]
+            top_participants = participants_qs.select_related('user').order_by('-progress')[:5]
+            leaderboard_data.append({
+                'challenge': challenge,
+                'participants': participants,
+                'top_participants': top_participants,
+                'count': participants_qs.count()
+            })
+        return render(request, 'CUFitness/general_website/navbar/challenges.html', {
+            'leaderboard_data': leaderboard_data,
+            'challenges': challenges,
+            'joined_ids': joined_ids,
+            'participations': user_participation,
+        })
+    else:
+        return render(request, 'CUFitness/general_website/navbar/challenges.html')
+
+@ensure_csrf_cookie
+def chatbot(request):
+    if request.method == 'POST':
+        user_message = request.POST.get('message', '').strip()
+        if not user_message:
+            return JsonResponse({'error': 'Empty message'}, status=400)
+        from CUFitness.apps import get_chatbot_model
+        tokenizer, model = get_chatbot_model()
+        messages = [{"role": "user", "content": user_message}]
+        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=100,
+                temperature=0.7,
+                do_sample=True,
+                top_p=0.9,
+                repetition_penalty=1.1
+            )
+        new_tokens = outputs[0][inputs['input_ids'].shape[1]:]
+        reply = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+        if not reply:
+            reply = "I'm not sure how to answer that."
+        return JsonResponse({'reply': reply})
+    return render(request, 'CUFitness/general_website/chatbot.html')
+# endregion
+
+# region ----------- More-Tab Dropdown Pages -----------
+def amenities(request):
+    return render(request, 'CUFitness/general_website/dropdown/amenities.html')
+
+def gym_schedule(request):
+    schedule = GymInfo.objects.all().order_by('day')
+    return render(request, 'CUFitness/general_website/dropdown/gym_schedule.html', {"gym_schedule": schedule})
+
+def contact_us(request):
+    if request.method == 'POST':
+        form = ContactMessageForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your message has been sent!')
+            return redirect('contact_us')
+    else:
+        form = ContactMessageForm()
+    return render(request, 'CUFitness/general_website/dropdown/contact_us.html', {"form": form})
+
+def about(request):
+    return render(request, 'CUFitness/general_website/dropdown/about.html')
+# endregion
+
+# region ----------- Footer Pages -----------
+def faq(request):
+    return render(request, 'CUFitness/general_website/faq.html')
+
+def privacy_policy(request):
+    return render(request, 'CUFitness/general_website/privacy_policy.html')
+# endregion
+
+# endregion
 
 # =================================================================================================================
 # ================================================== USER =========================================================
@@ -91,13 +240,16 @@ def login_user(request):
         email = request.POST['email']
         password = request.POST['password']
         user = authenticate(request, email=email, password=password)
-        if user is not None and (user.role == 'MEMBER'):
+        if user is not None and user.role == 'MEMBER':
             login(request, user)
             messages.success(request, 'You have been logged in as ' + user.first_name)
             return redirect('home')
         elif user is not None and user.role == 'STAFF':
             messages.error(request, 'Staff members go to staff login')
             return redirect('staff_login')
+        elif user is not None and user.role == 'COACH':
+            messages.error(request, 'Coaches go to coach login')
+            return redirect('coach_login')
         else:
             messages.error(request, 'Invalid Account Email or Password')
             return redirect('login')
@@ -109,23 +261,9 @@ def logout_user(request):
     messages.success(request, 'You have been logged out')
     return redirect('home')
 
-def coach_login(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        user = authenticate(request, email=email, password=password)
-        if user is not None and user.role == 'COACH':
-            login(request, user)
-            messages.success(request, 'You have been logged in as ' + user.first_name)
-            return redirect('home')
-        else:
-            messages.error(request, 'Invalid Account Email or Password')
-            return redirect('coach_login')
-    else:
-        return render(request, 'CUFitness/coach/coach_login.html')
 # endregion
 
-# region ----------- User Profile & Account -----------
+# region ----------- Logged-In User Views  -----------
 @login_required(login_url='login')
 def user_profile(request):
     if is_coach(request.user):
@@ -163,6 +301,8 @@ def delete_picture(request):
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_member(user) or is_coach(user))
 def user_settings(request):
+    if request.user.is_authenticated and request.user.role == 'COACH':
+        return redirect('coach_settings')
     privacy_form = PrivacySettingsForm(instance=request.user)
     email_form = UpdateEmailForm(instance=request.user)
     password_form = UpdatePasswordForm(user=request.user)
@@ -228,7 +368,7 @@ def user_inbox(request):
 @login_required(login_url='login')
 def user_calendar(request):
     if is_coach(request.user):
-        return redirect('user_coach_schedule')
+        return redirect('coach_schedule')
 
     now = timezone.now()
 
@@ -280,9 +420,62 @@ def user_calendar(request):
     }
     return render(request, 'CUFitness/user/user_calendar.html', context)
 
+# endregion
+
+# region ----------- Coach Views -----------
+
+def coach_login(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+        user = authenticate(request, email=email, password=password)
+        if user is not None and user.role == 'COACH':
+            login(request, user)
+            messages.success(request, 'You have been logged in as ' + user.first_name)
+            return redirect('coach_home')
+        else:
+            messages.error(request, 'Invalid Account Email or Password')
+            return redirect('coach_login')
+    else:
+        return render(request, 'CUFitness/coach/coach_login.html')
+
 @login_required(login_url='login')
 @user_passes_test(is_coach)
-def user_coach_schedule(request):
+def coach_home(request):
+    upcoming_appointments = CoachAppointment.objects.filter(
+        coach=request.user,
+        start_time__gte=timezone.now(),
+        status__in=['PENDING', 'ACCEPTED']
+    )
+    past_appointments = CoachAppointment.objects.filter(
+        coach=request.user,
+        start_time__lt=timezone.now()
+    ).order_by('-start_time')[:10]
+    availabilities = CoachAvailability.objects.filter(coach=request.user, start_time__gt=timezone.now())
+    context = {
+        'upcoming_appointments': upcoming_appointments,
+        'past_appointments': past_appointments,
+        'availabilities': availabilities,
+    }
+    return render(request, 'CUFitness/coach/coach_home.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def delete_availability(request, slot_id):
+    slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
+    if request.method == 'POST':
+        slot.delete()
+        messages.success(request, 'Slot deleted.')
+    return redirect('manage_availability')
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def coach_profile_page(request):
+    return render(request, 'CUFitness/coach/coach_profile.html')
+
+@login_required(login_url='login')
+@user_passes_test(is_coach)
+def coach_schedule(request):
     now = timezone.now()
     confirmed = CoachAppointment.objects.filter(
         coach=request.user,
@@ -347,56 +540,38 @@ def user_coach_schedule(request):
         'calendar_events_json': json.dumps(calendar_events),
         'gym_settings': json.dumps(gym_info),
     }
-    return render(request, 'CUFitness/user/user_coach_schedule.html', context)
+    return render(request, 'CUFitness/coach/coach_schedule.html', context)
 
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_member(user) or is_coach(user))
-def user_saved_recipes(request):
-    return render(request, 'CUFitness/user/user_saved_recipes.html')
-
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_member(user) or is_coach(user))
-def user_saved_workouts(request):
-    return render(request, 'CUFitness/user/user_saved_workouts.html')
-# endregion
-
-# region ----------- Coach Views -----------
-@login_required(login_url='login')
+@login_required(login_url='coach_login')
 @user_passes_test(is_coach)
-def coach_dashboard(request):
-    upcoming_appointments = CoachAppointment.objects.filter(
-        coach=request.user,
-        start_time__gte=timezone.now(),
-        status__in=['PENDING', 'ACCEPTED']
-    )
-    past_appointments = CoachAppointment.objects.filter(
-        coach=request.user,
-        start_time__lt=timezone.now()
-    ).order_by('-start_time')[:10]
-    availabilities = CoachAvailability.objects.filter(coach=request.user, start_time__gt=timezone.now())
-    context = {
-        'upcoming_appointments': upcoming_appointments,
-        'past_appointments': past_appointments,
-        'availabilities': availabilities,
-    }
-    return render(request, 'CUFitness/coach_dashboard.html', context)
-
-@login_required(login_url='login')
-@user_passes_test(is_coach)
-def delete_availability(request, slot_id):
-    slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
+def coach_settings(request):
+    email_form = UpdateEmailForm(instance=request.user)
+    password_form = UpdatePasswordForm(user=request.user)
     if request.method == 'POST':
-        slot.delete()
-        messages.success(request, 'Slot deleted.')
-    return redirect('manage_availability')
+        if 'email_submit' in request.POST:
+            email_form = UpdateEmailForm(request.POST, instance=request.user)
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(request, 'Email address updated.')
+                return redirect('coach_settings')
+        elif 'password_submit' in request.POST:
+            password_form = UpdatePasswordForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                update_session_auth_hash(request, password_form.user)
+                messages.success(request, 'Password updated successfully.')
+                return redirect('coach_settings')
+    context = {
+        'email_form': email_form,
+        'password_form': password_form,
+    }
+    return render(request, 'CUFitness/coach/coach_settings.html', context)
 
-@login_required(login_url='login')
-@user_passes_test(is_coach)
-def coach_profile_page(request):
-    return render(request, 'CUFitness/coach/coach_profile.html')
 # endregion
 
 # region ----------- Staff Views -----------
+
+# region -----------  Staff General navigation  -----------
 def staff_login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -478,7 +653,7 @@ def staff_messages(request):
     if request.method == 'POST':
         msg_id = request.POST.get('msg_id')
         ContactMessage.objects.filter(id=msg_id).update(is_read=True)
-        return redirect('contact_inbox')
+        return redirect('staff_messages')
     return render(request, 'CUFitness/staff/staff_messages.html', {'messages': all_messages})
 
 @login_required(login_url='staff_login')
@@ -486,8 +661,23 @@ def staff_messages(request):
 def staff_user_details(request, user_id):
     user_obj = get_object_or_404(User, id=user_id)
     return render(request, "CUFitness/staff/staff_user_details.html", {"user_obj": user_obj})
+# endregion
 
-# Staff Articles
+# region -----------  Article Pages  -----------
+def article_details(request, id):
+    article = get_object_or_404(Article, id=id)
+    if request.user.is_authenticated:
+        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
+    else:
+        base = 'CUFitness/general_website/base.html'
+    if article.locked and not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, 'CUFitness/staff/articles/article_details.html', {
+        'article_obj': article,
+        'base_template': base,
+    })
+
+ # -----------  Staff Article Pages  -----------
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_articles(request):
@@ -508,24 +698,13 @@ def staff_create_article(request):
         form = ArticleForm()
     return render(request, "CUFitness/staff/articles/staff_create_article.html", {"form": form})
 
-def article_details(request, id):
-    article = get_object_or_404(Article, id=id)
-    if request.user.is_authenticated:
-        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
-    else:
-        base = 'CUFitness/general_website/base.html'
-    if article.locked and not request.user.is_authenticated:
-        return redirect('login')
-    return render(request, 'CUFitness/staff/articles/article_details.html', {
-        'article_obj': article,
-        'base_template': base,
-    })
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_edit_article(request, id):
     article = get_object_or_404(Article, id=id)
-    if request.user != article.author:
+    # Allow any staff to edit if the original author's account has been deleted (author=None)
+    if article.author is not None and request.user != article.author:
         messages.error(request, 'You do not have permission to edit this article.')
         return redirect('staff_articles')
     if request.method == 'POST':
@@ -542,18 +721,17 @@ def staff_edit_article(request, id):
 @user_passes_test(is_staff_user)
 def staff_delete_article(request, id):
     article = get_object_or_404(Article, id=id)
-    if request.user != article.author:
+    if article.author is not None and request.user != article.author:
         messages.error(request, 'You do not have permission to delete this article.')
         return redirect('staff_articles')
     if request.method == 'POST':
         article.delete()
         messages.success(request, 'Article deleted successfully.')
         return redirect('staff_articles')
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    return redirect('article_details', id=id)
+    return HttpResponseNotAllowed(['POST'])
+# endregion
 
-# Staff Recipes
+# region -----------  Recipe Pages  -----------
 def recipe_details(request, id):
     recipe = get_object_or_404(Recipe, id=id)
     choices_dict = dict(Recipe.DIETARY_CHOICES)
@@ -570,6 +748,7 @@ def recipe_details(request, id):
         'base_template': base,
     })
 
+# -----------  Staff Recipe Pages  -----------
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_recipes(request):
@@ -598,7 +777,7 @@ def staff_create_recipe(request):
 @user_passes_test(is_staff_user)
 def staff_edit_recipe(request, id):
     recipe = get_object_or_404(Recipe, id=id)
-    if request.user != recipe.author:
+    if recipe.author is not None and request.user != recipe.author:
         messages.error(request, 'You do not have permission to edit this recipe.')
         return redirect('staff_recipes')
     if request.method == 'POST':
@@ -622,7 +801,7 @@ def staff_edit_recipe(request, id):
 @user_passes_test(is_staff_user)
 def staff_delete_recipe(request, id):
     recipe = get_object_or_404(Recipe, id=id)
-    if request.user != recipe.author:
+    if recipe.author is not None and request.user != recipe.author:
         messages.error(request, 'You do not have permission to delete this recipe.')
         return redirect('staff_recipes')
     if request.method == 'POST':
@@ -630,14 +809,9 @@ def staff_delete_recipe(request, id):
         messages.success(request, 'Recipe deleted successfully.')
         return redirect('staff_recipes')
     return HttpResponseNotAllowed(['POST'])
+# endregion
 
-# Staff Workouts
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def staff_workouts(request):
-    all_workout_plans = WorkoutPlan.objects.all()
-    return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html', {'workout_plans': all_workout_plans})
-
+# region -----------  Workout Pages  -----------
 def workout_plan_details(request, id):
     workout_plan = get_object_or_404(WorkoutPlan, id=id)
     if request.user.is_authenticated:
@@ -653,22 +827,60 @@ def workout_plan_details(request, id):
         'base_template': base,
     })
 
+# -----------  Staff Workout Pages  -----------
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_workouts(request):
+    all_workout_plans = WorkoutPlan.objects.all()
+    return render(request, 'CUFitness/staff/workout_plans/staff_workouts.html', {'workout_plans': all_workout_plans})
+
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_create_workout(request):
-    return render(request, 'CUFitness/staff/workout_plans/staff_create_workout.html')
+    if request.method == 'POST':
+        form = WorkoutPlanForm(request.POST)
+        if form.is_valid():
+            workout = form.save(commit=False)
+            workout.author = request.user
+            workout.save()
+            messages.success(request, 'Workout plan created successfully.')
+            return redirect('staff_workouts')
+    else:
+        form = WorkoutPlanForm()
+    return render(request, 'CUFitness/staff/workout_plans/staff_create_workout.html', {'form': form})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_edit_workout(request, id):
-    return render(request, 'CUFitness/staff/workout_plans/staff_edit_workout.html')
+    workout = get_object_or_404(WorkoutPlan, id=id)
+    if workout.author is not None and request.user != workout.author:
+        messages.error(request, 'You do not have permission to edit this workout plan.')
+        return redirect('staff_workouts')
+    if request.method == 'POST':
+        form = WorkoutPlanForm(request.POST, instance=workout)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Workout plan updated successfully.')
+            return redirect('workout_plan_details', id=workout.id)
+    else:
+        form = WorkoutPlanForm(instance=workout)
+    return render(request, 'CUFitness/staff/workout_plans/staff_edit_workout.html', {'form': form, 'workout': workout})
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_delete_workout(request, id):
-    return render(request, 'CUFitness/staff/workout_plans/delete_workout.html')
+    workout = get_object_or_404(WorkoutPlan, id=id)
+    if workout.author is not None and request.user != workout.author:
+        messages.error(request, 'You do not have permission to delete this workout plan.')
+        return redirect('staff_workouts')
+    if request.method == 'POST':
+        workout.delete()
+        messages.success(request, 'Workout plan deleted successfully.')
+        return redirect('staff_workouts')
+    return HttpResponseNotAllowed(['POST'])
+# endregion
 
-# Staff Exercises
+# region -----------  Exercise Pages  -----------
 def exercise_details(request, id):
     exercise = get_object_or_404(Exercise, id=id)
     if request.user.is_authenticated:
@@ -680,161 +892,113 @@ def exercise_details(request, id):
         'base_template': base,
     })
 
+# -----------  Staff Exercise Pages  -----------
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
 def staff_exercises(request):
-    return render(request, 'CUFitness/staff/exercises/staff_exercises.html')
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def create_exercises(request):
-    return render(request, 'CUFitness/staff/exercises/create_exercise.html')
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def edit_exercise(request, id):
-    return render(request, 'CUFitness/staff/exercises/edit_exercise.html')
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def delete_exercise(request, id):
-    return render(request, 'CUFitness/staff/exercises/delete_exercise.html')
-# endregion
-
-
-# =================================================================================================================
-# ============================================== FUNCTIONALITY ====================================================
-# =================================================================================================================
-
-# region ----------- Navbar Pages -----------
-def home(request):
-    if request.user.is_authenticated and request.user.role == 'STAFF':
-        active_members = CustomUser.objects.filter(role="MEMBER", is_active=True).order_by("first_name")
-        active_coaches = CustomUser.objects.filter(role="COACH", is_active=True).order_by("first_name")
-        return render(request, "CUFitness/staff/staff_home.html",
-                      {"active_members": active_members, "active_coaches": active_coaches})
-    else:
-        active_coaches = CustomUser.objects.filter(role="COACH", is_active=True).order_by("first_name")
-        return render(request, 'CUFitness/general_website/home.html', {"active_coaches": active_coaches})
-
-def services(request):
-    equipment = EquipmentList.objects.filter(is_active=True).order_by('name')
-    total_items = sum(e.quantity for e in equipment)
-    context = {
-        'equipment_list': equipment,
-        'total_equipment_items': total_items,
-    }
-    return render(request, 'CUFitness/general_website/navbar/services.html', context)
-
-def user_articles(request):
-    free_articles = Article.objects.filter(locked=False)
-    locked_articles = Article.objects.filter(locked=True)
-    return render(request, 'CUFitness/general_website/navbar/articles.html',
-                  {"free_articles": free_articles, "locked_articles": locked_articles})
-
-def workout_plans(request):
-    free_workouts = WorkoutPlan.objects.filter(locked=False).prefetch_related('exercises')
-    locked_workouts = WorkoutPlan.objects.filter(locked=True).prefetch_related('exercises')
-    return render(request, 'CUFitness/general_website/navbar/workout_plans.html', {
-        'free_workouts': free_workouts,
-        'locked_workouts': locked_workouts,
-    })
-
-def user_recipes(request):
-    free_recipes = Recipe.objects.filter(locked=False)
-    locked_recipes = Recipe.objects.filter(locked=True)
-    return render(request, "CUFitness/general_website/navbar/recipes.html",
-                  {"free_recipes": free_recipes, "locked_recipes": locked_recipes})
-
-def user_exercises(request):
     exercises = Exercise.objects.all().order_by('muscle_group')
-    return render(request, "CUFitness/general_website/navbar/exercises.html", {"exercises": exercises})
+    return render(request, 'CUFitness/staff/exercises/staff_exercises.html', {'exercises': exercises})
 
-def user_challenges(request):
-    if request.user.is_authenticated:
-        challenges = Challenge.objects.all()
-        user_participation = ChallengeParticipation.objects.filter(user=request.user)
-        joined_ids = user_participation.values_list('challenge_id', flat=True)
-        leaderboard_data = []
-        for challenge in Challenge.objects.all():
-            participants_qs = ChallengeParticipation.objects.filter(challenge=challenge)
-            participants = participants_qs.select_related('user').order_by('-progress')[:5]
-            top_participants = participants_qs.select_related('user').order_by('-progress')[:5]
-            leaderboard_data.append({
-                'challenge': challenge,
-                'participants': participants,
-                'top_participants': top_participants,
-                'count': participants_qs.count()
-            })
-        return render(request, 'CUFitness/general_website/navbar/challenges.html', {
-            'leaderboard_data': leaderboard_data,
-            'challenges': challenges,
-            'joined_ids': joined_ids,
-            'participations': user_participation,
-        })
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_create_exercise(request):
+    if request.method == 'POST':
+        form = ExerciseForm(request.POST)
+        if form.is_valid():
+            exercise = form.save(commit=False)
+            exercise.created_by = request.user
+            exercise.save()
+            messages.success(request, 'Exercise created successfully.')
+            return redirect('staff_exercises')
     else:
-        return render(request, 'CUFitness/general_website/navbar/challenges.html')
+        form = ExerciseForm()
+    return render(request, 'CUFitness/staff/exercises/staff_create_exercise.html', {'form': form})
 
-@ensure_csrf_cookie
-def chatbot(request):
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_edit_exercise(request, id):
+    exercise = get_object_or_404(Exercise, id=id)
     if request.method == 'POST':
-        user_message = request.POST.get('message', '').strip()
-        if not user_message:
-            return JsonResponse({'error': 'Empty message'}, status=400)
-        from CUFitness.apps import get_chatbot_model
-        tokenizer, model = get_chatbot_model()
-        messages = [{"role": "user", "content": user_message}]
-        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=100,
-                temperature=0.7,
-                do_sample=True,
-                top_p=0.9,
-                repetition_penalty=1.1
-            )
-        new_tokens = outputs[0][inputs['input_ids'].shape[1]:]
-        reply = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-        if not reply:
-            reply = "I'm not sure how to answer that."
-        return JsonResponse({'reply': reply})
-    return render(request, 'CUFitness/general_website/chatbot.html')
-# endregion
-
-# region ----------- Dropdown Menu Pages -----------
-def amenities(request):
-    return render(request, 'CUFitness/general_website/dropdown/amenities.html')
-
-def gym_schedule(request):
-    schedule = GymInfo.objects.all().order_by('day')
-    return render(request, 'CUFitness/general_website/dropdown/gym_schedule.html', {"gym_schedule": schedule})
-
-def contact_us(request):
-    if request.method == 'POST':
-        form = ContactMessageForm(request.POST)
+        form = ExerciseForm(request.POST, instance=exercise)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your message has been sent!')
-            return redirect('contact_us')
+            messages.success(request, 'Exercise updated successfully.')
+            return redirect('exercise_details', id=exercise.id)
     else:
-        form = ContactMessageForm()
-    return render(request, 'CUFitness/general_website/dropdown/contact_us.html', {"form": form})
+        form = ExerciseForm(instance=exercise)
+    return render(request, 'CUFitness/staff/exercises/staff_edit_exercise.html', {'form': form, 'exercise': exercise})
 
-def about(request):
-    return render(request, 'CUFitness/general_website/dropdown/about.html')
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_delete_exercise(request, id):
+    exercise = get_object_or_404(Exercise, id=id)
+    if request.method == 'POST':
+        exercise.delete()
+        messages.success(request, 'Exercise deleted successfully.')
+        return redirect('staff_exercises')
+    return HttpResponseNotAllowed(['POST'])
 # endregion
 
-# region ----------- Footer Pages -----------
-def faq(request):
-    return render(request, 'CUFitness/general_website/faq.html')
+# region  -----------  Challenge Pages  -----------
 
-def privacy_policy(request):
-    return render(request, 'CUFitness/general_website/privacy_policy.html')
-# endregion
+@login_required_any_role
+def challenge_details(request, id):
+    challenge = get_object_or_404(Challenge, id=id)
+    base = 'CUFitness/staff/staff_base.html' if request.user.role in ('STAFF', 'ADMIN') else 'CUFitness/general_website/base.html'
+    participants = ChallengeParticipation.objects.filter(challenge=challenge).select_related('user').order_by('-progress')
+    is_joined = ChallengeParticipation.objects.filter(user=request.user, challenge=challenge).exists()
+    return render(request, 'CUFitness/staff/challenges/challenge_details.html', {
+        'challenge': challenge,
+        'participants': participants,
+        'base_template': base,
+        'is_joined': is_joined,
+    })
 
-# region ----------- Fitness Challenges -----------
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_challenges(request):
+    challenges = Challenge.objects.all()
+    return render(request, 'CUFitness/staff/challenges/staff_challenges.html', {'challenges': challenges})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_create_challenge(request):
+    if request.method == "POST":
+        form = ChallengeForm(request.POST)
+        if form.is_valid():
+            challenge = form.save(commit=False)
+            challenge.created_by = request.user
+            challenge.save()
+            return redirect('staff_challenges')
+    else:
+        form = ChallengeForm()
+    return render(request, 'CUFitness/staff/challenges/staff_create_challenge.html', {'form': form})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_edit_challenge(request, id):
+    challenge = get_object_or_404(Challenge, id=id)
+    if request.method == 'POST':
+        form = ChallengeForm(request.POST, instance=challenge)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Challenge updated successfully.')
+            return redirect('challenge_details', id=challenge.id)
+    else:
+        form = ChallengeForm(instance=challenge)
+    return render(request, 'CUFitness/staff/challenges/staff_edit_challenge.html', {'form': form, 'challenge': challenge})
+
+@login_required(login_url='staff_login')
+@user_passes_test(is_staff_user)
+def staff_delete_challenge(request, id):
+    challenge = get_object_or_404(Challenge, id=id)
+    if request.method == 'POST':
+        challenge.delete()
+        messages.success(request, 'Challenge deleted successfully.')
+        return redirect('staff_challenges')
+    return HttpResponseNotAllowed(['POST'])
+
+# -----------  System Challenges Pages  -----------
 @login_required(login_url='login')
 def join_challenge(request, challenge_id):
     challenge = get_object_or_404(Challenge, id=challenge_id)
@@ -845,75 +1009,23 @@ def join_challenge(request, challenge_id):
 def update_progress(request, participation_id):
     participation = get_object_or_404(ChallengeParticipation, id=participation_id, user=request.user)
     if request.method == "POST":
-        increment = int(request.POST.get('progress', 0))
-        participation.progress += increment
-        if participation.progress > participation.challenge.goal_target:
-            participation.progress = participation.challenge.goal_target
+        try:
+            increment = int(request.POST.get('progress', 0))
+        except (ValueError, TypeError):
+            increment = 0
+        # Clamp increment to a non-negative value — negative submissions would silently
+        # decrease progress, which is never a valid user action.
+        increment = max(0, increment)
+        participation.progress = min(
+            participation.progress + increment,
+            participation.challenge.goal_target
+        )
         participation.save()
         participation.refresh_from_db()
     return redirect('user_challenges')
 
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def create_challenge(request):
-    if request.method == "POST":
-        form = ChallengeForm(request.POST)
-        if form.is_valid():
-            challenge = form.save(commit=False)
-            challenge.created_by = request.user
-            challenge.save()
-            return redirect('staff_challenges')
-    else:
-        form = ChallengeForm()
-    return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form})
+# endregion
 
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def staff_challenges(request):
-    challenges = Challenge.objects.all()
-    return render(request, 'CUFitness/staff/challenges/challenges.html', {'challenges': challenges})
-
-@user_passes_test(lambda user: is_member(user) or is_coach(user) or is_staff_user(user))
-def challenge_details(request, id):
-    challenge = get_object_or_404(Challenge, id=id)
-    if request.user.is_authenticated:
-        base = 'CUFitness/staff/staff_base.html' if request.user.role == 'STAFF' else 'CUFitness/general_website/base.html'
-    else:
-        base = 'CUFitness/general_website/base.html'
-    participants = ChallengeParticipation.objects.filter(challenge=challenge).select_related('user').order_by('-progress')
-    is_joined = request.user.is_authenticated and ChallengeParticipation.objects.filter(user=request.user, challenge=challenge).exists()
-    return render(request, 'CUFitness/staff/challenges/challenge_details.html', {
-        'challenge': challenge,
-        'participants': participants,
-        'base_template': base,
-        'is_joined': is_joined,
-    })
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def edit_challenge(request, id):
-    challenge = get_object_or_404(Challenge, id=id)
-    if request.method == 'POST':
-        form = ChallengeForm(request.POST, instance=challenge)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Challenge updated successfully.')
-            return redirect('challenge_details', id=challenge.id)
-    else:
-        form = ChallengeForm(instance=challenge)
-    return render(request, 'CUFitness/staff/challenges/create_challenge.html', {'form': form, 'challenge': challenge})
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def delete_challenge(request, id):
-    challenge = get_object_or_404(Challenge, id=id)
-    if request.method == 'POST':
-        challenge.delete()
-        messages.success(request, 'Challenge deleted successfully.')
-        return redirect('staff_challenges')
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    return redirect('challenge_details', id=id)
 # endregion
 
 
@@ -991,21 +1103,21 @@ class CoachReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         if not is_member(user):
-            raise PermissionError("Only members can write reviews.")
+            raise PermissionDenied("Only members can write reviews.")
         appointment_id = self.request.data.get('appointment')
         if not appointment_id:
-            raise PermissionError("Appointment ID is required.")
+            raise DRFValidationError("Appointment ID is required.")
         try:
             appointment = CoachAppointment.objects.get(id=appointment_id)
         except CoachAppointment.DoesNotExist:
-            raise PermissionError("Appointment not found.")
+            raise DRFValidationError("Appointment not found.")
         if appointment.member != user:
-            raise PermissionError("You can only review your own appointments.")
+            raise PermissionDenied("You can only review your own appointments.")
         # Allow review for ACCEPTED or REFUSED appointments (for testing)
         if appointment.status not in ['ACCEPTED', 'REFUSED']:
-            raise PermissionError("You can only review accepted or refused appointments.")
+            raise DRFValidationError("You can only review accepted or refused appointments.")
         if hasattr(appointment, 'review'):
-            raise PermissionError("This appointment has already been reviewed.")
+            raise DRFValidationError("This appointment has already been reviewed.")
         serializer.save(member=user, coach=appointment.coach, appointment=appointment)
 
 # endregion
@@ -1037,7 +1149,7 @@ def ajax_add_availability(request):
     if recurrence == 'weeks':
         max_weeks = recurrence_weeks
     elif recurrence == 'indefinite':
-        max_weeks = 52
+        max_weeks = 52 # max one year
     now = timezone.now()
     gym_info_cache = {}
     for i in range(7):
@@ -1078,7 +1190,7 @@ def ajax_add_availability(request):
                 coach=request.user,
                 start_time__lt=end_dt,
                 end_time__gt=start_dt,
-                is_booked=False
+                #is_booked=False
             )
             if overlapping.exists():
                 return JsonResponse({'error': f'Slot {start_dt} overlaps existing availability'}, status=400)
@@ -1100,7 +1212,7 @@ def ajax_add_availability(request):
                     coach=request.user,
                     start_time__lt=slot_end,
                     end_time__gt=slot_start,
-                    is_booked=False
+                    #is_booked=False
                 )
                 if overlapping.exists():
                     continue
@@ -1117,6 +1229,7 @@ def ajax_add_availability(request):
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
+@ensure_csrf_cookie
 def ajax_edit_availability(request, slot_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
@@ -1141,37 +1254,48 @@ def ajax_edit_availability(request, slot_id):
         return JsonResponse({'error': 'Cannot set slot in the past'}, status=400)
     if (end_dt - start_dt) != timedelta(hours=1):
         return JsonResponse({'error': 'Slot must be exactly one hour'}, status=400)
-    weekday = start_dt.weekday()
+    local_start = to_local_time(start_dt)
+    local_end = to_local_time(end_dt)
+    weekday = local_start.weekday()
     try:
         gym = GymInfo.objects.get(day=weekday)
         if not gym.is_open:
             return JsonResponse({'error': 'Gym closed on this day'}, status=400)
-        if start_dt.time() < gym.open_time or end_dt.time() > gym.close_time:
-            return JsonResponse({'error': 'Slot outside gym hours'}, status=400)
+        if not gym.is_open_24h:
+            if gym.open_time is None or gym.close_time is None:
+                return JsonResponse({'error': 'Gym hours not set for this day'}, status=400)
+            if local_start.time() < gym.open_time or local_end.time() > gym.close_time:
+                return JsonResponse({'error': 'Slot outside gym hours'}, status=400)
     except GymInfo.DoesNotExist:
         return JsonResponse({'error': 'Gym hours not configured'}, status=400)
     overlapping = CoachAvailability.objects.filter(
         coach=request.user,
         start_time__lt=end_dt,
         end_time__gt=start_dt,
-        is_booked=False
     ).exclude(pk=slot.pk)
     if overlapping.exists():
-        return JsonResponse({'error': 'Overlaps with existing availability'}, status=400)
+        return JsonResponse({'error': 'Overlaps with an existing slot'}, status=400)
     slot.start_time = start_dt
     slot.end_time = end_dt
-    slot.save()
+    try:
+        slot.save()
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'id': slot.id, 'start': slot.start_time.isoformat(), 'end': slot.end_time.isoformat()})
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
+@ensure_csrf_cookie
 def ajax_delete_availability(request, slot_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     slot = get_object_or_404(CoachAvailability, id=slot_id, coach=request.user)
     if slot.is_booked:
         return JsonResponse({'error': 'Cannot delete a booked slot'}, status=400)
-    slot.delete()
+    try:
+        slot.delete()
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'deleted': slot_id})
 
 @login_required(login_url='login')
@@ -1265,33 +1389,38 @@ def api_request_appointment(request):
     except ValueError:
         return JsonResponse({'error': 'Invalid datetime format'}, status=400)
 
-    # Check that the slot exists and is not booked
+    # Atomic block + select_for_update ensures only one request can book this slot
+    # at a time — concurrent requests will queue and the second will see is_booked=True
     try:
-        availability = CoachAvailability.objects.get(
-            coach_id=coach_id,
-            start_time=start_dt,
-            end_time=end_dt,
-            is_booked=False
-        )
-    except CoachAvailability.DoesNotExist:
-        return JsonResponse({'error': 'This time slot is no longer available'}, status=400)
+        with transaction.atomic():
+            try:
+                availability = CoachAvailability.objects.select_for_update().get(
+                    coach_id=coach_id,
+                    start_time=start_dt,
+                    end_time=end_dt,
+                    is_booked=False
+                )
+            except CoachAvailability.DoesNotExist:
+                return JsonResponse({'error': 'This time slot is no longer available'}, status=400)
 
-    # Double-check that there is no active appointment for this slot (optional safety)
-    if CoachAppointment.objects.filter(availability=availability, status__in=['PENDING', 'ACCEPTED']).exists():
-        return JsonResponse({'error': 'This slot is already booked or pending'}, status=400)
+            # Double-check that there is no active appointment for this slot (optional safety)
+            if CoachAppointment.objects.filter(availability=availability, status__in=['PENDING', 'ACCEPTED']).exists():
+                return JsonResponse({'error': 'This slot is already booked or pending'}, status=400)
 
-    # Create the appointment
-    appointment = CoachAppointment.objects.create(
-        coach_id=coach_id,
-        member=request.user,
-        start_time=start_dt,
-        end_time=end_dt,
-        status='PENDING',
-        availability=availability
-    )
+            # Create the appointment and mark the slot booked atomically
+            appointment = CoachAppointment.objects.create(
+                coach_id=coach_id,
+                member=request.user,
+                start_time=start_dt,
+                end_time=end_dt,
+                status='PENDING',
+                availability=availability
+            )
 
-    availability.is_booked = True
-    availability.save()
+            availability.is_booked = True
+            availability.save()
+    except Exception as e:
+        return JsonResponse({'error': 'Booking failed, please try again.'}, status=500)
 
     return JsonResponse({'success': True, 'appointment_id': appointment.id})
 
@@ -1309,7 +1438,7 @@ def ajax_accept_appointment(request, appointment_id):
 def ajax_cancel_appointment(request, appointment_id):
     """Cancel a pending appointment (member only)."""
     try:
-        appointment = get_object_or_404(CoachAppointment, id=appointment_id, member=request.user)
+        appointment = CoachAppointment.objects.get(id=appointment_id, member=request.user)
     except CoachAppointment.DoesNotExist:
         return JsonResponse({'error': 'Appointment not found.'}, status=404)
 
@@ -1348,8 +1477,11 @@ def ajax_reject_appointment(request, appointment_id):
     appointment.save()
     # Free the linked availability slot so it can be booked again
     if appointment.availability:
-        appointment.availability.is_booked = False
-        appointment.availability.save()
+        availability = appointment.availability
+        availability.is_booked = False
+        availability.save()
+        appointment.availability = None
+        appointment.save()
     return JsonResponse({'success': True})
 
 @login_required(login_url='login')
@@ -1410,415 +1542,3 @@ def mark_read(request, message_id):
         return JsonResponse({'status': 'ok'})
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 # endregion
-# endregion
-
-# =================================================================================================================
-# ============Potentially Not used Functions===========
-# (All legacy/commented code remains below as in your original file)
-# @login_required(login_url='login')
-# @user_passes_test(is_coach)
-# def manage_availability(request):
-#     """Add/delete availability slots."""
-#     if request.method == 'POST':
-#         form = CoachAvailabilityForm(request.POST)
-#         if form.is_valid():
-#             availability = form.save(commit=False)
-#             availability.coach = request.user
-#             availability.save()
-#             messages.success(request, 'Availability slot added.')
-#             return redirect('manage_availability')
-#     else:
-#         form = CoachAvailabilityForm()
-#     slots = CoachAvailability.objects.filter(coach=request.user).order_by('start_time')
-#     context = {
-#         'form': form,
-#         'slots': slots,
-#     }
-#
-#     # TODO New url needed
-#
-#     return render(request, 'CUFitness/manage_availability.html', context)
-
-# @login_required(login_url='login')
-# @user_passes_test(is_coach)
-# def manage_appointments(request):
-#     # View pending appointments and respond
-#     pending = (CoachAppointment.objects.filter
-#                (coach=request.user,
-#                 status='PENDING'
-#                 ).order_by('start_time')).select_related(
-#         'member')  # Without (select_related('member')), accessing appointment.member.first_name in the template triggers an extra query per row (N+1).
-#
-#     if request.method == 'POST':
-#         appointment_id = request.POST.get('appointment_id')
-#
-#         try:
-#             with transaction.atomic():
-#                 # lock this row until the request completes
-#                 appointment = CoachAppointment.objects.select_for_update().get(
-#                     id=appointment_id,
-#                     coach=request.user
-#                 )
-#                 form = AppointmentResponseForm(request.POST, instance=appointment)
-#                 if form.is_valid():
-#                     form.save()  # clean() runs here, safely locked
-#                     messages.success(request, f'Appointment {appointment.status}.')
-#                     return redirect('manage_appointments')
-#         except CoachAppointment.DoesNotExist:
-#             messages.error(request, 'Appointment not found.')
-#             return redirect('manage_appointments')
-#
-#     else:
-#         form = AppointmentResponseForm()
-#
-#     context = {
-#         'pending_appointments': pending,
-#         'response_form': form,
-#     }
-#     return render(request, 'CUFitness/manage_appointments.html', context)
-
-# --- Member Views ---
-#
-# '''
-# # not needed anymore... coach list is displayed in home page
-# @login_required(login_url='login')
-# @user_passes_test(is_member)
-# def coach_list_view(request):
-#     coaches = CustomUser.objects.filter(role='COACH', is_active=True)
-#
-#     # TODO need a html page to display the list of coach. change url if necessary
-#     return render(request, 'CUFitness/coach_list.html', {'coaches': coaches})
-#
-# '''
-#
-# class CoachAvailabilityViewSet(viewsets.ModelViewSet):
-#     """
-#     Manage availability slots. Coaches can CRUD their own; members can only read unbooked slots.
-#     """
-#     queryset = CoachAvailability.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['is_booked', 'start_time', 'end_time', 'coach']
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         if not user.is_authenticated:
-#             return CoachAvailability.objects.none()
-#         if is_coach(user):
-#             return CoachAvailability.objects.filter(coach=user)
-#         # Members can see all unbooked slots
-#         return CoachAvailability.objects.filter(is_booked=False)
-#
-#     def perform_create(self, serializer):
-#         if not is_coach(self.request.user):
-#             raise PermissionError("Only coaches can create availability slots.")
-#         serializer.save(coach=self.request.user)
-#
-#     def perform_update(self, serializer):
-#         slot = self.get_object()
-#         if slot.is_booked:
-#             raise PermissionError("Cannot edit a booked slot.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if instance.is_booked:
-#             raise PermissionError("Cannot delete a booked slot.")
-#         instance.delete()
-#
-#
-# class CoachAppointmentViewSet(viewsets.ModelViewSet):
-#     """
-#     Appointments between members and coaches.
-#     """
-#     queryset = CoachAppointment.objects.all()
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['status', 'coach', 'member', 'start_time', 'end_time']
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         if is_coach(user):
-#             return CoachAppointment.objects.filter(coach=user)
-#         elif is_member(user):
-#             return CoachAppointment.objects.filter(member=user)
-#         elif is_staff_user(user):
-#             return CoachAppointment.objects.all()
-#         return CoachAppointment.objects.none()
-#
-#     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-#     def accept(self, request, pk=None):
-#         """Coach accepts a pending appointment."""
-#         appointment = self.get_object()
-#         if appointment.coach != request.user:
-#             return Response({'detail': 'Not your appointment.'}, status=status.HTTP_403_FORBIDDEN)
-#         if appointment.status != 'PENDING':
-#             return Response({'detail': 'Appointment is not pending.'}, status=status.HTTP_400_BAD_REQUEST)
-#         appointment.status = 'ACCEPTED'
-#         appointment.save()
-#         return Response({'status': 'accepted'})
-#
-#     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-#     def reject(self, request, pk=None):
-#         """Coach rejects a pending appointment, optionally with a reason."""
-#         appointment = self.get_object()
-#         if appointment.coach != request.user:
-#             return Response({'detail': 'Not your appointment.'}, status=status.HTTP_403_FORBIDDEN)
-#         if appointment.status != 'PENDING':
-#             return Response({'detail': 'Appointment is not pending.'}, status=status.HTTP_400_BAD_REQUEST)
-#         reason = request.data.get('refusal_reason', '')
-#         appointment.status = 'REFUSED'
-#         appointment.refusal_reason = reason
-#         appointment.save()
-#         return Response({'status': 'rejected'})
-#
-#     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-#     def cancel(self, request, pk=None):
-#         """Member cancels an appointment."""
-#         appointment = self.get_object()
-#         if appointment.member != request.user:
-#             return Response({'detail': 'Not your appointment.'}, status=status.HTTP_403_FORBIDDEN)
-#         if appointment.status not in ['PENDING', 'ACCEPTED']:
-#             return Response({'detail': 'Cannot cancel this appointment.'}, status=status.HTTP_400_BAD_REQUEST)
-#         appointment.status = 'CANCELLED'
-#         appointment.save()
-#         return Response({'status': 'cancelled'})
-#
-#
-# class ArticleViewSet(viewsets.ModelViewSet):
-#     """
-#     Articles. Staff can create/update/delete; members can read.
-#     """
-#     queryset = Article.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     filter_backends = [SearchFilter]
-#     search_fields = ['title', 'description', 'body']
-#
-#     def get_queryset(self):
-#         # If not logged in, only free articles
-#         if not self.request.user.is_authenticated:
-#             return Article.objects.filter(locked=False)
-#         return Article.objects.all()
-#
-#     def perform_create(self, serializer):
-#         serializer.save(author=self.request.user)
-#
-#     def perform_update(self, serializer):
-#         # Staff only? Check role
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can edit articles.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can delete articles.")
-#         instance.delete()
-#
-#
-# class RecipeViewSet(viewsets.ModelViewSet):
-#     """
-#     Recipes. Staff can create/update/delete; members can read.
-#     """
-#     queryset = Recipe.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     filter_backends = [SearchFilter]
-#     search_fields = ['title', 'description', 'instructions']
-#
-#     def get_queryset(self):
-#         if not self.request.user.is_authenticated:
-#             return Recipe.objects.filter(locked=False)
-#         return Recipe.objects.all()
-#
-#     def perform_create(self, serializer):
-#         serializer.save(author=self.request.user)
-#
-#     def perform_update(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can edit recipes.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can delete recipes.")
-#         instance.delete()
-#
-#
-# class WorkoutPlanViewSet(viewsets.ModelViewSet):
-#     """
-#     Workout plans. Staff can create/update/delete; members can read.
-#     """
-#     queryset = WorkoutPlan.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     filter_backends = [SearchFilter]
-#     search_fields = ['title', 'description', 'body']
-#
-#     def get_queryset(self):
-#         if not self.request.user.is_authenticated:
-#             return WorkoutPlan.objects.filter(locked=False)
-#         return WorkoutPlan.objects.all()
-#
-#     def perform_create(self, serializer):
-#         serializer.save(author=self.request.user)
-#
-#     def perform_update(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can edit workouts.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can delete workouts.")
-#         instance.delete()
-#
-#
-# class ExerciseViewSet(viewsets.ModelViewSet):
-#     """
-#     Exercises. Staff can create/update/delete; members can read.
-#     """
-#     queryset = Exercise.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     filter_backends = [SearchFilter, OrderingFilter]
-#     search_fields = ['title', 'description', 'instructions']
-#     ordering_fields = ['created_at', 'title']
-#
-#     def perform_create(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can create exercises.")
-#         serializer.save(created_by=self.request.user)
-#
-#     def perform_update(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can edit exercises.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can delete exercises.")
-#         instance.delete()
-#
-#
-# class MessageViewSet(viewsets.ModelViewSet):
-#     """
-#     Messages between members and coaches.
-#     """
-#     queryset = Message.objects.all()
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['recipient', 'is_read']
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         # Users see messages they sent or received
-#         return Message.objects.filter(
-#             Q(sender=user) | Q(recipient=user)
-#         ).order_by('-timestamp')
-#
-#     def perform_create(self, serializer):
-#         # Only members can send messages (to coaches)
-#         if not is_member(self.request.user):
-#             raise PermissionError("Only members can send messages.")
-#         # Ensure recipient is a coach
-#         recipient = serializer.validated_data.get('recipient')
-#         if recipient.role != 'COACH':
-#             raise PermissionError("Messages can only be sent to coaches.")
-#         serializer.save(sender=self.request.user)
-#
-#     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-#     def mark_read(self, request, pk=None):
-#         """Mark a received message as read."""
-#         message = self.get_object()
-#         if message.recipient != request.user:
-#             return Response({'detail': 'Not your message.'}, status=status.HTTP_403_FORBIDDEN)
-#         message.is_read = True
-#         message.save()
-#         return Response({'status': 'read'})
-#
-#
-# class ChallengeViewSet(viewsets.ModelViewSet):
-#     """
-#     Fitness challenges.
-#     """
-#     queryset = Challenge.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     filter_backends = [SearchFilter, OrderingFilter]
-#     search_fields = ['title', 'description']
-#     ordering_fields = ['start_date', 'end_date', 'created_at']
-#
-#     def perform_create(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can create challenges.")
-#         serializer.save(created_by=self.request.user)
-#
-#     def perform_update(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can edit challenges.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can delete challenges.")
-#         instance.delete()
-#
-#
-# class ChallengeParticipationViewSet(viewsets.ModelViewSet):
-#     """
-#     User participation in challenges.
-#     """
-#     queryset = ChallengeParticipation.objects.all()
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['challenge']
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         # Users see their own participation; staff see all
-#         if is_staff_user(user):
-#             return ChallengeParticipation.objects.all()
-#         return ChallengeParticipation.objects.filter(user=user)
-#
-#     def perform_create(self, serializer):
-#         # Ensure user is authenticated and not already participating
-#         challenge = serializer.validated_data.get('challenge')
-#         if ChallengeParticipation.objects.filter(user=self.request.user, challenge=challenge).exists():
-#             raise PermissionError("Already participating in this challenge.")
-#         serializer.save(user=self.request.user)
-#
-#     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-#     def update_progress(self, request, pk=None):
-#         """Increment progress for a participation."""
-#         participation = self.get_object()
-#         if participation.user != request.user:
-#             return Response({'detail': 'Not your participation.'}, status=status.HTTP_403_FORBIDDEN)
-#         increment = request.data.get('progress', 0)
-#         try:
-#             increment = int(increment)
-#         except ValueError:
-#             return Response({'detail': 'Invalid progress value.'}, status=status.HTTP_400_BAD_REQUEST)
-#         participation.progress += increment
-#         # Cap at goal
-#         if participation.progress > participation.challenge.goal_target:
-#             participation.progress = participation.challenge.goal_target
-#         participation.save()
-#         return Response({'progress': participation.progress, 'percentage': participation.progress_percentage()})
-#
-#
-# class GymInfoViewSet(viewsets.ModelViewSet):
-#     """
-#     Gym operating hours. Staff can edit; members can view.
-#     """
-#     queryset = GymInfo.objects.all()
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#
-#     def perform_create(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can manage gym info.")
-#         serializer.save()
-#
-#     def perform_update(self, serializer):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can manage gym info.")
-#         serializer.save()
-#
-#     def perform_destroy(self, instance):
-#         if not is_staff_user(self.request.user):
-#             raise PermissionError("Only staff can manage gym info.")
-#         instance.delete()

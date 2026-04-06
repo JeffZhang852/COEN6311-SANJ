@@ -1,0 +1,1276 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% block title %}Coach Schedule{% endblock %}
+{% load static %}
+{% block extra_styles %}
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens ── */
+:root {
+  --cu-red:       hsl(349, 61%, 50%);
+  --cu-red-glow:  hsla(349, 61%, 50%, 0.15);
+  --surface-0:    #0d0d0d;
+  --surface-1:    #141414;
+  --surface-2:    #1c1c1c;
+  --border:       rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.14);
+  --text-primary:   #f0ede8;
+  --text-secondary: #9a9490;
+  --text-muted:     #5a5753;
+  --radius-lg: 20px;
+  --green: hsl(142, 60%, 40%);
+  --amber: hsl(38,  90%, 50%);
+  --blue:  hsl(217, 80%, 55%);
+}
+
+/* ── Page hero ── */
+.cs-hero {
+  position: relative;
+  padding: 56px 80px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.cs-hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 90% at 10% 50%, hsla(349,61%,20%,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cs-hero-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: flex-end;
+  justify-content: space-between; flex-wrap: wrap; gap: 32px;
+}
+.cs-hero-text .eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 16px;
+}
+.cs-hero-text .eyebrow em { color: var(--cu-red); font-style: normal; }
+.cs-hero-text h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 4vw, 48px); font-weight: 400;
+  color: var(--text-primary); line-height: 1.1; margin: 0 0 6px;
+}
+.cs-hero-text h1 i { font-style: italic; color: var(--cu-red); }
+.cs-hero-text p { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+/* KPI strip */
+.cs-kpis {
+  display: flex; gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden; flex-shrink: 0;
+}
+.kpi-cell {
+  background: var(--surface-1); padding: 20px 28px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 100px;
+}
+.kpi-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+}
+.kpi-value {
+  font-family: 'DM Serif Display', serif; font-size: 28px;
+  font-weight: 400; color: var(--text-primary); line-height: 1;
+}
+.kpi-value.red   { color: var(--cu-red); }
+.kpi-value.green { color: var(--green); }
+.kpi-value.amber { color: var(--amber); }
+
+/* ── Section ── */
+.section-block {
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 40px;
+}
+.section-header { padding: 40px 80px 24px; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.12em; color: var(--cu-red); text-transform: uppercase; margin-bottom: 12px;
+}
+.section-label::before { content:''; display:block; width:20px; height:1px; background:var(--cu-red); }
+.section-header h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(22px, 3vw, 34px); font-weight: 400;
+  color: var(--text-primary); line-height: 1.15; margin: 0;
+}
+.section-header h2 i { font-style: italic; color: var(--cu-red); }
+.section-header p { font-size: 14px; color: var(--text-secondary); margin-top: 8px; line-height: 1.7; }
+
+/* ── Card list ── */
+.card-list {
+  display: flex; flex-direction: column; gap: 1px;
+  margin: 0 80px 56px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+
+/* Appointment wrapper with collapsible reject drawer */
+.appt-wrapper {
+  display: flex; flex-direction: column;
+  background: var(--surface-1); position: relative; transition: background 0.2s;
+}
+.appt-wrapper::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background: var(--cu-red); transform: scaleY(0); transform-origin: bottom;
+  transition: transform 0.25s ease; z-index:1;
+}
+.appt-wrapper:hover { background: var(--surface-2); }
+.appt-wrapper:hover::before { transform: scaleY(1); }
+
+.appt-main {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto;
+  align-items: center; gap: 24px; padding: 20px 32px;
+}
+
+/* Reject drawer */
+.reject-drawer { display:none; padding: 0 32px 20px 96px; gap:10px; align-items:flex-start; }
+.reject-drawer.open { display:flex; }
+.reject-drawer textarea {
+  flex:1; background: var(--surface-0); border: 1px solid var(--border-hover);
+  border-radius: 12px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+  font-size:13px; padding: 10px 14px; resize:vertical; min-height:72px;
+  outline:none; transition: border-color 0.2s;
+}
+.reject-drawer textarea:focus { border-color: var(--cu-red); }
+.reject-drawer textarea::placeholder { color: var(--text-muted); }
+.drawer-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+
+/* Simple rows (confirmed, avail) */
+.card-row {
+  background: var(--surface-1); padding: 20px 32px;
+  display: grid; grid-template-columns: 40px 1fr auto auto;
+  align-items: center; gap: 24px;
+  position: relative; overflow: hidden; transition: background 0.2s, transform 0.2s;
+}
+.card-row::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background: var(--cu-red); transform:scaleY(0); transform-origin:bottom;
+  transition: transform 0.25s ease;
+}
+.card-row:hover { background: var(--surface-2); transform: translateX(4px); }
+.card-row:hover::before { transform: scaleY(1); }
+
+/* Row index */
+.card-index {
+  font-family: 'DM Serif Display', serif; font-size:24px;
+  color: var(--border-hover); line-height:1; transition: color 0.2s;
+}
+.appt-wrapper:hover .card-index,
+.card-row:hover .card-index { color: var(--cu-red); }
+
+/* Date column */
+.date-col {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 12px; flex-shrink:0; min-width: 52px;
+}
+.date-day {
+  font-family: 'DM Serif Display', serif; font-size:22px;
+  color: var(--text-primary); line-height:1;
+}
+.date-month {
+  font-family: 'JetBrains Mono', monospace; font-size:9px;
+  letter-spacing:0.1em; text-transform:uppercase; color: var(--text-muted); margin-top:2px;
+}
+
+/* Card body */
+.card-body { min-width:0; }
+.card-title {
+  font-family: 'DM Sans', sans-serif; font-size:14px; font-weight:600;
+  color: var(--text-primary); margin:0 0 3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.card-sub {
+  font-family: 'JetBrains Mono', monospace; font-size:11px;
+  letter-spacing:0.04em; color: var(--text-muted);
+}
+
+/* Card meta */
+.card-meta { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+.card-date { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); letter-spacing:0.03em; }
+
+/* ── Badges ── */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:'JetBrains Mono',monospace; font-size:9px;
+  letter-spacing:0.1em; text-transform:uppercase;
+  padding:3px 10px; border-radius:100px; border:1px solid;
+}
+.badge::before { content:''; display:block; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.badge-pending   { color:var(--amber); border-color:hsla(38,90%,50%,0.35); background:hsla(38,90%,50%,0.08); }
+.badge-accepted  { color:var(--green); border-color:hsla(142,60%,40%,0.35); background:hsla(142,60%,40%,0.08); }
+.badge-open      { color:var(--blue);  border-color:hsla(217,80%,55%,0.35); background:hsla(217,80%,55%,0.08); }
+.badge-recurring { color:var(--text-muted); border-color:var(--border-hover); background:transparent; }
+
+/* ── Action buttons ── */
+.card-actions { display:flex; gap:8px; flex-shrink:0; align-items:center; }
+
+.btn-act {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:0.08em; text-transform:uppercase;
+  padding:7px 14px; border-radius:100px; border:1px solid;
+  cursor:pointer; transition: background 0.2s, border-color 0.2s; white-space:nowrap; background:none;
+}
+.btn-accept  { color:var(--green); border-color:hsla(142,60%,40%,0.4); background:hsla(142,60%,40%,0.08); }
+.btn-accept:hover { background:hsla(142,60%,40%,0.2); border-color:var(--green); }
+.btn-reject  { color:var(--cu-red); border-color:hsla(349,61%,50%,0.4); background:var(--cu-red-glow); }
+.btn-reject:hover { background:hsla(349,61%,50%,0.25); }
+.btn-edit    { color:var(--text-secondary); border-color:var(--border-hover); }
+.btn-edit:hover { color:var(--text-primary); border-color:var(--border-hover); background:var(--surface-2); }
+.btn-delete  { color:var(--cu-red); border-color:hsla(349,61%,50%,0.3); background:transparent; }
+.btn-delete:hover { background:var(--cu-red-glow); }
+.btn-series  { color:var(--text-muted); border-color:var(--border); background:transparent; font-size:9px; }
+.btn-series:hover { color:var(--cu-red); border-color:hsla(349,61%,50%,0.4); }
+.btn-confirm { color:var(--cu-red); border-color:hsla(349,61%,50%,0.4); background:var(--cu-red-glow); }
+.btn-confirm:hover { background:hsla(349,61%,50%,0.25); }
+.btn-cancel-drawer { color:var(--text-muted); border-color:var(--border-hover); }
+.btn-cancel-drawer:hover { color:var(--text-secondary); }
+.btn-act.loading { opacity:0.5; pointer-events:none; }
+
+/* ── Empty state ── */
+.empty-row {
+  background: var(--surface-1); padding:36px 32px;
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  letter-spacing:0.06em; color:var(--text-muted); text-align:center;
+}
+
+/* ── Calendar ── */
+.cal-wrapper { margin: 0 80px 56px; }
+.cal-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:20px;
+}
+.cal-month-label {
+  font-family:'DM Serif Display',serif; font-size:20px;
+  font-weight:400; color:var(--text-primary);
+}
+.cal-nav-btn {
+  background: var(--surface-2); border:1px solid var(--border-hover);
+  color:var(--text-secondary); width:36px; height:36px; border-radius:50%;
+  cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.cal-nav-btn:hover { border-color:var(--cu-red); color:var(--cu-red); }
+
+.cal-day-names {
+  display:grid; grid-template-columns:repeat(7,1fr);
+  margin-bottom:6px;
+}
+.cal-day-names span {
+  font-family:'JetBrains Mono',monospace; font-size:9px;
+  letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--text-muted); text-align:center; padding:6px 0;
+}
+
+.cal-grid {
+  display:grid; grid-template-columns:repeat(7,1fr);
+  gap:4px;
+}
+.cal-cell {
+  background: var(--surface-2); border:1px solid var(--border);
+  border-radius:10px; min-height:72px; padding:8px;
+  display:flex; flex-direction:column; gap:3px;
+  position:relative; transition: border-color 0.2s, background 0.2s;
+}
+.cal-cell.empty   { background:transparent; border-color:transparent; }
+.cal-cell.disabled { opacity:0.35; pointer-events:none; }
+.cal-cell.clickable:not(.disabled) { cursor:pointer; }
+.cal-cell.clickable:hover { border-color:var(--cu-red); background:hsla(349,61%,50%,0.05); }
+.cal-cell.today   { border-color: hsla(217,80%,55%,0.5); }
+.cal-cell.today .cal-day-num { color:var(--blue); font-weight:600; }
+.cal-cell.has-events { border-color: var(--border-hover); }
+
+.cal-day-num {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--text-secondary); letter-spacing:0.04em;
+}
+.cal-event-dot {
+  display:block; width:7px; height:7px; border-radius:50;
+  border-radius:50%; flex-shrink:0;
+}
+.cal-event-pill {
+  display:block; width:100%; text-align:left;
+  font-family:'JetBrains Mono',monospace; font-size:9px;
+  letter-spacing:0.06em; padding:2px 6px; border-radius:4px;
+  border:none; cursor:pointer; color:#fff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition: opacity 0.2s;
+}
+.cal-event-pill:hover { opacity:0.8; }
+.cal-more {
+  font-family:'JetBrains Mono',monospace; font-size:9px;
+  color:var(--text-muted); letter-spacing:0.04em;
+}
+.cal-hint {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--text-muted); letter-spacing:0.05em;
+  margin-top:14px; text-align:center;
+}
+
+/* ── Legend ── */
+.cal-legend {
+  display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+  padding: 0 80px 24px;
+}
+.legend-item { display:flex; align-items:center; gap:7px; }
+.legend-dot {
+  width:9px; height:9px; border-radius:50%; flex-shrink:0;
+}
+.legend-dot.accepted { background:var(--green); }
+.legend-dot.pending  { background:var(--amber); }
+.legend-dot.available{ background:var(--blue); }
+.legend-label { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); }
+
+/* ── Modals ── */
+.modal-backdrop {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.75); align-items:center;
+  justify-content:center; z-index:1000;
+}
+.modal-backdrop.open { display:flex; }
+.modal-card {
+  background: var(--surface-2); border:1px solid var(--border-hover);
+  border-radius:24px; width:90%; max-width:540px;
+  padding:32px; position:relative;
+}
+.modal-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding-bottom:16px; margin-bottom:20px; border-bottom:1px solid var(--border);
+}
+.modal-title {
+  font-family:'DM Serif Display',serif; font-size:22px;
+  font-weight:400; color:var(--text-primary); margin:0;
+}
+.modal-close {
+  background:none; border:1px solid var(--border); border-radius:50%;
+  width:32px; height:32px; font-size:18px; cursor:pointer;
+  color:var(--text-muted); display:flex; align-items:center; justify-content:center;
+  transition: border-color 0.2s, color 0.2s; line-height:1;
+}
+.modal-close:hover { border-color:var(--cu-red); color:var(--cu-red); }
+
+.modal-error {
+  background: var(--cu-red-glow); border:1px solid hsla(349,61%,50%,0.3);
+  color:var(--cu-red); font-family:'JetBrains Mono',monospace; font-size:12px;
+  letter-spacing:0.05em; padding:10px 14px; border-radius:10px; margin-bottom:16px;
+}
+.modal-body { display:flex; flex-direction:column; gap:18px; }
+
+.form-row { display:flex; flex-direction:column; gap:6px; }
+.field-label {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted);
+}
+.modal-body textarea, .modal-body input[type="number"] {
+  background: var(--surface-1); border:1px solid var(--border-hover);
+  border-radius:10px; color:var(--text-primary); font-family:'DM Sans',sans-serif;
+  font-size:13px; padding:10px 14px; outline:none; transition:border-color 0.2s;
+  width:100%; box-sizing:border-box;
+}
+.modal-body textarea:focus, .modal-body input[type="number"]:focus { border-color:var(--cu-red); }
+.modal-body textarea::placeholder { color:var(--text-muted); }
+.modal-body small { font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+
+#hour-checkboxes {
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;
+}
+#hour-checkboxes div {
+  display:flex; align-items:center; gap:6px;
+}
+#hour-checkboxes input[type="checkbox"] { accent-color:var(--cu-red); width:14px; height:14px; cursor:pointer; }
+#hour-checkboxes label {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  letter-spacing:0.05em; color:var(--text-secondary); cursor:pointer;
+}
+
+.recurrence-options { display:flex; flex-direction:column; gap:8px; }
+.recurrence-options > label {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted);
+}
+.recurrence-options label {
+  display:flex; align-items:center; gap:8px;
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  letter-spacing:0.04em; color:var(--text-secondary); cursor:pointer;
+}
+.recurrence-options input[type="radio"]  { accent-color:var(--cu-red); cursor:pointer; }
+.recurrence-options input[type="number"] {
+  width:56px; background:var(--surface-1); border:1px solid var(--border-hover);
+  border-radius:6px; color:var(--text-primary); font-family:'JetBrains Mono',monospace;
+  font-size:11px; padding:4px 8px; outline:none;
+}
+
+.modal-footer {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:24px; padding-top:16px; border-top:1px solid var(--border);
+}
+.modal-footer-right { display:flex; gap:10px; margin-left:auto; }
+.btn-modal-save {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em;
+  text-transform:uppercase; padding:9px 22px; border-radius:100px;
+  border:1px solid hsla(142,60%,40%,0.4); background:hsla(142,60%,40%,0.1);
+  color:var(--green); cursor:pointer; transition: background 0.2s;
+}
+.btn-modal-save:hover { background:hsla(142,60%,40%,0.2); }
+.btn-modal-save:disabled { opacity:0.4; pointer-events:none; }
+.btn-modal-cancel {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em;
+  text-transform:uppercase; padding:9px 22px; border-radius:100px;
+  border:1px solid var(--border-hover); background:transparent;
+  color:var(--text-muted); cursor:pointer; transition: color 0.2s;
+}
+.btn-modal-cancel:hover { color:var(--text-secondary); }
+.btn-modal-delete {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em;
+  text-transform:uppercase; padding:9px 18px; border-radius:100px;
+  border:1px solid hsla(349,61%,50%,0.35); background:var(--cu-red-glow);
+  color:var(--cu-red); cursor:pointer; display:flex; align-items:center; gap:6px;
+  transition: background 0.2s;
+}
+.btn-modal-delete:hover { background:hsla(349,61%,50%,0.25); }
+
+/* Reject modal confirm button */
+#reject-modal-confirm {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em;
+  text-transform:uppercase; padding:9px 22px; border-radius:100px;
+  border:1px solid hsla(349,61%,50%,0.4); background:var(--cu-red-glow);
+  color:var(--cu-red); cursor:pointer; transition:background 0.2s;
+}
+#reject-modal-confirm:hover { background:hsla(349,61%,50%,0.25); }
+#reject-modal-confirm:disabled { opacity:0.4; pointer-events:none; }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; bottom:2rem; right:2rem;
+  background:var(--surface-2); border:1px solid var(--border-hover);
+  color:var(--text-primary); padding:12px 24px; border-radius:100px;
+  font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.05em;
+  opacity:0; transition:opacity 0.2s; z-index:1100; pointer-events:none;
+}
+.toast.show    { opacity:1; }
+.toast.success { border-color:hsla(142,60%,40%,0.5); color:#6fcf97; }
+.toast.error   { border-color:hsla(349,61%,50%,0.5); color:var(--cu-red); }
+.toast.warn    { border-color:hsla(38,90%,50%,0.5); color:var(--amber); }
+
+/* ── Responsive ── */
+@media (max-width:1024px) {
+  .cs-hero, .section-header, .cal-legend { padding-left:32px; padding-right:32px; }
+  .card-list, .cal-wrapper { margin-left:32px; margin-right:32px; }
+}
+@media (max-width:768px) {
+  .cs-hero     { padding:32px 20px 28px; }
+  .cs-kpis     { width:100%; }
+  .section-header, .cal-legend { padding:28px 20px 16px; }
+  .card-list, .cal-wrapper    { margin:0 20px 32px; }
+  .appt-main, .card-row       { padding:14px 20px; }
+  .appt-main  { grid-template-columns: 1fr auto auto; }
+  .card-row   { grid-template-columns: 1fr auto auto; }
+  .card-index { display:none; }
+  .reject-drawer { padding:0 20px 16px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<!---------------- Hero ----------------->
+<section class="cs-hero">
+  <div class="cs-hero-inner">
+    <div class="cs-hero-text">
+      <div class="eyebrow">
+        <em>Coach Schedule</em>
+        <span style="color:var(--border-hover)">·</span>
+        <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
+      </div>
+      <h1>Manage Your <i>Calendar</i></h1>
+      <p>Appointments, pending requests, and open availability — all in one place.</p>
+    </div>
+    <div class="cs-kpis">
+      <div class="kpi-cell">
+        <div class="kpi-label">Confirmed</div>
+        <div class="kpi-value green">{{ confirmed.count }}</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Pending</div>
+        <div class="kpi-value amber">{{ pending.count }}</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Open Slots</div>
+        <div class="kpi-value red">{{ upcoming_avail.count }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!---------------- Legend ----------------->
+<div class="cal-legend">
+  <div class="legend-item">
+    <span class="legend-dot accepted"></span>
+    <span class="legend-label">Confirmed</span>
+  </div>
+  <div class="legend-item">
+    <span class="legend-dot pending"></span>
+    <span class="legend-label">Pending</span>
+  </div>
+  <div class="legend-item">
+    <span class="legend-dot available"></span>
+    <span class="legend-label">Open Slot</span>
+  </div>
+</div>
+
+<!---------------- Confirmed Appointments ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">Confirmed</div>
+    <h2>Upcoming <i>Sessions</i></h2>
+    <p>Accepted appointments scheduled with your clients.</p>
+  </div>
+  <div class="card-list">
+    {% if confirmed %}
+      {% for appt in confirmed %}
+      <div class="card-row">
+        <div class="card-index">{{ forloop.counter|stringformat:"02d" }}</div>
+        <div class="date-col">
+          <span class="date-day">{{ appt.start_time|date:"d" }}</span>
+          <span class="date-month">{{ appt.start_time|date:"M" }}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">{{ appt.member.first_name }} {{ appt.member.last_name }}</div>
+          <div class="card-sub">{{ appt.start_time|date:"H:i" }} – {{ appt.end_time|date:"H:i" }}</div>
+        </div>
+        <div class="card-meta">
+          <span class="badge badge-accepted">Confirmed</span>
+          <div class="card-date">{{ appt.start_time|date:"l" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">No confirmed appointments — pending requests will appear here once accepted.</div>
+    {% endif %}
+  </div>
+</section>
+
+<!---------------- Pending Requests ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">Action Required</div>
+    <h2>Incoming <i>Requests</i></h2>
+    <p>Accept or reject pending appointment requests from members.</p>
+  </div>
+  <div class="card-list" id="pending-list">
+    {% if pending %}
+      {% for req in pending %}
+      <div class="appt-wrapper" id="req-{{ req.id }}">
+        <div class="appt-main">
+          <div class="card-index">{{ forloop.counter|stringformat:"02d" }}</div>
+          <div class="date-col">
+            <span class="date-day">{{ req.start_time|date:"d" }}</span>
+            <span class="date-month">{{ req.start_time|date:"M" }}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">{{ req.member.first_name }} {{ req.member.last_name }}</div>
+            <div class="card-sub">{{ req.start_time|date:"H:i" }} – {{ req.end_time|date:"H:i" }}</div>
+          </div>
+          <div class="card-meta">
+            <span class="badge badge-pending status-badge">Pending</span>
+            <div class="card-date">{{ req.start_time|date:"l" }}</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-act btn-accept" onclick="acceptRequest({{ req.id }}, this)">✓ Accept</button>
+            <button class="btn-act btn-reject" onclick="openRejectDrawer({{ req.id }})">✕ Reject</button>
+          </div>
+        </div>
+        <div class="reject-drawer" id="drawer-{{ req.id }}">
+          <textarea id="reason-{{ req.id }}" placeholder="Required: reason for rejection (max 500 chars)" maxlength="500"></textarea>
+          <div class="drawer-actions">
+            <button class="btn-act btn-confirm" onclick="confirmRejectInline({{ req.id }}, this)">Confirm</button>
+            <button class="btn-act btn-cancel-drawer" onclick="closeRejectDrawer({{ req.id }})">Cancel</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">No pending requests — you're all caught up.</div>
+    {% endif %}
+  </div>
+</section>
+
+<!---------------- Open Availability (next 14 days) ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">Availability</div>
+    <h2>Open <i>Slots</i></h2>
+    <p>Your unbooked availability for the next 14 days.</p>
+  </div>
+  <div class="card-list" id="upcoming-avail-list">
+    {% if upcoming_avail %}
+      {% for slot in upcoming_avail %}
+      <div class="card-row" id="slot-{{ slot.id }}"
+           data-start="{{ slot.start_time|date:'c' }}"
+           data-end="{{ slot.end_time|date:'c' }}"
+           data-recurring="{% if slot.is_recurring %}true{% else %}false{% endif %}">
+        <div class="card-index">{{ forloop.counter|stringformat:"02d" }}</div>
+        <div class="date-col">
+          <span class="date-day appt-day">{{ slot.start_time|date:"d" }}</span>
+          <span class="date-month appt-month">{{ slot.start_time|date:"M" }}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title appt-time">{{ slot.start_time|date:"H:i" }} – {{ slot.end_time|date:"H:i" }}</div>
+          <div class="card-sub">{{ slot.start_time|date:"l, F j" }}</div>
+        </div>
+        <div class="card-meta">
+          <span class="badge badge-open">Open</span>
+          {% if slot.is_recurring %}<span class="badge badge-recurring">Recurring</span>{% endif %}
+        </div>
+        <div class="card-actions">
+          <button class="btn-act btn-edit" onclick="openEditModal({{ slot.id }})" title="Edit">Edit</button>
+          <button class="btn-act btn-delete" onclick="deleteSlot({{ slot.id }})" title="Delete">Delete</button>
+          {% if slot.is_recurring %}
+          <button class="btn-act btn-series" onclick="cancelSeries('{{ slot.recurrence_group }}')" title="Cancel full series">Cancel Series</button>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">No open slots in the next 14 days — use the calendar below to add some.</div>
+    {% endif %}
+  </div>
+</section>
+
+<!---------------- Add Availability Calendar ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">Add Availability</div>
+    <h2>Your <i>Calendar</i></h2>
+    <p>Click any open gym day to add availability slots for members to book.</p>
+  </div>
+  <div class="cal-wrapper">
+    <div class="cal-nav">
+      <button id="prev-month" class="cal-nav-btn" aria-label="Previous month">&#8249;</button>
+      <span id="cal-month-label" class="cal-month-label"></span>
+      <button id="next-month" class="cal-nav-btn" aria-label="Next month">&#8250;</button>
+    </div>
+    <div class="cal-day-names">
+      <span>Sun</span><span>Mon</span><span>Tue</span>
+      <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+    </div>
+    <div id="cal-grid" class="cal-grid"></div>
+    <p class="cal-hint">&#9432; Click a future open day to add availability · Greyed days are gym-closed or past</p>
+  </div>
+</section>
+
+<!---------------- Availability Modal ----------------->
+<div id="avail-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="modal-heading" class="modal-title">Add Availability</h2>
+      <button class="modal-close" id="modal-close-btn" aria-label="Close">&times;</button>
+    </div>
+    <div id="modal-error" class="modal-error" style="display:none"></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="field-label">Select hours (check all that apply)</label>
+        <div id="hour-checkboxes"></div>
+      </div>
+      <div class="form-row recurrence-options">
+        <label>Repeat</label>
+        <label><input type="radio" name="recurrence" value="none" checked> No repeat</label>
+        <label>
+          <input type="radio" name="recurrence" value="weeks"> Repeat weekly for
+          <input type="number" id="recurrence-weeks" value="4" min="1" max="52"> weeks
+        </label>
+        <label><input type="radio" name="recurrence" value="indefinite"> Repeat weekly until cancelled</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="modal-delete-btn" class="btn-modal-delete" style="display:none">Delete Slot</button>
+      <div class="modal-footer-right">
+        <button class="btn-modal-cancel" id="modal-cancel-btn">Cancel</button>
+        <button class="btn-modal-save"   id="modal-save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!---------------- Reject Modal (fallback) ----------------->
+<div id="reject-modal" class="modal-backdrop">
+  <div class="modal-card" style="max-width:500px;">
+    <div class="modal-header">
+      <h2 class="modal-title">Reject Appointment</h2>
+      <button class="modal-close" id="reject-modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="field-label">Reason for refusal <span style="color:var(--cu-red)">*</span></label>
+        <textarea id="refusal-reason" rows="4" maxlength="500" placeholder="Please explain why you cannot accept this appointment…" required></textarea>
+        <small>Maximum 500 characters.</small>
+      </div>
+      <div id="reject-modal-error" class="modal-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-footer-right">
+        <button class="btn-modal-cancel" id="reject-modal-cancel">Cancel</button>
+        <button id="reject-modal-confirm">Confirm Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+const IS_COACH = true;
+const CSRF = '{{ csrf_token }}';
+const GYM_SETTINGS = {{ gym_settings|safe }};
+let EVENTS = {{ calendar_events_json|safe }};
+
+const URL_ADD          = "{% url 'ajax_add_availability' %}";
+const URL_EDIT         = "{% url 'ajax_edit_availability' 0 %}".replace('/0/', '/{id}/');
+const URL_DEL          = "{% url 'ajax_delete_availability' 0 %}".replace('/0/', '/{id}/');
+const URL_CANCEL_SERIES= "{% url 'ajax_cancel_series' '00000000-0000-0000-0000-000000000000' %}".replace('/00000000-0000-0000-0000-000000000000/', '/{group_id}/');
+
+let currentDate  = new Date();
+let selectedDate = null;
+let editingId    = null;
+
+/* ── Inline accept / reject (no page reload) ── */
+function openRejectDrawer(id) {
+  const drawer = document.getElementById(`drawer-${id}`);
+  drawer.classList.add('open');
+  drawer.querySelector('textarea').focus();
+}
+function closeRejectDrawer(id) {
+  document.getElementById(`drawer-${id}`).classList.remove('open');
+}
+
+async function acceptRequest(reqId, btn) {
+  btn.classList.add('loading');
+  btn.textContent = '…';
+  try {
+    const res = await fetch(`/api/appointment/${reqId}/accept/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed.');
+    showToast('Appointment accepted.', 'success');
+    // Swap badge, remove actions + drawer
+    const wrapper = document.getElementById(`req-${reqId}`);
+    wrapper.querySelector('.status-badge').outerHTML =
+      `<span class="badge badge-accepted status-badge">Confirmed</span>`;
+    wrapper.querySelector('.card-actions').remove();
+    const drawer = document.getElementById(`drawer-${reqId}`);
+    if (drawer) drawer.remove();
+  } catch (err) {
+    btn.classList.remove('loading');
+    btn.textContent = '✓ Accept';
+    showToast(err.message || 'Something went wrong.', 'error');
+  }
+}
+
+async function confirmRejectInline(reqId, btn) {
+  const reason = document.getElementById(`reason-${reqId}`).value.trim();
+  if (!reason) {
+    showToast('A reason is required to reject.', 'error');
+    document.getElementById(`reason-${reqId}`).focus();
+    return;
+  }
+  btn.classList.add('loading');
+  btn.textContent = '…';
+  try {
+    const res = await fetch(`/api/appointment/${reqId}/reject/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': CSRF,
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({ refusal_reason: reason }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed.');
+    showToast('Appointment rejected.', 'success');
+    // Animate row out
+    const wrapper = document.getElementById(`req-${reqId}`);
+    wrapper.style.maxHeight  = wrapper.offsetHeight + 'px';
+    wrapper.style.overflow   = 'hidden';
+    wrapper.style.transition = 'opacity 0.3s ease, max-height 0.35s ease';
+    requestAnimationFrame(() => { wrapper.style.opacity = '0'; wrapper.style.maxHeight = '0'; });
+    setTimeout(() => {
+      wrapper.remove();
+      const list = document.getElementById('pending-list');
+      if (!list.querySelector('.appt-wrapper')) {
+        list.innerHTML = '<div class="empty-row">No pending requests — you\'re all caught up.</div>';
+      }
+    }, 370);
+  } catch (err) {
+    btn.classList.remove('loading');
+    btn.textContent = 'Confirm';
+    showToast(err.message || 'Something went wrong.', 'error');
+  }
+}
+
+/* ── Fallback modal reject (used by old openRejectModal calls) ── */
+let currentRejectId = null;
+function openRejectModal(reqId) {
+  currentRejectId = reqId;
+  document.getElementById('refusal-reason').value = '';
+  document.getElementById('reject-modal-error').style.display = 'none';
+  document.getElementById('reject-modal').classList.add('open');
+}
+function closeRejectModal() {
+  document.getElementById('reject-modal').classList.remove('open');
+  currentRejectId = null;
+}
+async function confirmReject() {
+  const reason = document.getElementById('refusal-reason').value.trim();
+  if (!reason) {
+    const errDiv = document.getElementById('reject-modal-error');
+    errDiv.textContent = 'Please provide a reason.';
+    errDiv.style.display = 'block';
+    return;
+  }
+  const reqId = currentRejectId;
+  document.getElementById('reject-modal-confirm').disabled = true;
+  try {
+    const res = await fetch(`/api/appointment/${reqId}/reject/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ refusal_reason: reason }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Appointment rejected.', 'success');
+      document.getElementById(`req-${reqId}`)?.remove();
+    } else {
+      showToast(data.error || 'Error rejecting appointment.', 'error');
+    }
+  } catch { showToast('Network error.', 'error'); }
+  finally {
+    document.getElementById('reject-modal-confirm').disabled = false;
+    closeRejectModal();
+  }
+}
+
+function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+// Render calendar
+function renderCalendar(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    document.getElementById('cal-month-label').textContent =
+        date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const eventMap = {};
+    EVENTS.forEach(ev => {
+        const d = new Date(ev.start);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+            const day = d.getDate();
+            if (!eventMap[day]) eventMap[day] = [];
+            eventMap[day].push(ev);
+        }
+    });
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'cal-cell empty';
+        grid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cellDate = new Date(year, month, day);
+        cellDate.setHours(0,0,0,0);
+        const cellDateStr = formatDate(cellDate);
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell';
+
+        if (cellDate < today) {
+            cell.classList.add('disabled');
+        } else {
+            const gym = GYM_SETTINGS[cellDateStr];
+            if (gym && gym.is_open) {
+                cell.classList.add('clickable');
+                cell.addEventListener('click', () => openAddModal(cellDate));
+            } else {
+                cell.classList.add('disabled');
+            }
+        }
+
+        if (cellDate.getTime() === today.getTime()) cell.classList.add('today');
+
+        const num = document.createElement('span');
+        num.className = 'cal-day-num';
+        num.textContent = day;
+        cell.appendChild(num);
+
+        const dayEvents = eventMap[day] || [];
+        dayEvents.slice(0, 3).forEach(ev => {
+            if (ev.type === 'appointment') {
+                const dot = document.createElement('span');
+                dot.className = 'cal-event-dot';
+                dot.style.background = ev.color;
+                dot.title = ev.title;
+                cell.appendChild(dot);
+            } else {
+                const pill = document.createElement('button');
+                pill.className = 'cal-event-pill';
+                pill.style.background = ev.color;
+                pill.textContent = 'Open';
+                pill.addEventListener('click', e => {
+                    e.stopPropagation();
+                    openEditModal(ev.id);
+                });
+                cell.appendChild(pill);
+            }
+        });
+
+        if (dayEvents.length > 3) {
+            const more = document.createElement('span');
+            more.className = 'cal-more';
+            more.textContent = `+${dayEvents.length - 3}`;
+            cell.appendChild(more);
+        }
+
+        if (dayEvents.length) cell.classList.add('has-events');
+        grid.appendChild(cell);
+    }
+}
+
+function populateHourCheckboxes(selectedDate) {
+    const container = document.getElementById('hour-checkboxes');
+    container.innerHTML = '';
+    const dateStr = formatDate(selectedDate);
+    const gym = GYM_SETTINGS[dateStr];
+    if (!gym || !gym.is_open) {
+        container.innerHTML = '<p>Gym closed on this day</p>';
+        return;
+    }
+    const openTime = gym.open_time;
+    const closeTime = gym.close_time;
+    if (!openTime || !closeTime) {
+        container.innerHTML = '<p>Hours not set</p>';
+        return;
+    }
+    const startHour = parseInt(openTime.split(':')[0]);
+    const endHour = parseInt(closeTime.split(':')[0]);
+    for (let h = startHour; h < endHour; h++) {
+        const start = new Date(selectedDate);
+        start.setHours(h, 0, 0, 0);
+        const end = new Date(selectedDate);
+        end.setHours(h+1, 0, 0, 0);
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <input type="checkbox" id="hour-${h}" value='${JSON.stringify({start: start.toISOString(), end: end.toISOString()})}'>
+            <label for="hour-${h}">${h.toString().padStart(2,'0')}:00 – ${(h+1).toString().padStart(2,'0')}:00</label>
+        `;
+        container.appendChild(div);
+    }
+}
+
+function openAddModal(date) {
+    editingId = null;
+    selectedDate = date;
+    document.getElementById('modal-heading').textContent = 'Add Availability';
+    document.getElementById('modal-delete-btn').style.display = 'none';
+    document.querySelector('input[name="recurrence"][value="none"]').checked = true;
+    populateHourCheckboxes(date);
+    document.getElementById('avail-modal').classList.add('open');
+}
+
+function openEditModal(slotId) {
+    let ev = EVENTS.find(e => e.type === 'availability' && e.id === slotId);
+    if (!ev) {
+        const card = document.getElementById(`slot-${slotId}`);
+        if (!card) { showToast('Slot not found.', 'error'); return; }
+        const startISO = card.dataset.start;
+        const endISO   = card.dataset.end;
+        const recurring = card.dataset.recurring === 'true';
+        if (!startISO) { showToast('Slot data missing — please refresh.', 'error'); return; }
+        ev = { type: 'availability', id: slotId, start: startISO, end: endISO, is_booked: false, is_recurring: recurring };
+    }
+    if (ev.is_booked) {
+        showToast('This slot is already booked and cannot be edited.', 'warn');
+        return;
+    }
+    editingId = slotId;
+    selectedDate = new Date(ev.start);
+
+    document.getElementById('modal-heading').textContent = 'Edit Availability';
+    document.getElementById('modal-delete-btn').style.display = 'flex';
+
+    // Ensure the slot's date is in GYM_SETTINGS so the hour checkboxes render correctly.
+    // The context only passes 14 days; if this slot's date is missing, inject a permissive
+    // 24h entry so the coach can still pick the correct hour.
+    const dateStr = formatDate(selectedDate);
+    if (!GYM_SETTINGS[dateStr]) {
+        GYM_SETTINGS[dateStr] = { is_open: true, open_time: '00:00', close_time: '24:00' };
+    }
+
+    populateHourCheckboxes(selectedDate);
+
+    // Pre-select the current hour; all hours enabled so coach can pick a new one.
+    // Enforce single-selection in edit mode.
+    const targetStart = new Date(ev.start).getTime();
+    document.querySelectorAll('#hour-checkboxes input').forEach(cb => {
+        const slotVal = JSON.parse(cb.value);
+        cb.checked  = new Date(slotVal.start).getTime() === targetStart;
+        cb.disabled = false;
+        cb.addEventListener('change', function() {
+            if (this.checked) {
+                document.querySelectorAll('#hour-checkboxes input').forEach(other => {
+                    if (other !== this) other.checked = false;
+                });
+            }
+        });
+    });
+
+    if (ev.is_recurring) {
+        document.querySelector('input[name="recurrence"][value="indefinite"]').checked = true;
+    } else {
+        document.querySelector('input[name="recurrence"][value="none"]').checked = true;
+    }
+    // Recurrence type cannot change on edit
+    document.querySelectorAll('input[name="recurrence"]').forEach(r => r.disabled = true);
+    document.getElementById('avail-modal').classList.add('open');
+}
+
+function hideModal() {
+    document.getElementById('avail-modal').classList.remove('open');
+    document.getElementById('modal-error').style.display = 'none';
+    document.querySelectorAll('input[name="recurrence"]').forEach(r => r.disabled = false);
+    editingId = null;
+    selectedDate = null;
+}
+
+async function saveAvailability() {
+    const checkboxes = document.querySelectorAll('#hour-checkboxes input:checked');
+    if (checkboxes.length === 0) {
+        showModalError('Select at least one hour.');
+        return;
+    }
+    const slots = [];
+    checkboxes.forEach(cb => slots.push(JSON.parse(cb.value)));
+
+    document.getElementById('modal-save-btn').disabled = true;
+
+    try {
+        let res, data;
+
+        if (editingId) {
+            // Edit: backend expects { start_time, end_time } — one slot only
+            res = await fetch(URL_EDIT.replace('{id}', editingId), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ start_time: slots[0].start, end_time: slots[0].end }),
+            });
+            data = await res.json();
+            if (!res.ok) {
+                showModalError(data.error || 'Error updating slot.');
+            } else {
+                // Keep EVENTS in sync
+                const idx = EVENTS.findIndex(e => e.type === 'availability' && e.id === editingId);
+                if (idx !== -1) { EVENTS[idx].start = data.start; EVENTS[idx].end = data.end; }
+                updateSidebarCard(editingId, data.start, data.end);
+                showToast('Slot updated.', 'success');
+                hideModal();
+                renderCalendar(currentDate);
+            }
+        } else {
+            // Add: backend expects { slots, recurrence, recurrence_weeks }
+            const recurrenceType  = document.querySelector('input[name="recurrence"]:checked').value;
+            const recurrenceWeeks = recurrenceType === 'weeks'
+                ? (parseInt(document.getElementById('recurrence-weeks').value) || 4)
+                : recurrenceType === 'indefinite' ? -1 : 0;
+            res = await fetch(URL_ADD, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ slots, recurrence: recurrenceType, recurrence_weeks: recurrenceWeeks }),
+            });
+            data = await res.json();
+            if (!res.ok) {
+                showModalError(data.error || 'Error creating slots.');
+            } else {
+                showToast(`Created ${data.created || slots.length} slot${data.created !== 1 ? 's' : ''}.`, 'success');
+                setTimeout(() => location.reload(), 1200);
+                return;
+            }
+        }
+    } catch {
+        showModalError('Network error — please try again.');
+    } finally {
+        document.getElementById('modal-save-btn').disabled = false;
+    }
+}
+
+async function deleteSlot(slotId) {
+    const card = document.getElementById(`slot-${slotId}`);
+    if (!card) return;
+    if (card.querySelector('.delete-confirm')) return;
+
+    const actions = card.querySelector('.card-actions');
+
+    // Hide existing buttons by collecting them before inserting new ones
+    const originalBtns = Array.from(actions.children);
+    originalBtns.forEach(b => b.style.display = 'none');
+
+    const confirmSpan = document.createElement('span');
+    confirmSpan.className = 'delete-confirm';
+    confirmSpan.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    confirmSpan.innerHTML = `
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--text-muted);">Sure?</span>
+      <button class="btn-act btn-delete" id="del-yes-${slotId}">Yes, delete</button>
+      <button class="btn-act btn-cancel-drawer" id="del-no-${slotId}">Cancel</button>`;
+    actions.appendChild(confirmSpan);
+
+    document.getElementById(`del-no-${slotId}`).addEventListener('click', () => {
+        confirmSpan.remove();
+        originalBtns.forEach(b => b.style.display = '');
+    });
+
+    document.getElementById(`del-yes-${slotId}`).addEventListener('click', async () => {
+        try {
+            const res = await fetch(URL_DEL.replace('{id}', slotId), {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF },
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showToast(data.error || 'Error deleting slot.', 'error');
+                confirmSpan.remove();
+                originalBtns.forEach(b => b.style.display = '');
+            } else {
+                EVENTS = EVENTS.filter(e => !(e.type === 'availability' && e.id === slotId));
+                card.style.transition = 'opacity 0.3s ease, max-height 0.35s ease';
+                card.style.maxHeight  = card.offsetHeight + 'px';
+                card.style.overflow   = 'hidden';
+                requestAnimationFrame(() => { card.style.opacity = '0'; card.style.maxHeight = '0'; });
+                setTimeout(() => {
+                    card.remove();
+                    const list = document.getElementById('upcoming-avail-list');
+                    if (!list.querySelector('.card-row')) {
+                        list.innerHTML = '<div class="empty-row">No open slots in the next 14 days — use the calendar below to add some.</div>';
+                    }
+                }, 350);
+                renderCalendar(currentDate);
+                showToast('Slot deleted.', 'success');
+            }
+        } catch {
+            showToast('Network error.', 'error');
+        }
+    });
+}
+
+async function cancelSeries(groupId) {
+    if (!confirm('Cancel all future unbooked slots in this series?')) return;
+    try {
+        const res = await fetch(URL_CANCEL_SERIES.replace('{group_id}', groupId), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.error || 'Error cancelling series', 'error');
+        } else {
+            showToast(`Cancelled ${data.deleted_count} slots`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+    } catch {
+        showToast('Network error', 'error');
+    }
+}
+
+function updateSidebarCard(id, start, end) {
+    const card = document.getElementById(`slot-${id}`);
+    if (!card) return;
+    const startDate = new Date(start);
+    const endDate   = new Date(end);
+    card.querySelector('.appt-day').textContent   = startDate.getDate();
+    card.querySelector('.appt-month').textContent = startDate.toLocaleString('default', { month: 'short' });
+    card.querySelector('.appt-time').textContent  =
+        `${startDate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} – ${endDate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+    // Update data attributes so a subsequent Edit opens the right time
+    card.dataset.start = start;
+    card.dataset.end   = end;
+}
+
+function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type || ''}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function showModalError(msg) {
+    const errDiv = document.getElementById('modal-error');
+    errDiv.textContent = msg;
+    errDiv.style.display = 'block';
+}
+
+// Modal event listeners
+document.getElementById('modal-close-btn').addEventListener('click', hideModal);
+document.getElementById('modal-cancel-btn').addEventListener('click', hideModal);
+document.getElementById('avail-modal').addEventListener('click', e => { if (e.target === document.getElementById('avail-modal')) hideModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { hideModal(); closeRejectModal(); } });
+document.getElementById('modal-save-btn').addEventListener('click', saveAvailability);
+document.getElementById('modal-delete-btn').addEventListener('click', function() {
+    if (editingId) deleteSlot(editingId);
+});
+
+document.getElementById('reject-modal-close').addEventListener('click', closeRejectModal);
+document.getElementById('reject-modal-cancel').addEventListener('click', closeRejectModal);
+document.getElementById('reject-modal-confirm').addEventListener('click', confirmReject);
+document.getElementById('reject-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('reject-modal')) closeRejectModal();
+});
+
+document.getElementById('prev-month').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar(currentDate);
+});
+document.getElementById('next-month').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar(currentDate);
+});
+
+// Expose globally for inline onclick
+window.openEditModal         = openEditModal;
+window.deleteSlot            = deleteSlot;
+window.cancelSeries          = cancelSeries;
+window.acceptRequest         = acceptRequest;
+window.openRejectDrawer      = openRejectDrawer;
+window.closeRejectDrawer     = closeRejectDrawer;
+window.confirmRejectInline   = confirmRejectInline;
+window.openRejectModal       = openRejectModal;
+window.confirmReject         = confirmReject;
+window.closeRejectModal      = closeRejectModal;
+
+renderCalendar(currentDate);
+</script>
+
+{% else %}
+    <p style="padding:60px;text-align:center;">
+        Please <a href="{% url 'login' %}">log in</a> to view your schedule.
+    </p>
+{% endif %}
+{% endblock %}

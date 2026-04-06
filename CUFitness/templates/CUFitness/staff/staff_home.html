@@ -55,8 +55,11 @@
     </div>
     <ul class="staff-list">
       {% for coach in active_coaches %}
+      {% with avg=coach.average_rating total=coach.total_reviews_count reviews=coach.latest_reviews %}
       <li class="staff-item">
         <a href="{% url 'staff_user_details' coach.id %}" class="staff-link">
+
+          <!-- avatar -->
           <div class="staff-avatar">
             {% if coach.profile_picture %}
               <img src="{{ coach.profile_picture.url }}" alt="{{ coach.first_name }}">
@@ -64,13 +67,45 @@
               {{ coach.first_name|slice:":1" }}{{ coach.last_name|slice:":1" }}
             {% endif %}
           </div>
+
+          <!-- name + email + stars -->
           <div class="staff-info">
             <span class="staff-name">{{ coach.first_name }} {{ coach.last_name }}</span>
             <span class="staff-email">{{ coach.email }}</span>
+            <div class="coach-rating">
+              <div class="stars" style="--fill: {{ avg }}">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-value">{{ avg }}</span>
+              <span class="review-count">({{ total }} review{{ total|pluralize }})</span>
+            </div>
+
+            <!-- latest reviews -->
+            {% if reviews %}
+            <div class="coach-reviews">
+              {% for review in reviews %}
+              <div class="review-chip">
+                <span class="review-stars">
+                  {% for i in "12345" %}
+                    <span class="{% if forloop.counter <= review.rating %}star-on{% else %}star-off{% endif %}">★</span>
+                  {% endfor %}
+                </span>
+                {% if review.comment %}
+                  <span class="review-text">&ldquo;{{ review.comment|truncatechars:60 }}&rdquo;</span>
+                {% endif %}
+                <span class="review-author">— {{ review.member.first_name }} {{ review.member.last_name|slice:":1" }}.</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <span class="no-reviews">No reviews yet.</span>
+            {% endif %}
           </div>
+
           <div class="staff-arrow">→</div>
         </a>
       </li>
+      {% endwith %}
       {% empty %}
       <li class="staff-empty">No active coaches.</li>
       {% endfor %}

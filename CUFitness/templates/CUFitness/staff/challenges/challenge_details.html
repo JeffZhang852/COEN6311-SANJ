@@ -8,9 +8,16 @@
 {% block content %}
 
 <div class="art-detail-page">
-  <a href="{% url 'user_challenges' %}" class="art-detail-back">
-    <span class="material-icons" style="font-size:16px">arrow_back</span> Challenges
-  </a>
+{% if user.is_authenticated and user.role == "STAFF" %}
+    <a href="{% url 'staff_challenges' %}" class="art-detail-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Challenges
+    </a>
+{% else %}
+    <a href="{% url 'user_challenges' %}" class="art-detail-back">
+        <span class="material-icons" style="font-size:16px">arrow_back</span> Challenges
+    </a>
+{% endif %}
+
   <div class="art-detail-container">
 
     <div class="art-detail-header">
@@ -24,7 +31,7 @@
                 <div class="article-actions">
 
                     {% if user == challenge.created_by or user.role == "ADMIN" %}
-                        <a href="{% url 'edit_challenge' challenge.id %}" class="edit-btn">
+                        <a href="{% url 'staff_edit_challenge' challenge.id %}" class="edit-btn">
                             <span class="material-icons" style="font-size:16px">edit</span> Edit
                         </a>
                         <button class="delete-btn"
@@ -123,7 +130,7 @@
     <h3>Delete Challenge?</h3>
     <p>This action cannot be undone.</p>
 
-    <form method="POST" action="{% url 'delete_challenge' challenge.id %}">
+    <form method="POST" action="{% url 'staff_delete_challenge' challenge.id %}">
       {% csrf_token %}
       <button type="submit" class="btn-confirm-delete">Delete</button>
     </form>

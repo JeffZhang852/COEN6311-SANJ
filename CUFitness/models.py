@@ -46,10 +46,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(_("last name"), max_length=50, default='')
     membership = models.CharField(_("membership"), max_length=50, choices=MEMBERSHIP_CHOICES, default='BASIC')
     phone_number = models.CharField(max_length=20, default='', help_text='e.g. +1 514 555 0123')
-    date_of_birth = models.DateField(null=True, help_text='Format: YYYY-MM-DD')
-    address = models.CharField(max_length=255, default='', blank=True, help_text='Address here')
-    profile_picture = models.ImageField(upload_to='profile_pictures/', default='defaults/Default_Profile_Picture.jpg',
-                                        blank=True)
+    date_of_birth = models.DateField(null=True,)
+    address = models.CharField(max_length=255, default='', blank=True,)
+
+    # Profile picture — optional, defaults to the generic silhouette
+    #upload_to='profile_pictures/' means uploaded photos go to MEDIA_ROOT/profile_pictures/
+    # default='defaults/...' points to the fallback image inside MEDIA_ROOT
+    profile_picture = models.ImageField(upload_to='profile_pictures/', default='defaults/Default_Profile_Picture.jpg',blank=True,)
 
     # Coach request handling
     REQUEST_STATUS_CHOICES = [
@@ -111,7 +114,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def latest_reviews(self, limit=5):
         if self.role != 'COACH':
             return CoachReview.objects.none()
-        return self.received_reviews.all()[:limit]
+        return self.received_reviews.order_by('-created_at')[:limit]
     # Count reviews for payment calculation
     def total_reviews_count(self):
         if self.role != 'COACH':
@@ -219,29 +222,18 @@ class Recipe(models.Model):
         ('VEGETARIAN', 'Vegetarian'),
     ]
     # Author of the recipe. Keep recipe if author deleted (set NULL)
-    author = models.ForeignKey(
-        CustomUser,
-        related_name='recipes',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-    )
+    author = models.ForeignKey(CustomUser, related_name='recipes', on_delete=models.SET_NULL, null=True, blank=True,)
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=250, help_text='Brief summary of the recipe')
     # Premium content – requires login if True
-    locked = models.BooleanField(
-        default=False,
-        help_text='Premium content — requires login to view',
-    )
+    locked = models.BooleanField(default=False, help_text='Premium content — requires login to view',)
     # Recipe‑specific fields
     prep_time_minutes = models.PositiveIntegerField(help_text='Preparation time in minutes')
     cook_time_minutes = models.PositiveIntegerField(help_text='Cooking time in minutes (0 if none)')
     servings = models.PositiveIntegerField(default=1)
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='MEDIUM')
     instructions = models.TextField(help_text='Step-by-step cooking instructions')
-    calories_per_serving = models.PositiveIntegerField(
-        null=True, blank=True,
-        help_text='Approximate calories per serving (optional)',
-    )
+    calories_per_serving = models.PositiveIntegerField(null=True, blank=True, help_text='Approximate calories per serving (optional)',)
     dietary_restrictions = MultiSelectField(choices=DIETARY_CHOICES, blank=True, max_length=250, help_text='Dietary choices (optional)')
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
