@@ -4,419 +4,207 @@
 {% block title %}Coach Profile{% endblock %}
 
 {% block extra_styles %}
-<style>
-  /* ========== COACH PROFILE PAGE STYLES ========== */
-  .coach-profile-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-    flex-wrap: wrap;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid #f0f0f0;
-  }
-  .profile-picture {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid hsl(349, 61%, 50%);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  .profile-info h1 {
-    font-size: 2.2rem;
-    margin: 0 0 0.25rem 0;
-    font-family: 'DM Serif Display', serif;
-  }
-  .profile-info .role {
-    color: hsl(349, 61%, 50%);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-  .profile-info .member-since {
-    color: #666;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-  }
-
-  .rating-card {
-    background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
-    border-radius: 24px;
-    padding: 1.8rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-  }
-  .stars-display {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .stars {
-    font-size: 1.8rem;
-    letter-spacing: 4px;
-    color: #ffb400;
-  }
-  .avg-rating {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #333;
-  }
-  .total-reviews {
-    color: #666;
-    font-size: 0.95rem;
-  }
-  .salary-card {
-    background: #f0f9ff;
-    border-radius: 20px;
-    padding: 1rem 2rem;
-    text-align: center;
-    min-width: 200px;
-  }
-  .salary-card .label {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #2c7da0;
-  }
-  .salary-card .value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #1e4a6b;
-  }
-  .salary-card .small-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #1e4a6b;
-  }
-  .salary-card .sub {
-    font-size: 0.7rem;
-    color: #666;
-    margin-top: 0.25rem;
-  }
-
-  .reviews-section {
-    margin-top: 2rem;
-  }
-  .reviews-section h2 {
-    font-size: 1.6rem;
-    margin-bottom: 1rem;
-    font-family: 'DM Serif Display', serif;
-  }
-  .reviews-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .review-button {
-    background: white;
-    border: 1px solid #e2e2e2;
-    border-radius: 60px;
-    padding: 0.75rem 1.25rem;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .review-button:hover {
-    background: #fafafa;
-    border-color: hsl(349, 61%, 50%);
-    transform: translateX(4px);
-  }
-  .review-meta {
-    display: flex;
-    gap: 1rem;
-    align-items: baseline;
-    flex-wrap: wrap;
-  }
-  .review-stars {
-    color: #ffb400;
-    font-weight: 500;
-  }
-  .review-date {
-    font-size: 0.8rem;
-    color: #888;
-  }
-  .review-preview {
-    color: #333;
-    font-size: 0.9rem;
-    max-width: 60%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .no-reviews {
-    background: #f9f9f9;
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    color: #777;
-  }
-
-  .review-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  .review-modal.open {
-    display: flex;
-  }
-  .review-modal-content {
-    background: white;
-    border-radius: 28px;
-    max-width: 550px;
-    width: 90%;
-    padding: 1.8rem;
-    position: relative;
-    box-shadow: 0 20px 35px rgba(0,0,0,0.2);
-  }
-  .review-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
-  }
-  .review-modal-header h3 {
-    margin: 0;
-    font-family: 'DM Serif Display', serif;
-  }
-  .close-modal {
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    color: #999;
-  }
-  .modal-rating {
-    font-size: 1.2rem;
-    margin: 0.5rem 0;
-    color: #ffb400;
-  }
-  .modal-comment {
-    background: #f8f8f8;
-    padding: 1rem;
-    border-radius: 16px;
-    margin: 1rem 0;
-    white-space: pre-wrap;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  .modal-date {
-    font-size: 0.8rem;
-    color: #888;
-    text-align: right;
-  }
-
-  .loading-spinner {
-    text-align: center;
-    padding: 3rem;
-    color: #888;
-  }
-  .error-message {
-    background: #ffe6e6;
-    color: #cc0000;
-    padding: 1rem;
-    border-radius: 16px;
-    text-align: center;
-  }
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: #333;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 40px;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 1100;
-  }
-  .toast.show {
-    opacity: 1;
-  }
-  .toast.success {
-    background: #2e7d32;
-  }
-  .toast.error {
-    background: #c62828;
-  }
-</style>
+  <link rel="stylesheet" href="{% static 'coach/coach_profile.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="coach-profile-container">
-  <div class="profile-header">
-    {% if request.user.profile_picture %}
-      <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="profile-picture">
-    {% else %}
-      <img src="{% static 'defaults/Default_Profile_Picture.jpg' %}" alt="Default profile" class="profile-picture">
-    {% endif %}
-    <div class="profile-info">
-      <h1>{{ request.user.first_name }} {{ request.user.last_name }}</h1>
-      <div class="role">Certified Coach</div>
-      <div class="member-since">Member since {{ request.user.date_joined|date:"F Y" }}</div>
+
+<!---------------- Profile Hero ---------------->
+<section class="profile-hero">
+  <div class="profile-hero-inner">
+
+    <div class="avatar-wrap">
+      <div class="avatar-placeholder">
+        {% if request.user.profile_picture %}
+          <img src="{{ request.user.profile_picture.url }}" alt="Profile picture">
+        {% else %}
+          <img src="{% static 'defaults/Default_Profile_Picture.jpg' %}" alt="Default profile">
+        {% endif %}
+      </div>
     </div>
-  </div>
 
-  <div id="profile-data">
-    <div class="loading-spinner">Loading your coach profile...</div>
-  </div>
+    <div class="profile-meta">
+      <div class="profile-eyebrow">
+        <span class="profile-role-tag">Coach</span>
+        <span class="profile-divider">·</span>
+        <span>Member since {{ request.user.date_joined|date:"F Y" }}</span>
+      </div>
 
-  <div id="reviews-list" class="reviews-section">
-    <!-- dynamic content -->
-  </div>
-</div>
+      <h1 class="profile-name">{{ request.user.first_name }} {{ request.user.last_name }}</h1>
 
-<!-- Modal for full review -->
+      <div class="profile-tier-badge">Certified Coach</div>
+    </div>
+
+    <div class="profile-actions">
+      <a href="{% url 'user_settings' %}" class="profile-edit-btn">Edit Profile &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<!---------------- Stats Strip (loaded via JS) ---------------->
+<section class="stats-section" id="stats-section">
+  <div class="section-header">
+    <div class="section-label">Performance</div>
+    <h2>Your <em>Stats</em></h2>
+    <p>Rating, salary, and hours at a glance.</p>
+  </div>
+  <div class="stats-grid" id="stats-grid">
+    <div class="loading-row" style="grid-column: 1 / -1;">Loading stats…</div>
+  </div>
+</section>
+
+<!---------------- Reviews (loaded via JS) ---------------->
+<section class="reviews-section" id="reviews-section">
+  <div class="section-header">
+    <div class="section-label">Feedback</div>
+    <h2>Latest <em>Reviews</em></h2>
+    <p>Most recent client reviews for your sessions.</p>
+  </div>
+  <div class="reviews-list" id="reviews-list">
+    <div class="loading-row">Loading reviews…</div>
+  </div>
+</section>
+
+<!---------------- Review Modal ---------------->
 <div id="reviewModal" class="review-modal">
   <div class="review-modal-content">
     <div class="review-modal-header">
       <h3>Client Review</h3>
       <button class="close-modal" id="closeModalBtn">&times;</button>
     </div>
-    <div id="modal-body">
-      <div class="modal-rating" id="modalRating"></div>
-      <div class="modal-comment" id="modalComment"></div>
-      <div class="modal-date" id="modalDate"></div>
-    </div>
+    <div class="modal-rating"  id="modalRating"></div>
+    <div class="modal-comment" id="modalComment"></div>
+    <div class="modal-date"    id="modalDate"></div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <script>
-  const coachId = {{ request.user.id }};
+  const coachId    = {{ request.user.id }};
   const profileUrl = `/api/users/${coachId}/coach-profile/`;
-
-  async function loadCoachProfile() {
-    const profileContainer = document.getElementById('profile-data');
-    const reviewsContainer = document.getElementById('reviews-list');
-
-    try {
-      const response = await fetch(profileUrl);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-
-      const avgRating = data.average_rating || 0;
-      const fullStars = Math.floor(avgRating);
-      const halfStar = (avgRating - fullStars) >= 0.5;
-      let starsHtml = '';
-      for (let i = 0; i < fullStars; i++) starsHtml += '★';
-      if (halfStar) starsHtml += '½';
-      for (let i = starsHtml.length; i < 5; i++) starsHtml += '☆';
-
-      profileContainer.innerHTML = `
-        <div class="rating-card">
-          <div class="stars-display">
-            <div class="stars">${starsHtml}</div>
-            <div class="avg-rating">${avgRating.toFixed(1)}</div>
-            <div class="total-reviews">(${data.total_reviews} review${data.total_reviews !== 1 ? 's' : ''})</div>
-          </div>
-          <div class="salary-card">
-            <div class="label">Hourly Rate</div>
-            <div class="value">$${data.hourly_salary}</div>
-            <div class="sub">Base $15 + $2 × rating</div>
-            <div class="label" style="margin-top:0.8rem;">This Month's Hours</div>
-            <div class="small-value">${data.total_hours_this_month} hrs</div>
-            <div class="label" style="margin-top:0.8rem;">Est. Monthly Payout</div>
-            <div class="value" style="font-size:1.6rem;">$${data.estimated_monthly_payout}</div>
-            <div class="sub">Accepted appointments only</div>
-          </div>
-        </div>
-      `;
-
-      if (data.latest_reviews && data.latest_reviews.length > 0) {
-        let reviewsHtml = `<h2>Latest Reviews</h2><div class="reviews-grid">`;
-        data.latest_reviews.forEach(review => {
-          const date = new Date(review.created_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
-          const ratingStars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-          const preview = review.comment && review.comment.length > 60 ? review.comment.substring(0, 60) + '…' : (review.comment || 'No comment');
-          reviewsHtml += `
-            <button class="review-button" data-rating="${review.rating}" data-comment="${escapeHtml(review.comment || '')}" data-date="${review.created_at}">
-              <div class="review-meta">
-                <span class="review-stars">${ratingStars}</span>
-                <span class="review-date">${date}</span>
-              </div>
-              <div class="review-preview">${escapeHtml(preview)}</div>
-            </button>
-          `;
-        });
-        reviewsHtml += `</div>`;
-        reviewsContainer.innerHTML = reviewsHtml;
-
-        document.querySelectorAll('.review-button').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const rating = btn.dataset.rating;
-            const comment = btn.dataset.comment;
-            const date = new Date(btn.dataset.date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-            const modalRatingStars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-            document.getElementById('modalRating').innerHTML = `${modalRatingStars} (${rating}/5)`;
-            document.getElementById('modalComment').innerHTML = comment ? escapeHtml(comment) : '<em>No written review.</em>';
-            document.getElementById('modalDate').innerHTML = `Reviewed on ${date}`;
-            document.getElementById('reviewModal').classList.add('open');
-          });
-        });
-      } else {
-        reviewsContainer.innerHTML = `<div class="no-reviews">✨ No reviews yet. Keep up the great work!</div>`;
-      }
-    } catch (err) {
-      console.error(err);
-      profileContainer.innerHTML = `<div class="error-message">Failed to load profile data. Please refresh the page.</div>`;
-      reviewsContainer.innerHTML = '';
-    }
-  }
 
   function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function starsHtml(rating, size) {
+    const full = Math.floor(rating);
+    let s = '★'.repeat(full);
+    if (rating - full >= 0.5) s += '½';
+    while (s.replace('½','x').length < 5) s += '☆';
+    return s;
+  }
+
+  function formatDate(iso, style) {
+    const d = new Date(iso);
+    if (style === 'short') return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+    return d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+
+  async function loadCoachProfile() {
+    const statsGrid    = document.getElementById('stats-grid');
+    const reviewsList  = document.getElementById('reviews-list');
+
+    try {
+      const res = await fetch(profileUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const d = await res.json();
+
+      // ---- stats grid ----
+      const avgRating = d.average_rating || 0;
+      statsGrid.innerHTML = `
+        <div class="stat-cell">
+          <div class="stat-label">Avg Rating</div>
+          <div class="stat-value accent">${avgRating.toFixed(1)}</div>
+          <div class="stars-inline">${starsHtml(avgRating)}</div>
+          <div class="stat-sub">${d.total_reviews} review${d.total_reviews !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Hourly Rate</div>
+          <div class="stat-value">$${d.hourly_salary}</div>
+          <div class="stat-sub">base $15 + $2 × rating</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Hours This Month</div>
+          <div class="stat-value">${d.total_hours_this_month}</div>
+          <div class="stat-sub">accepted appointments</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Est. Monthly Payout</div>
+          <div class="stat-value accent">$${d.estimated_monthly_payout}</div>
+          <div class="stat-sub">hours × hourly rate</div>
+        </div>
+      `;
+
+      // ---- reviews list ----
+      if (d.latest_reviews && d.latest_reviews.length > 0) {
+        reviewsList.innerHTML = d.latest_reviews.map((r, i) => {
+          const stars   = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+          const preview = r.comment
+            ? (r.comment.length > 70 ? r.comment.substring(0, 70) + '…' : r.comment)
+            : 'No written comment.';
+          const num = String(i + 1).padStart(2, '0');
+          return `
+            <button class="review-row"
+              data-rating="${r.rating}"
+              data-comment="${escapeHtml(r.comment || '')}"
+              data-date="${r.created_at}">
+              <div class="review-index">${num}</div>
+              <div class="review-info">
+                <div class="review-stars-row">${stars}</div>
+                <div class="review-preview-text">${escapeHtml(preview)}</div>
+              </div>
+              <div class="review-date-col">${formatDate(r.created_at, 'short')}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.review-row').forEach(btn => {
+          btn.addEventListener('click', () => openModal(btn.dataset));
+        });
+
+      } else {
+        reviewsList.innerHTML = `<div class="review-empty">No reviews yet — keep up the great work.</div>`;
+      }
+
+    } catch (err) {
+      console.error(err);
+      statsGrid.innerHTML   = `<div class="error-row" style="grid-column:1/-1;">Failed to load stats. Please refresh.</div>`;
+      reviewsList.innerHTML = `<div class="error-row">Failed to load reviews. Please refresh.</div>`;
+    }
+  }
+
+  function openModal({ rating, comment, date }) {
+    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    document.getElementById('modalRating').innerHTML  = `${stars} (${rating}/5)`;
+    document.getElementById('modalComment').innerHTML = comment
+      ? escapeHtml(comment)
+      : '<em style="color:var(--text-muted)">No written review.</em>';
+    document.getElementById('modalDate').innerHTML    = `Reviewed on ${formatDate(date, 'long')}`;
+    document.getElementById('reviewModal').classList.add('open');
   }
 
   document.getElementById('closeModalBtn').addEventListener('click', () => {
     document.getElementById('reviewModal').classList.remove('open');
   });
-  window.addEventListener('click', (e) => {
+
+  window.addEventListener('click', e => {
     const modal = document.getElementById('reviewModal');
     if (e.target === modal) modal.classList.remove('open');
   });
 
-  loadCoachProfile();
-
   function showToast(msg, type) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.className = `toast show ${type}`;
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3000);
   }
+
+  loadCoachProfile();
 </script>
+
 {% endblock %}

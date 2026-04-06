@@ -114,7 +114,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def latest_reviews(self, limit=5):
         if self.role != 'COACH':
             return CoachReview.objects.none()
-        return self.received_reviews.all()[:limit]
+        return self.received_reviews.order_by('-created_at')[:limit]
     # Count reviews for payment calculation
     def total_reviews_count(self):
         if self.role != 'COACH':
@@ -222,29 +222,18 @@ class Recipe(models.Model):
         ('VEGETARIAN', 'Vegetarian'),
     ]
     # Author of the recipe. Keep recipe if author deleted (set NULL)
-    author = models.ForeignKey(
-        CustomUser,
-        related_name='recipes',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-    )
+    author = models.ForeignKey(CustomUser, related_name='recipes', on_delete=models.SET_NULL, null=True, blank=True,)
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=250, help_text='Brief summary of the recipe')
     # Premium content – requires login if True
-    locked = models.BooleanField(
-        default=False,
-        help_text='Premium content — requires login to view',
-    )
+    locked = models.BooleanField(default=False, help_text='Premium content — requires login to view',)
     # Recipe‑specific fields
     prep_time_minutes = models.PositiveIntegerField(help_text='Preparation time in minutes')
     cook_time_minutes = models.PositiveIntegerField(help_text='Cooking time in minutes (0 if none)')
     servings = models.PositiveIntegerField(default=1)
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='MEDIUM')
     instructions = models.TextField(help_text='Step-by-step cooking instructions')
-    calories_per_serving = models.PositiveIntegerField(
-        null=True, blank=True,
-        help_text='Approximate calories per serving (optional)',
-    )
+    calories_per_serving = models.PositiveIntegerField(null=True, blank=True, help_text='Approximate calories per serving (optional)',)
     dietary_restrictions = MultiSelectField(choices=DIETARY_CHOICES, blank=True, max_length=250, help_text='Dietary choices (optional)')
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

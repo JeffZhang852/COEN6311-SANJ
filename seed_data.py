@@ -1,13 +1,25 @@
 """
 seed_data.py — CUFitness Database Seeder
 =========================================
-this file creates testing data for both user accounts (admin, staff, coach) and article data (locked/unlocked
+This file creates testing data for user accounts, content, equipment, challenges, and gym schedule.
 What it creates:
-  - 1 Admin user        (admin@cufitness.com  / Admin@1234)
-  - 2 Staff users       (staff1@..., staff2@... / Staff@1234)
+  - 1 Admin user        (admin@cufitness.com               / Admin@1234)
+  - 2 Staff users       (staff1@..., staff2@...            / Staff@1234)
   - 3 Regular members   (member1@..., member2@..., member3@... / Member@1234)
-  - 5 Articles          (3 unlocked, 2 locked), authored by the staff users
-  - 6 Recipes           (4 unlocked, 2 locked), with ingredients, authored by staff/coach
+  - 3 Coach users       (coach1@..., coach2@..., coach3@... / Coach@1234)
+  - Articles            (mix of locked/unlocked), authored by staff
+  - Recipes             (mix of locked/unlocked), with ingredients, authored by staff/coaches
+  - Exercises           (various muscle groups, difficulties, goals)
+  - Workout Plans       (mix of locked/unlocked), with exercises, authored by staff/coaches
+  - Equipment           (10 items)
+  - 2 Fitness Challenges
+  - Challenge Participations (members joined to challenges with progress)
+  - Gym Schedule        (Mon–Fri open 24h, Sat–Sun 06:00–18:00)
+  - Coach Availabilities (past + future slots for each coach)
+  - Coach Appointments  (ACCEPTED past appointments for salary calculation)
+  - Coach Reviews       (members review past appointments)
+  - Messages            (inbox messages between members and coaches)
+  - Contact Messages    (support form submissions)
 
 All entries are idempotent — re-running won't duplicate data.
 """
@@ -21,10 +33,12 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from CUFitness.models import (Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise,
-                              EquipmentList, Challenge, GymInfo)
+                              EquipmentList, Challenge, ChallengeParticipation, GymInfo,
+                              CoachAvailability, CoachAppointment, CoachReview,
+                              Message, ContactMessage)
 
 from django.utils import timezone
-from datetime import datetime, time
+from datetime import datetime, date, time, timedelta
 
 User = get_user_model()
 
@@ -33,7 +47,7 @@ User = get_user_model()
 # ─────────────────────────────────────────────
 
 def create_user(email, password, first_name, last_name,
-                role, membership="BASIC", is_staff_flag=False, is_superuser=False,
+                role, membership="BASIC", is_superuser=False,
                 phone_number='', address='', date_of_birth=None):
     if User.objects.filter(email=email).exists():
         print(f"  [skip] User already exists: {email}")
@@ -48,7 +62,8 @@ def create_user(email, password, first_name, last_name,
     user.last_name     = last_name
     user.role          = role
     user.membership    = membership
-    user.is_staff      = is_staff_flag
+    # Note: is_staff is intentionally NOT set here — CustomUser.save() automatically
+    # derives it from the role field (STAFF and ADMIN → is_staff=True).
     user.phone_number  = phone_number
     user.address       = address
     user.date_of_birth = date_of_birth
@@ -86,7 +101,6 @@ admin = create_user(
     first_name     = "Admin",
     last_name      = "User",
     role           = "ADMIN",
-    is_staff_flag  = True,
     is_superuser   = True,
     phone_number   = "+1 514 900 0001",
     address        = "1455 De Maisonneuve Blvd W, Montreal, QC H3G 1M8",
@@ -103,7 +117,6 @@ staff1 = create_user(
     first_name     = "Sarah",
     last_name      = "Connor",
     role           = "STAFF",
-    is_staff_flag  = True,
     phone_number   = "+1 514 900 0002",
     address        = "4121 Sherbrooke St W, Westmount, QC H3Z 1B5",
     date_of_birth  = "1990-03-22",
@@ -115,7 +128,6 @@ staff2 = create_user(
     first_name     = "James",
     last_name      = "Wilson",
     role           = "STAFF",
-    is_staff_flag  = True,
     phone_number   = "+1 514 900 0003",
     address        = "7005 Taschereau Blvd, Brossard, QC J4Z 1A7",
     date_of_birth  = "1988-07-09",
@@ -535,8 +547,8 @@ create_recipe(
     ),
     ingredients = [
         {'name': 'turkey mince',    'quantity': '500', 'unit': 'G'},
-        {'name': 'egg',             'quantity': '1',   'unit': ''},
-        {'name': 'garlic',          'quantity': '2',   'unit': '',    'notes': 'cloves, minced'},
+        {'name': 'egg',             'quantity': '1',   'unit': 'WHOLE'},
+        {'name': 'garlic',          'quantity': '2',   'unit': 'WHOLE','notes': 'cloves, minced'},
         {'name': 'fresh parsley',   'quantity': '2',   'unit': 'TBSP','notes': 'chopped'},
         {'name': 'zucchini',        'quantity': '3',   'unit': 'WHOLE','notes': 'spiralized'},
         {'name': 'olive oil',       'quantity': '1',   'unit': 'TBSP'},
@@ -565,7 +577,7 @@ create_recipe(
     ),
     ingredients = [
         {'name': 'black beans',     'quantity': '400', 'unit': 'G',    'notes': '1 can, drained'},
-        {'name': 'corn tortillas',  'quantity': '4',   'unit': ''},
+        {'name': 'corn tortillas',  'quantity': '4',   'unit': 'WHOLE'},
         {'name': 'avocado',         'quantity': '1',   'unit': 'WHOLE'},
         {'name': 'lime',            'quantity': '1',   'unit': 'WHOLE','notes': 'juiced'},
         {'name': 'salsa',           'quantity': '4',   'unit': 'TBSP'},
@@ -602,7 +614,7 @@ create_recipe(
         {'name': 'olive oil',       'quantity': '2',   'unit': 'TBSP'},
         {'name': 'tahini',          'quantity': '2',   'unit': 'TBSP'},
         {'name': 'lemon juice',     'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'garlic',          'quantity': '1',   'unit': '',     'notes': 'clove, minced'},
+        {'name': 'garlic',          'quantity': '1',   'unit': 'WHOLE', 'notes': 'clove, minced'},
         {'name': 'smoked paprika',  'quantity': '1',   'unit': 'TSP'},
     ],
 )
@@ -629,12 +641,12 @@ create_recipe(
     ingredients = [
         {'name': 'beef mince',      'quantity': '400', 'unit': 'G',    'notes': 'lean, 5% fat'},
         {'name': 'jasmine rice',    'quantity': '1.5', 'unit': 'CUP'},
-        {'name': 'eggs',            'quantity': '2',   'unit': ''},
+        {'name': 'eggs',            'quantity': '2',   'unit': 'WHOLE'},
         {'name': 'edamame',         'quantity': '100', 'unit': 'G',    'notes': 'shelled, frozen is fine'},
         {'name': 'tamari soy sauce','quantity': '3',   'unit': 'TBSP'},
         {'name': 'sesame oil',      'quantity': '1',   'unit': 'TBSP'},
         {'name': 'fresh ginger',    'quantity': '1',   'unit': 'TSP',  'notes': 'grated'},
-        {'name': 'garlic',          'quantity': '2',   'unit': '',     'notes': 'cloves, minced'},
+        {'name': 'garlic',          'quantity': '2',   'unit': 'WHOLE','notes': 'cloves, minced'},
         {'name': 'spring onion',    'quantity': '2',   'unit': 'WHOLE','notes': 'sliced'},
         {'name': 'sesame seeds',    'quantity': '1',   'unit': 'TSP'},
     ],
@@ -662,7 +674,7 @@ create_recipe(
     ingredients = [
         {'name': 'rolled oats',      'quantity': '1',   'unit': 'CUP',  'notes': 'blended into flour'},
         {'name': 'Greek yogurt',     'quantity': '150', 'unit': 'G',    'notes': 'plain, full-fat'},
-        {'name': 'eggs',             'quantity': '2',   'unit': ''},
+        {'name': 'eggs',             'quantity': '2',   'unit': 'WHOLE'},
         {'name': 'baking powder',    'quantity': '1',   'unit': 'TSP'},
         {'name': 'vanilla extract',  'quantity': '0.5', 'unit': 'TSP'},
         {'name': 'mixed berries',    'quantity': '80',  'unit': 'G'},
@@ -691,7 +703,7 @@ create_recipe(
     ),
     ingredients = [
         {'name': 'canned tuna',      'quantity': '1',   'unit': 'WHOLE', 'notes': '130g can, drained'},
-        {'name': 'plain rice cakes', 'quantity': '4',   'unit': ''},
+        {'name': 'plain rice cakes', 'quantity': '4',   'unit': 'WHOLE'},
         {'name': 'sriracha',         'quantity': '1',   'unit': 'TSP'},
         {'name': 'light mayonnaise', 'quantity': '1',   'unit': 'TBSP'},
         {'name': 'soy sauce',        'quantity': '0.5', 'unit': 'TSP'},
@@ -725,7 +737,7 @@ create_recipe(
     ingredients = [
         {'name': 'red lentils',      'quantity': '200', 'unit': 'G',    'notes': 'rinsed'},
         {'name': 'onion',            'quantity': '1',   'unit': 'WHOLE','notes': 'diced'},
-        {'name': 'garlic',           'quantity': '3',   'unit': '',     'notes': 'cloves, minced'},
+        {'name': 'garlic',           'quantity': '3',   'unit': 'WHOLE','notes': 'cloves, minced'},
         {'name': 'carrot',           'quantity': '2',   'unit': 'WHOLE','notes': 'diced'},
         {'name': 'celery',           'quantity': '2',   'unit': 'WHOLE','notes': 'stalks, sliced'},
         {'name': 'canned tomatoes',  'quantity': '400', 'unit': 'G',    'notes': '1 can'},
@@ -760,7 +772,7 @@ create_recipe(
         "7. Season and serve immediately."
     ),
     ingredients = [
-        {'name': 'egg whites',       'quantity': '5',   'unit': '',     'notes': 'approx 150ml'},
+        {'name': 'egg whites',       'quantity': '5',   'unit': 'WHOLE','notes': 'approx 150ml'},
         {'name': 'red capsicum',     'quantity': '0.5', 'unit': 'WHOLE','notes': 'diced'},
         {'name': 'mushrooms',        'quantity': '60',  'unit': 'G',    'notes': 'sliced'},
         {'name': 'baby spinach',     'quantity': '30',  'unit': 'G'},
@@ -798,7 +810,7 @@ create_recipe(
         {'name': 'chicken broth',    'quantity': '500', 'unit': 'ML'},
         {'name': 'kale',             'quantity': '80',  'unit': 'G',    'notes': 'roughly chopped'},
         {'name': 'rosemary',         'quantity': '1',   'unit': 'WHOLE','notes': 'fresh sprig'},
-        {'name': 'bay leaves',       'quantity': '2',   'unit': ''},
+        {'name': 'bay leaves',       'quantity': '2',   'unit': 'WHOLE'},
         {'name': 'smoked paprika',   'quantity': '1',   'unit': 'TSP'},
         {'name': 'garlic powder',    'quantity': '1',   'unit': 'TSP'},
     ],
@@ -827,7 +839,7 @@ create_recipe(
     ingredients = [
         {'name': 'smoked salmon',    'quantity': '100', 'unit': 'G'},
         {'name': 'avocado',          'quantity': '0.5', 'unit': 'WHOLE'},
-        {'name': 'egg',              'quantity': '1',   'unit': ''},
+        {'name': 'egg',              'quantity': '1',   'unit': 'WHOLE'},
         {'name': 'cooked quinoa',    'quantity': '0.5', 'unit': 'CUP'},
         {'name': 'cucumber',         'quantity': '0.25','unit': 'WHOLE', 'notes': 'peeled into ribbons'},
         {'name': 'capers',           'quantity': '1',   'unit': 'TBSP'},
@@ -1641,8 +1653,8 @@ Challenge.objects.get_or_create(
     title="7-Day Push-Up Challenge",
     description="Complete 50 push-ups daily for 7 days.",
     goal_target=7,
-    start_date=timezone.make_aware(datetime(2026, 4, 1)),
-    end_date=timezone.make_aware(datetime(2026, 4, 7)),
+    start_date=date(2026, 4, 1),
+    end_date=date(2026, 4, 7),
     created_by=staff1,
 )
 
@@ -1650,8 +1662,8 @@ Challenge.objects.get_or_create(
     title="10K Steps Daily",
     description="Walk 10,000 steps every day for 14 days.",
     goal_target=14,
-    start_date=timezone.make_aware(datetime(2026, 4, 1)),
-    end_date=timezone.make_aware(datetime(2026, 4, 14)),
+    start_date=date(2026, 4, 1),
+    end_date=date(2026, 4, 14),
     created_by=staff2,
 )
 
@@ -1685,18 +1697,212 @@ for day, open_time, close_time, is_open, is_open_24h in gym_schedule_data:
         print(f"  [skip] GymInfo already exists: {obj}")
 
 # ─────────────────────────────────────────────
+# 12. Challenge Participations
+# ─────────────────────────────────────────────
+print("\n── Creating Challenge Participations ──")
+
+pushup_challenge  = Challenge.objects.get(title="7-Day Push-Up Challenge")
+steps_challenge   = Challenge.objects.get(title="10K Steps Daily")
+
+participations = [
+    (member1, pushup_challenge, 7),   # completed
+    (member1, steps_challenge,  10),  # in progress
+    (member2, pushup_challenge, 4),   # in progress
+    (member2, steps_challenge,  14),  # completed
+    (member3, pushup_challenge, 2),   # just started
+]
+
+for user, challenge, progress in participations:
+    obj, created = ChallengeParticipation.objects.get_or_create(
+        user=user, challenge=challenge,
+        defaults={'progress': progress}
+    )
+    if created:
+        print(f"  [created] {user.first_name} joined '{challenge.title}' (progress: {progress})")
+    else:
+        print(f"  [skip] {user.first_name} already joined '{challenge.title}'")
+
+
+# ─────────────────────────────────────────────
+# 13. Coach Availabilities + Appointments + Reviews
+# ─────────────────────────────────────────────
+# Strategy:
+#   - Create PAST slots (this month) → link to ACCEPTED appointments → add reviews
+#   - Create FUTURE slots → leave unbooked (available to book via UI)
+# ─────────────────────────────────────────────
+print("\n── Creating Coach Availabilities, Appointments & Reviews ──")
+
+now        = timezone.now()
+tz         = timezone.get_current_timezone()
+
+def make_dt(days_offset, hour):
+    """Return a timezone-aware datetime offset from today."""
+    d = (now + timedelta(days=days_offset)).replace(
+        hour=hour, minute=0, second=0, microsecond=0
+    )
+    if timezone.is_naive(d):
+        d = timezone.make_aware(d, tz)
+    return d
+
+def get_or_create_availability(coach, start, end):
+    existing = CoachAvailability.objects.filter(coach=coach, start_time=start, end_time=end).first()
+    if existing:
+        print(f"  [skip] Availability already exists: {coach.first_name} @ {start}")
+        return existing, False
+    slot = CoachAvailability.objects.create(coach=coach, start_time=start, end_time=end, is_booked=False)
+    print(f"  [created] Availability: {coach.first_name} @ {start}")
+    return slot, True
+
+def get_or_create_appointment(coach, member, slot, start, end, status='ACCEPTED'):
+    if CoachAppointment.objects.filter(coach=coach, member=member, start_time=start, end_time=end).exists():
+        print(f"  [skip] Appointment already exists: {member.first_name} w/ {coach.first_name} @ {start}")
+        return CoachAppointment.objects.get(coach=coach, member=member, start_time=start, end_time=end), False
+    appt = CoachAppointment(
+        coach=coach, member=member, availability=slot,
+        start_time=start, end_time=end, status=status
+    )
+    appt.save()
+    if slot:
+        slot.is_booked = True
+        CoachAvailability.objects.filter(pk=slot.pk).update(is_booked=True)
+    print(f"  [created] Appointment ({status}): {member.first_name} w/ {coach.first_name} @ {start}")
+    return appt, True
+
+def get_or_create_review(coach, member, appointment, rating, comment):
+    if CoachReview.objects.filter(appointment=appointment).exists():
+        print(f"  [skip] Review already exists for appointment {appointment.id}")
+        return
+    CoachReview.objects.create(
+        coach=coach, member=member, appointment=appointment,
+        rating=rating, comment=comment
+    )
+    print(f"  [created] Review: {member.first_name} → {coach.first_name} ({rating}★)")
+
+
+# ── Coach 1 (Mike) ──
+# Past slots this month → accepted appointments with reviews
+for days_ago, hour, member, rating, comment in [
+    (-14, 9,  member1, 5, "Mike is an outstanding coach. His technique cues are incredibly precise and he always pushes me to improve without being overwhelming. Highly recommend."),
+    (-10, 11, member2, 4, "Really solid session. Mike knows his stuff and explains everything well. Would have given 5 stars but we ran a bit over time."),
+    (-6,  14, member3, 5, "Best coaching session I have had. Mike adapted the entire workout to my shoulder issue on the spot. Super professional."),
+    (-3,  9,  member1, 4, "Great as always. Mike keeps things fresh every session. Minor scheduling mix-up at the start but nothing serious."),
+]:
+    start = make_dt(days_ago, hour)
+    end   = make_dt(days_ago, hour + 1)
+    slot, _  = get_or_create_availability(coach1, start, end)
+    appt, _  = get_or_create_appointment(coach1, member, slot, start, end, 'ACCEPTED')
+    get_or_create_review(coach1, member, appt, rating, comment)
+
+# Future open slots for coach1
+for days_ahead, hour in [(3, 9), (3, 14), (7, 10), (10, 9), (10, 14)]:
+    start = make_dt(days_ahead, hour)
+    end   = make_dt(days_ahead, hour + 1)
+    get_or_create_availability(coach1, start, end)
+
+# ── Coach 2 (Emma) ──
+for days_ago, hour, member, rating, comment in [
+    (-12, 10, member2, 5, "Emma is phenomenal. Her energy is contagious and she made a tough workout feel fun. Already booked my next session."),
+    (-8,  13, member1, 3, "Session was okay. Emma is knowledgeable but the workout felt a bit generic for my level. Hoping for more personalisation next time."),
+    (-4,  10, member3, 5, "Emma completely transformed my approach to cardio. I learned more in one hour with her than in months on my own."),
+]:
+    start = make_dt(days_ago, hour)
+    end   = make_dt(days_ago, hour + 1)
+    slot, _  = get_or_create_availability(coach2, start, end)
+    appt, _  = get_or_create_appointment(coach2, member, slot, start, end, 'ACCEPTED')
+    get_or_create_review(coach2, member, appt, rating, comment)
+
+# Future open slots for coach2
+for days_ahead, hour in [(2, 10), (5, 13), (8, 10), (12, 13)]:
+    start = make_dt(days_ahead, hour)
+    end   = make_dt(days_ahead, hour + 1)
+    get_or_create_availability(coach2, start, end)
+
+# ── Coach 3 (David) ──
+for days_ago, hour, member, rating, comment in [
+    (-15, 8,  member3, 4, "David really knows his stuff when it comes to strength training. Good session overall, communication could be a bit clearer."),
+    (-9,  15, member1, 5, "Incredible session with David. He spotted a major form issue in my deadlift that I have had for years. Total game changer."),
+    (-5,  8,  member2, 4, "David is great — very technical and detail-oriented. Not for everyone but perfect if you want to really dial in your form."),
+]:
+    start = make_dt(days_ago, hour)
+    end   = make_dt(days_ago, hour + 1)
+    slot, _  = get_or_create_availability(coach3, start, end)
+    appt, _  = get_or_create_appointment(coach3, member, slot, start, end, 'ACCEPTED')
+    get_or_create_review(coach3, member, appt, rating, comment)
+
+# Future open slots for coach3
+for days_ahead, hour in [(4, 8), (4, 15), (6, 8), (11, 15)]:
+    start = make_dt(days_ahead, hour)
+    end   = make_dt(days_ahead, hour + 1)
+    get_or_create_availability(coach3, start, end)
+
+# A couple of pending appointments (no review yet — visible in coach schedule)
+pending_start = make_dt(1, 10)
+pending_end   = make_dt(1, 11)
+pending_slot, _ = get_or_create_availability(coach1, pending_start, pending_end)
+get_or_create_appointment(coach1, member2, pending_slot, pending_start, pending_end, 'PENDING')
+
+
+# ─────────────────────────────────────────────
+# 14. Messages
+# ─────────────────────────────────────────────
+print("\n── Creating Messages ──")
+
+messages_data = [
+    (member1, coach1, "Question about my program",       "Hi Mike, I wanted to ask about the progression plan you mentioned. Should I increase weight every week or every two weeks?", True),
+    (coach1,  member1, "Re: Question about my program",  "Hey Alice! Great question. For beginners I recommend increasing every two weeks. Focus on form first, then load. See you next session!", True),
+    (member2, coach2,  "Nutrition advice",               "Hi Emma, do you have any recommendations for pre-workout nutrition? I always feel low energy halfway through our sessions.", True),
+    (coach2,  member2, "Re: Nutrition advice",           "Hi Bob! Try a small meal 90 minutes before — oats with a banana works great. Stay hydrated too. Let me know how it goes!", False),
+    (member3, coach1,  "Cancellation notice",            "Hi Mike, unfortunately I need to cancel our session next Monday. Something came up at work. Can we reschedule to later in the week?", False),
+    (member1, coach3,  "First session questions",        "Hi David, I have never worked with a strength coach before. What should I bring and what can I expect from our first session?", False),
+]
+
+for sender, recipient, subject, body, is_read in messages_data:
+    if Message.objects.filter(sender=sender, recipient=recipient, subject=subject).exists():
+        print(f"  [skip] Message already exists: '{subject}'")
+        continue
+    Message.objects.create(sender=sender, recipient=recipient, subject=subject, body=body, is_read=is_read)
+    print(f"  [created] Message: {sender.first_name} → {recipient.first_name}: '{subject}'")
+
+
+# ─────────────────────────────────────────────
+# 15. Contact Messages
+# ─────────────────────────────────────────────
+print("\n── Creating Contact Messages ──")
+
+contact_data = [
+    ("Alice Johnson",  "alice@example.com",  "Issue with booking system",      "I tried to book a session with Coach Mike but the calendar keeps showing an error after I select a time slot. Please help!", True),
+    ("Bob Martinez",   "bob@example.com",    "Membership upgrade question",    "I am currently on the Standard plan and would like to know what additional benefits the Platinum plan includes before upgrading.", False),
+    ("Carol Davis",    "carol@example.com",  "Feedback on workout plans",      "I really enjoy the locked workout plans. Any chance you could add more HIIT-focused content? The current selection is great but more variety would be amazing.", False),
+    ("Anonymous User", "visitor@example.com","Website accessibility issue",    "Some of the text on the recipes page is very hard to read on mobile. The contrast between the text and background could be improved.", False),
+]
+
+for name, email, subject, message_body, is_read in contact_data:
+    if ContactMessage.objects.filter(email=email, subject=subject).exists():
+        print(f"  [skip] Contact message already exists: '{subject}'")
+        continue
+    ContactMessage.objects.create(name=name, email=email, subject=subject, message=message_body, is_read=is_read)
+    print(f"  [created] Contact message from {name}: '{subject}'")
+
+
+# ─────────────────────────────────────────────
 # Summary
 # ─────────────────────────────────────────────
 print("\n" + "="*50)
 print("✅ Seed complete! Summary:")
-print(f"   Users         : {User.objects.count()} total")
-print(f"   Articles      : {Article.objects.count()} total")
-print(f"   Recipes       : {Recipe.objects.count()} total")
-print(f"   Exercises     : {Exercise.objects.count()} total")
-print(f"   Workout Plans : {WorkoutPlan.objects.count()} total")
-print(f"   Equipment     : {EquipmentList.objects.count()} total")
-print(f"   Challenges    : {Challenge.objects.count()} total")
-print(f"   Gym Schedule  : {GymInfo.objects.count()} days configured")
+print(f"   Users                  : {User.objects.count()} total")
+print(f"   Articles               : {Article.objects.count()} total")
+print(f"   Recipes                : {Recipe.objects.count()} total")
+print(f"   Exercises              : {Exercise.objects.count()} total")
+print(f"   Workout Plans          : {WorkoutPlan.objects.count()} total")
+print(f"   Equipment              : {EquipmentList.objects.count()} total")
+print(f"   Challenges             : {Challenge.objects.count()} total")
+print(f"   Challenge Participations: {ChallengeParticipation.objects.count()} total")
+print(f"   Gym Schedule           : {GymInfo.objects.count()} days configured")
+print(f"   Coach Availabilities   : {CoachAvailability.objects.count()} total")
+print(f"   Coach Appointments     : {CoachAppointment.objects.count()} total")
+print(f"   Coach Reviews          : {CoachReview.objects.count()} total")
+print(f"   Messages               : {Message.objects.count()} total")
+print(f"   Contact Messages       : {ContactMessage.objects.count()} total")
 print()
 print("Login credentials:")
 print("  Admin  : admin@cufitness.com   / Admin@1234")

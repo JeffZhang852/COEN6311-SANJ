@@ -1,0 +1,273 @@
+{% extends 'CUFitness/general_website/base.html' %}
+{% load static %}
+
+{% block title %}Coach Home{% endblock %}
+
+{% block extra_styles %}
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'coach/coach_home.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<!---------------- Hero ----------------->
+<section class="ch-hero">
+  <div class="ch-hero-inner">
+    <div class="ch-hero-text">
+      <div class="eyebrow">
+        <span>Coach Dashboard</span>
+        <span style="color:var(--border-hover)">·</span>
+        <span style="color:var(--text-muted)">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+      </div>
+      <h1>Your <em>Schedule</em><br>at a Glance</h1>
+      <p class="subtitle">Upcoming sessions, pending requests, and open availability.</p>
+    </div>
+    <div class="ch-hero-kpis">
+      <div class="kpi-cell">
+        <div class="kpi-label">Upcoming</div>
+        <div class="kpi-value red">{{ upcoming_appointments.count }}</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Past (10)</div>
+        <div class="kpi-value">{{ past_appointments.count }}</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Open Slots</div>
+        <div class="kpi-value green">{{ availabilities.count }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!---------------- Upcoming Appointments ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">Scheduled</div>
+    <h2>Upcoming <em>Appointments</em></h2>
+    <p>Accept or reject pending requests directly from here.</p>
+  </div>
+
+  <div class="card-list" id="upcoming-list">
+    {% if upcoming_appointments %}
+      {% for appt in upcoming_appointments %}
+      <div class="appt-wrapper" id="appt-{{ appt.id }}">
+
+        <div class="appt-main">
+          <div class="card-index">{{ forloop.counter|stringformat:"02d" }}</div>
+
+          <div class="card-body">
+            <div class="card-title">{{ appt.member.first_name }} {{ appt.member.last_name }}</div>
+            <div class="card-sub">{{ appt.member.email }}</div>
+          </div>
+
+          <div class="card-meta">
+            <span class="badge {% if appt.status == 'PENDING' %}badge-pending{% else %}badge-accepted{% endif %} status-badge">
+              {% if appt.status == 'PENDING' %}Pending{% else %}Confirmed{% endif %}
+            </span>
+            <div class="card-date">
+              {{ appt.start_time|date:"M d, Y" }} · {{ appt.start_time|date:"H:i" }}–{{ appt.end_time|date:"H:i" }}
+            </div>
+          </div>
+
+          {% if appt.status == 'PENDING' %}
+          <div class="card-actions">
+            <button class="btn-accept" onclick="acceptAppointment({{ appt.id }}, this)">✓ Accept</button>
+            <button class="btn-reject" onclick="toggleRejectDrawer({{ appt.id }})">✕ Reject</button>
+          </div>
+          {% else %}
+          <div></div>
+          {% endif %}
+        </div>
+
+        {% if appt.status == 'PENDING' %}
+        <div class="reject-drawer" id="drawer-{{ appt.id }}">
+          <textarea
+            id="reason-{{ appt.id }}"
+            placeholder="Required: reason for rejecting this appointment (max 500 chars)"
+            maxlength="500"
+          ></textarea>
+          <div class="drawer-actions">
+            <button class="btn-confirm-reject" onclick="rejectAppointment({{ appt.id }}, this)">Confirm</button>
+            <button class="btn-cancel-reject"  onclick="toggleRejectDrawer({{ appt.id }})">Cancel</button>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">No upcoming appointments — your schedule is clear.</div>
+    {% endif %}
+  </div>
+</section>
+
+<!---------------- Open Availability ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">Availability</div>
+    <h2>Open <em>Slots</em></h2>
+    <p>Future time slots available for members to book.</p>
+  </div>
+  <div class="card-list">
+    {% if availabilities %}
+      {% for slot in availabilities %}
+      <div class="card-row">
+        <div class="card-index">{{ forloop.counter|stringformat:"02d" }}</div>
+        <div class="card-body">
+          <div class="card-title">{{ slot.start_time|date:"l, F j" }}</div>
+          <div class="card-sub">{{ slot.start_time|date:"H:i" }} – {{ slot.end_time|date:"H:i" }}</div>
+        </div>
+        <div class="card-meta">
+          {% if slot.is_booked %}
+            <span class="badge badge-accepted">Booked</span>
+          {% else %}
+            <span class="badge badge-open">Open</span>
+          {% endif %}
+          {% if slot.is_recurring %}<div class="card-date">Recurring</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">No upcoming availability — add slots so members can book you.</div>
+    {% endif %}
+  </div>
+</section>
+
+<!---------------- Past Appointments ----------------->
+<section class="section-block">
+  <div class="section-header">
+    <div class="section-label">History</div>
+    <h2>Past <em>Sessions</em></h2>
+    <p>Your 10 most recent completed appointments.</p>
+  </div>
+  <div class="card-list">
+    {% if past_appointments %}
+      {% for appt in past_appointments %}
+      <div class="card-row">
+        <div class="card-index">{{ forloop.counter|stringformat:"02d" }}</div>
+        <div class="card-body">
+          <div class="card-title">{{ appt.member.first_name }} {{ appt.member.last_name }}</div>
+          <div class="card-sub">{{ appt.member.email }}</div>
+        </div>
+        <div class="card-meta">
+          {% if appt.status == 'ACCEPTED' %}
+            <span class="badge badge-accepted">Completed</span>
+          {% elif appt.status == 'REFUSED' %}
+            <span class="badge badge-refused">Refused</span>
+          {% elif appt.status == 'CANCELLED' %}
+            <span class="badge badge-cancelled">Cancelled</span>
+          {% else %}
+            <span class="badge badge-pending">{{ appt.status }}</span>
+          {% endif %}
+          <div class="card-date">{{ appt.start_time|date:"M d, Y" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">No past sessions yet — your history will appear here.</div>
+    {% endif %}
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const CSRF = '{{ csrf_token }}';
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show toast-${type}`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function toggleRejectDrawer(id) {
+    const drawer = document.getElementById(`drawer-${id}`);
+    drawer.classList.toggle('open');
+    if (drawer.classList.contains('open')) {
+      drawer.querySelector('textarea').focus();
+    }
+  }
+
+  async function acceptAppointment(id, btn) {
+    btn.classList.add('loading');
+    btn.textContent = '…';
+    try {
+      const res = await fetch(`/api/appointment/${id}/accept/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': CSRF,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed.');
+
+      // Swap badge to Confirmed
+      const wrapper = document.getElementById(`appt-${id}`);
+      wrapper.querySelector('.status-badge').outerHTML =
+        `<span class="badge badge-accepted status-badge">Confirmed</span>`;
+
+      // Remove action buttons and the reject drawer
+      wrapper.querySelector('.card-actions').remove();
+      const drawer = document.getElementById(`drawer-${id}`);
+      if (drawer) drawer.remove();
+
+      showToast('Appointment confirmed.', 'success');
+    } catch (err) {
+      btn.classList.remove('loading');
+      btn.textContent = '✓ Accept';
+      showToast(err.message || 'Something went wrong.', 'error');
+    }
+  }
+
+  async function rejectAppointment(id, btn) {
+    const reason = document.getElementById(`reason-${id}`).value.trim();
+    if (!reason) {
+      showToast('A reason is required to reject an appointment.', 'error');
+      document.getElementById(`reason-${id}`).focus();
+      return;
+    }
+    btn.classList.add('loading');
+    btn.textContent = '…';
+    try {
+      const res = await fetch(`/api/appointment/${id}/reject/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': CSRF,
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({ refusal_reason: reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed.');
+
+      // Animate row out
+      const wrapper = document.getElementById(`appt-${id}`);
+      const h = wrapper.offsetHeight;
+      wrapper.style.maxHeight = h + 'px';
+      wrapper.style.overflow  = 'hidden';
+      wrapper.style.transition = 'opacity 0.3s ease, max-height 0.35s ease';
+      requestAnimationFrame(() => {
+        wrapper.style.opacity   = '0';
+        wrapper.style.maxHeight = '0';
+      });
+      setTimeout(() => {
+        wrapper.remove();
+        const list = document.getElementById('upcoming-list');
+        if (!list.querySelector('.appt-wrapper')) {
+          list.innerHTML = '<div class="empty-row">No upcoming appointments — your schedule is clear.</div>';
+        }
+      }, 370);
+
+      showToast('Appointment rejected.', 'success');
+    } catch (err) {
+      btn.classList.remove('loading');
+      btn.textContent = 'Confirm';
+      showToast(err.message || 'Something went wrong.', 'error');
+    }
+  }
+</script>
+
+{% endblock %}

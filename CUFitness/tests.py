@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.contrib.auth import get_user_model
-from CUFitness.models import CustomUser, Article, CoachAvailability, CoachAppointment, EquipmentList, Recipe, RecipeIngredient
+from CUFitness.models import CustomUser, Article, Challenge, CoachAvailability, CoachAppointment, EquipmentList, Recipe, RecipeIngredient
 from CUFitness.forms import ArticleForm, CustomUserCreationForm, PrivacySettingsForm, UpdateEmailForm, UpdatePasswordForm
 from decimal import Decimal
 
@@ -26,10 +26,10 @@ def make_coach(email='coach@test.com', password='Pass@1234'):
     )
 
 def make_staff(email='staff@test.com', password='Pass@1234'):
+    # Note: is_staff is NOT passed here — CustomUser.save() sets it automatically from role
     return User.objects.create_user(
         email=email, password=password, role='STAFF',
-        first_name='Alice', last_name='Admin',
-        is_staff=True, date_of_birth='1988-07-09'
+        first_name='Alice', last_name='Admin', date_of_birth='1988-07-09'
     )
 
 def make_article(author, title='Test Article', locked=False):
@@ -61,7 +61,7 @@ class UsersManagersTests(TestCase):
         u = User.objects.create_user(email="normal@user.com", password="foo")
         self.assertEqual(u.email, "normal@user.com")
         self.assertTrue(u.is_active)
-        self.assertFalse(u.is_staff)
+        self.assertFalse(u.is_staff)   # MEMBER role → is_staff should be False
         self.assertFalse(u.is_superuser)
         try:
             self.assertIsNone(u.username)
@@ -73,6 +73,18 @@ class UsersManagersTests(TestCase):
             User.objects.create_user(email="")
         with self.assertRaises(ValueError):
             User.objects.create_user(email="", password="foo")
+
+    def test_is_staff_derived_from_role(self):
+        # CustomUser.save() automatically sets is_staff based on role —
+        # STAFF and ADMIN get True, everything else gets False
+        staff = User.objects.create_user(email="staff@role.com", password="foo", role="STAFF")
+        self.assertTrue(staff.is_staff)
+
+        member = User.objects.create_user(email="member@role.com", password="foo", role="MEMBER")
+        self.assertFalse(member.is_staff)
+
+        coach = User.objects.create_user(email="coach@role.com", password="foo", role="COACH")
+        self.assertFalse(coach.is_staff)
 
     def test_create_superuser(self):
         User = get_user_model()
@@ -120,6 +132,12 @@ class EquipmentBookingTest(TestCase):
         self.equipment = EquipmentList.objects.create(name="Bench Press")
         self.t0 = timezone.now()
         self.t1 = self.t0 + timedelta(hours=1)
+
+    def test_equipment_is_active_by_default(self):
+        self.assertTrue(self.equipment.is_active)
+
+    def test_equipment_str_is_name(self):
+        self.assertEqual(str(self.equipment), "Bench Press")
 
 
 # ------------------------------------------------
@@ -202,6 +220,7 @@ class ArticleModelTest(TestCase):
         self.article = Article.objects.create(
             author=self.author,
             title="Test Article",
+            description="A short description.",
             body="This is a test article body.",
             locked=False,
         )
@@ -250,12 +269,17 @@ class LoginViewTest(TestCase):
 
     def test_coach_logs_in(self):
         r = self.client.post(reverse('coach_login'), {'email': 'coach@test.com', 'password': 'Pass@1234'})
-        self.assertRedirects(r, reverse('home'))
+        self.assertRedirects(r, reverse('coach_home'))
 
     def test_staff_bounced_to_staff_login(self):
-        # staff shouldn't be able to sneak in through the member login
+        # staff should not be able to sneak in through the member login page
         r = self.client.post(reverse('login'), {'email': 'staff@test.com', 'password': 'Pass@1234'})
         self.assertRedirects(r, reverse('staff_login'))
+
+    def test_coach_bounced_to_coach_login(self):
+        # coaches have their own login page — the member login should redirect them there
+        r = self.client.post(reverse('login'), {'email': 'coach@test.com', 'password': 'Pass@1234'})
+        self.assertRedirects(r, reverse('coach_login'))
 
     def test_wrong_password_bounced_back(self):
         r = self.client.post(reverse('login'), {'email': 'member@test.com', 'password': 'wrongpassword'})
@@ -405,6 +429,29 @@ class ArticleViewTest(TestCase):
         self.client.force_login(self.staff)
         r = self.client.get(reverse('article_details', args=[99999]))
         self.assertEqual(r.status_code, 404)
+
+    def test_orphaned_article_can_be_edited_by_any_staff(self):
+        # bug #3 — when the original author's account is deleted, the article's
+        # author FK becomes NULL. Any staff member should still be able to edit it.
+        article_id = self.article.id
+        self.staff.delete()
+        self.article.refresh_from_db()
+        self.assertIsNone(self.article.author)
+        # force_login AFTER the delete so the session isn't tied to the deleted user
+        self.client.force_login(self.other_staff)
+        self.client.post(reverse('staff_edit_article', args=[article_id]), {
+            'title': 'Edited Orphan', 'description': 'Updated.', 'body': 'Updated body.', 'locked': False,
+        })
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.title, 'Edited Orphan')
+
+    def test_orphaned_article_can_be_deleted_by_any_staff(self):
+        # same bug — deletion should also work once the author is gone
+        article_id = self.article.id
+        self.staff.delete()
+        self.client.force_login(self.other_staff)
+        self.client.post(reverse('staff_delete_article', args=[article_id]))
+        self.assertFalse(Article.objects.filter(id=article_id).exists())
 
 
 # ------------------------------------------------
@@ -913,7 +960,7 @@ class EmailUpdateViewTest(TestCase):
     def test_coach_can_update_email(self):
         coach = make_coach()
         self.client.force_login(coach)
-        self.client.post(reverse('user_settings'), {'email': 'newcoach@test.com', 'email_submit': '1'})
+        self.client.post(reverse('coach_settings'), {'email': 'newcoach@test.com', 'email_submit': '1'})
         coach.refresh_from_db()
         self.assertEqual(coach.email, 'newcoach@test.com')
 
@@ -1025,7 +1072,7 @@ class PasswordUpdateViewTest(TestCase):
     def test_coach_can_change_pw(self):
         coach = make_coach()
         self.client.force_login(coach)
-        self.client.post(reverse('user_settings'), {
+        self.client.post(reverse('coach_settings'), {
             'old_password': 'Pass@1234',
             'new_password1': 'NewCoach@9999',
             'new_password2': 'NewCoach@9999',
@@ -1281,9 +1328,66 @@ class ChallengeViewTest(TestCase):
 
     def setUp(self):
         self.client = Client()
+        self.staff = make_staff()
+        self.coach = make_coach()
         self.member = make_member()
+        self.challenge = Challenge.objects.create(
+            title='Test Challenge', description='Do the thing.',
+            goal_target=10,
+            start_date='2026-04-01', end_date='2026-04-30',
+            created_by=self.staff,
+        )
 
     def test_challenges_page_loads(self):
         self.client.force_login(self.member)
         r = self.client.get(reverse('user_challenges'))
         self.assertEqual(r.status_code, 200)
+
+    # --- challenge_details access control (bug #6) ---
+
+    def test_anon_blocked_from_challenge_details(self):
+        r = self.client.get(reverse('challenge_details', args=[self.challenge.id]))
+        self.assertNotEqual(r.status_code, 200)
+
+    def test_member_can_see_challenge_details(self):
+        self.client.force_login(self.member)
+        r = self.client.get(reverse('challenge_details', args=[self.challenge.id]))
+        self.assertEqual(r.status_code, 200)
+
+    def test_coach_can_see_challenge_details(self):
+        self.client.force_login(self.coach)
+        r = self.client.get(reverse('challenge_details', args=[self.challenge.id]))
+        self.assertEqual(r.status_code, 200)
+
+    def test_staff_can_see_challenge_details(self):
+        self.client.force_login(self.staff)
+        r = self.client.get(reverse('challenge_details', args=[self.challenge.id]))
+        self.assertEqual(r.status_code, 200)
+
+    # --- update_progress guards (bug #9) ---
+
+    def test_negative_progress_does_not_decrease_score(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('join_challenge', args=[self.challenge.id]))
+        participation = self.member.challengeparticipation_set.get(challenge=self.challenge)
+        participation.progress = 5
+        participation.save()
+        self.client.post(reverse('update_progress', args=[participation.id]), {'progress': '-999'})
+        participation.refresh_from_db()
+        self.assertEqual(participation.progress, 5)
+
+    def test_non_integer_progress_does_not_crash(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('join_challenge', args=[self.challenge.id]))
+        participation = self.member.challengeparticipation_set.get(challenge=self.challenge)
+        r = self.client.post(reverse('update_progress', args=[participation.id]), {'progress': 'abc'})
+        # should redirect cleanly, not 500
+        self.assertEqual(r.status_code, 302)
+
+    def test_progress_capped_at_goal_target(self):
+        self.client.force_login(self.member)
+        self.client.post(reverse('join_challenge', args=[self.challenge.id]))
+        participation = self.member.challengeparticipation_set.get(challenge=self.challenge)
+        self.client.post(reverse('update_progress', args=[participation.id]), {'progress': '99999'})
+        participation.refresh_from_db()
+        self.assertEqual(participation.progress, self.challenge.goal_target)

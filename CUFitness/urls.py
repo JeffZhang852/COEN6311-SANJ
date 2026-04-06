@@ -59,47 +59,43 @@ urlpatterns = [
     # path to user profiles from staff_home page
     path("staff_user_details/<int:user_id>/", views.staff_user_details, name="staff_user_details"),
 
-    # region Article Pages
+    # region -----------  Article Pages  -----------
     path("article_details/<int:id>/", views.article_details, name="article_details"),
  # -----------  Staff Article Pages  -----------
     path('staff_articles/', views.staff_articles, name='staff_articles'),
     path('staff_create_article/', views.staff_create_article, name='staff_create_article'),
-    # path to edit article page from article_details page
     path("staff_edit_article/<int:id>/edit/", views.staff_edit_article, name="staff_edit_article"),
     path("staff_delete_article/<int:id>/delete/", views.staff_delete_article, name="staff_delete_article"),
     # endregion
 
-    # region Recipe Pages
+    # region -----------  Recipe Pages  -----------
     path("recipe_details/<int:id>/", views.recipe_details, name="recipe_details"),
 # -----------  Staff Recipe Pages  -----------
     path("staff_recipes/", views.staff_recipes, name='staff_recipes'),
     path('staff_create_recipe/', views.staff_create_recipe, name='staff_create_recipe'),
-    # path to edit recipe page from recipe_details page
     path("staff_edit_recipe/<int:id>/edit/", views.staff_edit_recipe, name="staff_edit_recipe"),
     path("staff_delete_recipe/<int:id>/delete/", views.staff_delete_recipe, name="staff_delete_recipe"),
     # endregion
 
-    # region Exercise Pages
-    path("exercise_details/<int:id>/", views.exercise_details, name="exercise_details"),
-# -----------   Exercise Pages  -----------
-    path("staff_exercises/", views.staff_exercises, name='staff_exercises'),
-    path('staff_create_exercise/', views.staff_create_exercise, name='staff_create_exercise'),
-    # path to edit exercise page from exercise_details page
-    path("staff_edit_exercise/<int:id>/edit/", views.staff_edit_exercise, name="staff_edit_exercise"),
-    path("staff_delete_exercise/<int:id>/delete/", views.staff_delete_exercise, name="staff_delete_exercise"),
-    # endregion
-
-    # region Workout-Plans Pages
+    # region -----------  Workout Pages  -----------
     path("workout_plan_details/<int:id>/", views.workout_plan_details, name="workout_plan_details"),
     # -----------  Staff Workout Pages  -----------
     path("staff_workouts/", views.staff_workouts, name='staff_workouts'),
     path('staff_create_workout/', views.staff_create_workout, name='staff_create_workout'),
-    # path to edit workout page from workout_details page
     path("staff_edit_workout/<int:id>/edit/", views.staff_edit_workout, name="staff_edit_workout"),
     path("staff_delete_workout/<int:id>/delete/", views.staff_delete_workout, name="staff_delete_workout"),
     # endregion
 
-    # region Challenges Pages
+    # region -----------  Exercise Pages  -----------
+    path("exercise_details/<int:id>/", views.exercise_details, name="exercise_details"),
+    # -----------  Staff Exercise Pages  -----------
+    path("staff_exercises/", views.staff_exercises, name='staff_exercises'),
+    path('staff_create_exercise/', views.staff_create_exercise, name='staff_create_exercise'),
+    path("staff_edit_exercise/<int:id>/edit/", views.staff_edit_exercise, name="staff_edit_exercise"),
+    path("staff_delete_exercise/<int:id>/delete/", views.staff_delete_exercise, name="staff_delete_exercise"),
+    # endregion
+
+    # region -----------  Challenges Pages  -----------
     path("challenge_details/<int:id>/", views.challenge_details, name="challenge_details"),
     # -----------  Staff Challenges Pages  -----------
     path("staff_challenges/", views.staff_challenges, name='staff_challenges'),
@@ -115,7 +111,7 @@ urlpatterns = [
 
 
     # Coach Schedule & Availability AJAX
-    path('user_coach_schedule/', views.user_coach_schedule, name='user_coach_schedule'),
+    path('coach_schedule/', views.coach_schedule, name='coach_schedule'),
     path('api/availability/add/', views.ajax_add_availability, name='ajax_add_availability'),
     path('api/availability/<int:slot_id>/edit/', views.ajax_edit_availability, name='ajax_edit_availability'),
     path('api/availability/<int:slot_id>/delete/', views.ajax_delete_availability, name='ajax_delete_availability'),
@@ -141,6 +137,8 @@ urlpatterns = [
 
     # Coach Profile
     path('coach_profile/', views.coach_profile_page, name='coach_profile'),
+    path('coach_home/', views.coach_home, name='coach_home'),
+    path('coach_settings/', views.coach_settings, name='coach_settings'),
 
     # REST API endpoints
     path('api/', include(router.urls)),
@@ -148,7 +146,6 @@ urlpatterns = [
 
     # ========== Potentially Not Used URLs ==========
     # Legacy coach pages
-    # path('coach/dashboard/', views.coach_dashboard, name='coach_dashboard'),
     # path('coach/availability/', views.manage_availability, name='manage_availability'),
     # path('coach/availability/delete/<int:slot_id>/', views.delete_availability, name='delete_availability'),
     # path('coach/appointments/', views.manage_appointments, name='manage_appointments'),
