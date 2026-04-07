@@ -33,9 +33,8 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from CUFitness.models import (Article, Recipe, RecipeIngredient, Exercise, WorkoutPlan, WorkoutPlanExercise,
-                              EquipmentList, Challenge, ChallengeParticipation, GymInfo,
-                              CoachAvailability, CoachAppointment, CoachReview,
-                              Message, ContactMessage)
+          EquipmentList, Challenge, ChallengeParticipation, GymInfo, CoachAvailability,
+          CoachAppointment, CoachReview,Message, ContactMessage)
 
 from django.utils import timezone
 from datetime import datetime, date, time, timedelta
@@ -58,14 +57,14 @@ def create_user(email, password, first_name, last_name,
     else:
         user = User.objects.create_user(email=email, password=password)
 
-    user.first_name    = first_name
-    user.last_name     = last_name
-    user.role          = role
-    user.membership    = membership
+    user.first_name = first_name
+    user.last_name = last_name
+    user.role = role
+    user.membership = membership
     # Note: is_staff is intentionally NOT set here — CustomUser.save() automatically
     # derives it from the role field (STAFF and ADMIN → is_staff=True).
-    user.phone_number  = phone_number
-    user.address       = address
+    user.phone_number = phone_number
+    user.address = address
     user.date_of_birth = date_of_birth
     if role == 'COACH':
         user.coach_request_status = 'APPROVED'
@@ -96,15 +95,15 @@ def create_article(author, title, description, body, locked):
 # ─────────────────────────────────────────────
 print("\n── Creating Admin ──")
 admin = create_user(
-    email          = "admin@cufitness.com",
-    password       = "Admin@1234",
-    first_name     = "Admin",
-    last_name      = "User",
-    role           = "ADMIN",
-    is_superuser   = True,
-    phone_number   = "+1 514 900 0001",
-    address        = "1455 De Maisonneuve Blvd W, Montreal, QC H3G 1M8",
-    date_of_birth  = "1980-01-15",
+    email = "admin@cufitness.com",
+    password = "Admin@1234",
+    first_name = "Admin",
+    last_name= "User",
+    role = "ADMIN",
+    is_superuser= True,
+    phone_number= "+1 514 900 0001",
+    address = "1455 De Maisonneuve Blvd W, Montreal, QC H3G 1M8",
+    date_of_birth = "1980-01-15",
 )
 
 # ─────────────────────────────────────────────
@@ -112,25 +111,25 @@ admin = create_user(
 # ─────────────────────────────────────────────
 print("\n── Creating Staff Users ──")
 staff1 = create_user(
-    email          = "staff1@cufitness.com",
-    password       = "Staff@1234",
-    first_name     = "Sarah",
-    last_name      = "Connor",
-    role           = "STAFF",
-    phone_number   = "+1 514 900 0002",
-    address        = "4121 Sherbrooke St W, Westmount, QC H3Z 1B5",
-    date_of_birth  = "1990-03-22",
+    email = "staff1@cufitness.com",
+    password = "Staff@1234",
+    first_name = "Sarah",
+    last_name= "Connor",
+    role = "STAFF",
+    phone_number= "+1 514 900 0002",
+    address = "4121 Sherbrooke St W, Westmount, QC H3Z 1B5",
+    date_of_birth = "1990-03-22",
 )
 
 staff2 = create_user(
-    email          = "staff2@cufitness.com",
-    password       = "Staff@1234",
-    first_name     = "James",
-    last_name      = "Wilson",
-    role           = "STAFF",
-    phone_number   = "+1 514 900 0003",
-    address        = "7005 Taschereau Blvd, Brossard, QC J4Z 1A7",
-    date_of_birth  = "1988-07-09",
+    email = "staff2@cufitness.com",
+    password = "Staff@1234",
+    first_name = "James",
+    last_name= "Wilson",
+    role = "STAFF",
+    phone_number= "+1 514 900 0003",
+    address = "7005 Taschereau Blvd, Brossard, QC J4Z 1A7",
+    date_of_birth = "1988-07-09",
 )
 
 # ─────────────────────────────────────────────
@@ -138,39 +137,39 @@ staff2 = create_user(
 # ─────────────────────────────────────────────
 print("\n── Creating Regular Members ──")
 member1 = create_user(
-    email          = "member1@cufitness.com",
-    password       = "Member@1234",
-    first_name     = "Alice",
-    last_name      = "Johnson",
-    role           = "MEMBER",
-    membership     = "BASIC",
-    phone_number   = "+1 514 900 0004",
-    address        = "3480 Rue University, Montreal, QC H3A 2A7",
-    date_of_birth  = "1998-11-30",
+    email = "member1@cufitness.com",
+    password = "Member@1234",
+    first_name = "Alice",
+    last_name= "Johnson",
+    role = "MEMBER",
+    membership = "BASIC",
+    phone_number= "+1 514 900 0004",
+    address = "3480 Rue University, Montreal, QC H3A 2A7",
+    date_of_birth = "1998-11-30",
 )
 
 member2 = create_user(
-    email          = "member2@cufitness.com",
-    password       = "Member@1234",
-    first_name     = "Bob",
-    last_name      = "Martinez",
-    role           = "MEMBER",
-    membership     = "STANDARD",
-    phone_number   = "+1 514 900 0005",
-    address        = "1600 Lapointe St, Longueuil, QC J4K 2K1",
-    date_of_birth  = "1995-05-14",
+    email = "member2@cufitness.com",
+    password = "Member@1234",
+    first_name = "Bob",
+    last_name= "Martinez",
+    role = "MEMBER",
+    membership = "STANDARD",
+    phone_number= "+1 514 900 0005",
+    address = "1600 Lapointe St, Longueuil, QC J4K 2K1",
+    date_of_birth = "1995-05-14",
 )
 
 member3 = create_user(
-    email          = "member3@cufitness.com",
-    password       = "Member@1234",
-    first_name     = "Carol",
-    last_name      = "Davis",
-    role           = "MEMBER",
-    membership     = "PLATINUM",
-    phone_number   = "+1 514 900 0006",
-    address        = "900 Boulevard de Maisonneuve E, Montreal, QC H2L 1Y8",
-    date_of_birth  = "2000-02-28",
+    email = "member3@cufitness.com",
+    password = "Member@1234",
+    first_name = "Carol",
+    last_name= "Davis",
+    role = "MEMBER",
+    membership = "PLATINUM",
+    phone_number= "+1 514 900 0006",
+    address = "900 Boulevard de Maisonneuve E, Montreal, QC H2L 1Y8",
+    date_of_birth = "2000-02-28",
 )
 
 # ─────────────────────────────────────────────
@@ -178,39 +177,39 @@ member3 = create_user(
 # ─────────────────────────────────────────────
 print("\n── Creating Coach ──")
 coach1 = create_user(
-    email          = "coach1@cufitness.com",
-    password       = "Coach@1234",
-    first_name     = "Mike",
-    last_name      = "Thompson",
-    role           = "COACH",
-    membership     = "BASIC",
-    phone_number   = "+1 514 900 0007",
-    address        = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
-    date_of_birth  = "1985-09-03",
+    email = "coach1@cufitness.com",
+    password = "Coach@1234",
+    first_name = "Mike",
+    last_name= "Thompson",
+    role = "COACH",
+    membership = "BASIC",
+    phone_number= "+1 514 900 0007",
+    address = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
+    date_of_birth = "1985-09-03",
 )
 
 coach2 = create_user(
-    email          = "coach2@cufitness.com",
-    password       = "Coach@1234",
-    first_name     = "George",
-    last_name      = "Thompson",
-    role           = "COACH",
-    membership     = "BASIC",
-    phone_number   = "+1 514 900 0008",
-    address        = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
-    date_of_birth  = "1985-09-03",
+    email = "coach2@cufitness.com",
+    password = "Coach@1234",
+    first_name = "George",
+    last_name= "Thompson",
+    role = "COACH",
+    membership = "BASIC",
+    phone_number= "+1 514 900 0008",
+    address = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
+    date_of_birth = "1985-09-03",
 )
 
 coach3 = create_user(
-    email          = "coach3@cufitness.com",
-    password       = "Coach@1234",
-    first_name     = "Sarah",
-    last_name      = "Thompson",
-    role           = "COACH",
-    membership     = "BASIC",
-    phone_number   = "+1 514 900 0009",
-    address        = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
-    date_of_birth  = "1985-09-03",
+    email = "coach3@cufitness.com",
+    password = "Coach@1234",
+    first_name = "Sarah",
+    last_name= "Thompson",
+    role = "COACH",
+    membership = "BASIC",
+    phone_number= "+1 514 900 0009",
+    address = "5757 Decarie Blvd, Montreal, QC H3X 3L3",
+    date_of_birth = "1985-09-03",
 )
 
 # ─────────────────────────────────────────────
@@ -219,10 +218,10 @@ coach3 = create_user(
 print("\n── Creating Articles ──")
 
 create_article(
-    author      = staff1,
-    title       = "5 Best Warm-Up Exercises Before Any Workout",
+    author= staff1,
+    title = "5 Best Warm-Up Exercises Before Any Workout",
     description = "A quick guide to effective warm-up routines that prevent injury.",
-    body        = (
+    body = (
         "Warming up before exercise is essential to prepare your muscles and joints. "
         "Here are five exercises everyone should do:\n\n"
         "1. Jumping Jacks (2 minutes) — gets your heart rate up.\n"
@@ -232,14 +231,14 @@ create_article(
         "5. High Knees (30 seconds) — full-body activation.\n\n"
         "Always spend at least 5–10 minutes warming up before intense activity."
     ),
-    locked      = False,
+    locked= False,
 )
 
 create_article(
-    author      = staff1,
-    title       = "Understanding Macronutrients: Protein, Carbs & Fats",
+    author= staff1,
+    title = "Understanding Macronutrients: Protein, Carbs & Fats",
     description = "Learn what macronutrients are and how to balance them in your diet.",
-    body        = (
+    body = (
         "Macronutrients are the three main categories of nutrients that fuel your body:\n\n"
         "**Protein** (4 kcal/g): Builds and repairs muscle tissue. Aim for 0.8–1.2g per kg of body weight.\n\n"
         "**Carbohydrates** (4 kcal/g): Your body's primary energy source. Choose complex carbs like oats, "
@@ -249,14 +248,14 @@ create_article(
         "A balanced plate typically contains 40% carbs, 30% protein, and 30% fat — but this varies "
         "based on your fitness goals."
     ),
-    locked      = False,
+    locked= False,
 )
 
 create_article(
-    author      = staff2,
-    title       = "Beginner's Guide to Strength Training",
+    author= staff2,
+    title = "Beginner's Guide to Strength Training",
     description = "Everything a beginner needs to know to start lifting safely and effectively.",
-    body        = (
+    body = (
         "Starting strength training can feel overwhelming, but it doesn't have to be.\n\n"
         "**Start with compound movements**: Squats, deadlifts, bench press, and rows give you the most "
         "benefit per exercise.\n\n"
@@ -266,14 +265,14 @@ create_article(
         "training the same muscle group.\n\n"
         "A simple 3-day/week full-body routine is perfect for beginners."
     ),
-    locked      = False,
+    locked= False,
 )
 
 create_article(
-    author      = staff2,
-    title       = "Advanced HIIT Protocols for Maximum Fat Loss",
+    author= staff2,
+    title = "Advanced HIIT Protocols for Maximum Fat Loss",
     description = "Premium high-intensity interval training plans designed for experienced athletes.",
-    body        = (
+    body = (
         "High-Intensity Interval Training (HIIT) at an advanced level requires careful programming "
         "to maximize results while avoiding overtraining.\n\n"
         "**Protocol 1 — Tabata**: 20 seconds all-out effort, 10 seconds rest, 8 rounds per exercise.\n\n"
@@ -283,14 +282,14 @@ create_article(
         "Limit sessions to 3x/week to allow full recovery. Pair with adequate protein intake (1.6g/kg) "
         "to preserve lean muscle mass."
     ),
-    locked      = True,   # Premium content
+    locked= True, # Premium content
 )
 
 create_article(
-    author      = staff1,
-    title       = "Personalized Meal Planning: A Step-by-Step System",
+    author= staff1,
+    title = "Personalized Meal Planning: A Step-by-Step System",
     description = "A detailed premium guide to building a sustainable meal plan tailored to your goals.",
-    body        = (
+    body = (
         "Building a personalized meal plan is the single most impactful nutrition change you can make.\n\n"
         "**Step 1 — Calculate your TDEE**: Total Daily Energy Expenditure is your maintenance calorie number. "
         "Use the Mifflin-St Jeor equation as a baseline.\n\n"
@@ -304,14 +303,14 @@ create_article(
         "isn't moving in the right direction.\n\n"
         "This system is included in the Platinum and Standard membership tiers."
     ),
-    locked      = True,   # Premium content
+    locked= True, # Premium content
 )
 
 create_article(
-    author      = staff2,
-    title       = "The Science of Sleep & Athletic Recovery",
+    author= staff2,
+    title = "The Science of Sleep & Athletic Recovery",
     description = "Why sleep is the most underrated performance tool and how to optimise it.",
-    body        = (
+    body = (
         "Most athletes obsess over training and nutrition but neglect the single most powerful recovery tool available: sleep.\n\n"
         "**What happens during sleep**: Growth hormone secretion peaks during deep sleep stages, driving muscle repair and tissue regeneration. "
         "Memory consolidation during REM sleep also improves motor skill learning — meaning technique practice is literally processed overnight.\n\n"
@@ -325,14 +324,14 @@ create_article(
         "- Consider magnesium glycinate (200–400mg) before bed to support relaxation\n\n"
         "Treat sleep with the same intentionality as your training sessions and your recovery will improve dramatically."
     ),
-    locked      = False,
+    locked= False,
 )
 
 create_article(
-    author      = staff1,
-    title       = "How to Prevent the 5 Most Common Gym Injuries",
+    author= staff1,
+    title = "How to Prevent the 5 Most Common Gym Injuries",
     description = "Practical prevention strategies for the injuries that sideline most gym-goers.",
-    body        = (
+    body = (
         "Injuries don't just happen — they're almost always the result of predictable, avoidable mistakes. "
         "Here are the five most common gym injuries and exactly how to prevent them.\n\n"
         "**1. Lower Back Strain**\nCause: Rounding the lower back during deadlifts and rows.\n"
@@ -348,14 +347,14 @@ create_article(
         "Fix: Keep wrists neutral and stacked over elbows. Add wrist curls and extensions to accessory work.\n\n"
         "Prevention is always better than rehab. A 5-minute prehab routine before each session is an investment that pays for itself."
     ),
-    locked      = False,
+    locked= False,
 )
 
 create_article(
-    author      = staff2,
-    title       = "Creatine: What the Research Actually Says",
+    author = staff2,
+    title = "Creatine: What the Research Actually Says",
     description = "An evidence-based breakdown of the most studied supplement in sports science.",
-    body        = (
+    body = (
         "Creatine monohydrate is the single most researched and most effective legal performance supplement available. "
         "Here's what the science actually shows — without the marketing hype.\n\n"
         "**What it does**: Creatine increases phosphocreatine stores in your muscles, allowing faster regeneration of ATP "
@@ -374,14 +373,14 @@ create_article(
         "**Form to buy**: Plain creatine monohydrate. Not creatine HCl, ethyl ester, or any 'advanced' variant — "
         "none of these have been shown to outperform plain monohydrate at equivalent doses."
     ),
-    locked      = False,
+    locked = False,
 )
 
 create_article(
-    author      = staff1,
-    title       = "Mental Toughness: Building a Resilient Athletic Mindset",
+    author = staff1,
+    title = "Mental Toughness: Building a Resilient Athletic Mindset",
     description = "Psychological tools used by elite athletes to push through discomfort and stay consistent.",
-    body        = (
+    body = (
         "Physical capacity is only half the equation. What separates consistent athletes from inconsistent ones "
         "is almost always psychological, not physiological.\n\n"
         "**1. Reframe discomfort as signal, not threat**\nElite athletes learn to interpret the burning sensation of hard effort "
@@ -397,14 +396,14 @@ create_article(
         "or whether progress is fast. You can control your effort, your preparation, and your consistency. "
         "Direct all mental energy toward what's in your control."
     ),
-    locked      = False,
+    locked = False,
 )
 
 create_article(
-    author      = staff2,
-    title       = "Periodisation for Intermediate Athletes: How to Structure Your Year",
+    author = staff2,
+    title = "Periodisation for Intermediate Athletes: How to Structure Your Year",
     description = "A premium guide to annual training planning using proven periodisation models.",
-    body        = (
+    body = (
         "Once you've been training consistently for 1–2 years, random programming stops working. "
         "Progress requires deliberate periodisation — the planned variation of training stress over time.\n\n"
         "**Why periodisation?**: Your body adapts to any fixed stimulus within 4–8 weeks. "
@@ -423,7 +422,7 @@ create_article(
         "This 8-week mini-cycle is a reliable framework for continuous progress.\n\n"
         "This guide is part of the CUFitness Premium coaching programme."
     ),
-    locked      = True,
+    locked= True,
 )
 
 # ─────────────────────────────────────────────
@@ -437,26 +436,26 @@ def create_recipe(author, title, description, difficulty,
         return Recipe.objects.get(title=title)
 
     recipe = Recipe.objects.create(
-        author               = author,
-        title                = title,
-        description          = description,
-        difficulty           = difficulty,
-        prep_time_minutes    = prep,
-        cook_time_minutes    = cook,
-        servings             = servings,
+        author = author,
+        title = title,
+        description = description,
+        difficulty = difficulty,
+        prep_time_minutes = prep,
+        cook_time_minutes = cook,
+        servings = servings,
         calories_per_serving = calories,
-        dietary_restrictions      = dietary,
-        locked               = locked,
-        instructions         = instructions,
+        dietary_restrictions= dietary,
+        locked = locked,
+        instructions= instructions,
     )
 
     for ing in ingredients:
         RecipeIngredient.objects.create(
-            recipe   = recipe,
-            name     = ing['name'],
+            recipe= recipe,
+            name = ing['name'],
             quantity = ing['quantity'],
-            unit     = ing['unit'],
-            notes    = ing.get('notes', ''),
+            unit = ing['unit'],
+            notes = ing.get('notes', ''),
         )
 
     status = "🔒 locked" if locked else "🔓 unlocked"
@@ -467,16 +466,16 @@ def create_recipe(author, title, description, difficulty,
 print("\n── Creating Recipes ──")
 
 create_recipe(
-    author      = staff1,
-    title       = "High-Protein Chicken & Quinoa Bowl",
+    author= staff1,
+    title = "High-Protein Chicken & Quinoa Bowl",
     description = "A quick post-workout meal packed with lean protein and complex carbs.",
-    difficulty  = "EASY",
-    prep        = 10,
-    cook        = 20,
-    servings    = 2,
-    calories    = 480,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 10,
+    cook = 20,
+    servings = 2,
+    calories = 480,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked= False,
     instructions = (
         "1. Rinse quinoa under cold water and cook in chicken broth (1:2 ratio) for 15 minutes.\n"
         "2. Season chicken breast with salt, pepper, and garlic powder.\n"
@@ -486,28 +485,28 @@ create_recipe(
         "6. Drizzle with lemon juice and serve."
     ),
     ingredients = [
-        {'name': 'chicken breast',    'quantity': '300', 'unit': 'G'},
-        {'name': 'quinoa',            'quantity': '1',   'unit': 'CUP'},
-        {'name': 'chicken broth',     'quantity': '2',   'unit': 'CUP'},
-        {'name': 'olive oil',         'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'cherry tomatoes',   'quantity': '100', 'unit': 'G',    'notes': 'halved'},
-        {'name': 'cucumber',          'quantity': '0.5', 'unit': 'WHOLE','notes': 'diced'},
-        {'name': 'lemon juice',       'quantity': '2',   'unit': 'TBSP'},
-        {'name': 'garlic powder',     'quantity': '1',   'unit': 'TSP'},
+        {'name': 'chicken breast', 'quantity': '300', 'unit': 'G'},
+        {'name': 'quinoa', 'quantity': '1', 'unit': 'CUP'},
+        {'name': 'chicken broth', 'quantity': '2', 'unit': 'CUP'},
+        {'name': 'olive oil', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'cherry tomatoes', 'quantity': '100', 'unit': 'G', 'notes': 'halved'},
+        {'name': 'cucumber', 'quantity': '0.5', 'unit': 'WHOLE','notes': 'diced'},
+        {'name': 'lemon juice', 'quantity': '2', 'unit': 'TBSP'},
+        {'name': 'garlic powder', 'quantity': '1', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = staff2,
-    title       = "Overnight Oats with Berries",
+    author= staff2,
+    title = "Overnight Oats with Berries",
     description = "No-cook, prep-ahead breakfast loaded with fibre and antioxidants.",
-    difficulty  = "EASY",
-    prep        = 5,
-    cook        = 0,
-    servings    = 1,
-    calories    = 350,
-    dietary     = ['NO_NUTS', 'VEGETARIAN'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 5,
+    cook = 0,
+    servings = 1,
+    calories = 350,
+    dietary = ['NO_NUTS', 'VEGETARIAN'],
+    locked= False,
     instructions = (
         "1. Add oats, chia seeds, and milk to a jar or container with a lid.\n"
         "2. Stir in honey and vanilla extract.\n"
@@ -516,27 +515,27 @@ create_recipe(
         "5. Stir and eat cold, or microwave for 90 seconds if you prefer it warm."
     ),
     ingredients = [
-        {'name': 'rolled oats',    'quantity': '0.5', 'unit': 'CUP'},
-        {'name': 'chia seeds',     'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'milk',           'quantity': '0.5', 'unit': 'CUP',  'notes': 'dairy or plant-based'},
-        {'name': 'Greek yogurt',   'quantity': '100', 'unit': 'G'},
-        {'name': 'mixed berries',  'quantity': '80',  'unit': 'G',    'notes': 'fresh or frozen'},
-        {'name': 'honey',          'quantity': '1',   'unit': 'TSP'},
+        {'name': 'rolled oats', 'quantity': '0.5', 'unit': 'CUP'},
+        {'name': 'chia seeds', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'milk', 'quantity': '0.5', 'unit': 'CUP', 'notes': 'dairy or plant-based'},
+        {'name': 'Greek yogurt', 'quantity': '100', 'unit': 'G'},
+        {'name': 'mixed berries', 'quantity': '80', 'unit': 'G', 'notes': 'fresh or frozen'},
+        {'name': 'honey', 'quantity': '1', 'unit': 'TSP'},
         {'name': 'vanilla extract','quantity': '0.5', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = coach2,
-    title       = "Lean Turkey Meatballs with Zoodles",
+    author= coach2,
+    title = "Lean Turkey Meatballs with Zoodles",
     description = "Low-carb, high-protein dinner that's easy to batch cook for the week.",
-    difficulty  = "MEDIUM",
-    prep        = 15,
-    cook        = 25,
-    servings    = 4,
-    calories    = 320,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
-    locked      = False,
+    difficulty = "MEDIUM",
+    prep = 15,
+    cook = 25,
+    servings = 4,
+    calories = 320,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked= False,
     instructions = (
         "1. Preheat oven to 200°C (400°F). Line a baking tray with parchment paper.\n"
         "2. Mix turkey mince with egg, garlic, parsley, salt, and pepper. Roll into 16 equal balls.\n"
@@ -546,28 +545,28 @@ create_recipe(
         "6. Plate zoodles, top with meatballs, and spoon over sauce. Garnish with fresh basil."
     ),
     ingredients = [
-        {'name': 'turkey mince',    'quantity': '500', 'unit': 'G'},
-        {'name': 'egg',             'quantity': '1',   'unit': 'WHOLE'},
-        {'name': 'garlic',          'quantity': '2',   'unit': 'WHOLE','notes': 'cloves, minced'},
-        {'name': 'fresh parsley',   'quantity': '2',   'unit': 'TBSP','notes': 'chopped'},
-        {'name': 'zucchini',        'quantity': '3',   'unit': 'WHOLE','notes': 'spiralized'},
-        {'name': 'olive oil',       'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'marinara sauce',  'quantity': '1.5', 'unit': 'CUP', 'notes': 'store-bought or homemade'},
-        {'name': 'fresh basil',     'quantity': '1',   'unit': 'PINCH','notes': 'to garnish'},
+        {'name': 'turkey mince', 'quantity': '500', 'unit': 'G'},
+        {'name': 'egg', 'quantity': '1', 'unit': 'WHOLE'},
+        {'name': 'garlic', 'quantity': '2', 'unit': 'WHOLE','notes': 'cloves, minced'},
+        {'name': 'fresh parsley', 'quantity': '2', 'unit': 'TBSP','notes': 'chopped'},
+        {'name': 'zucchini', 'quantity': '3', 'unit': 'WHOLE','notes': 'spiralized'},
+        {'name': 'olive oil', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'marinara sauce', 'quantity': '1.5', 'unit': 'CUP', 'notes': 'store-bought or homemade'},
+        {'name': 'fresh basil', 'quantity': '1', 'unit': 'PINCH','notes': 'to garnish'},
     ],
 )
 
 create_recipe(
-    author      = staff1,
-    title       = "Vegan Black Bean Tacos",
+    author= staff1,
+    title = "Vegan Black Bean Tacos",
     description = "Flavourful plant-based tacos ready in under 20 minutes.",
-    difficulty  = "EASY",
-    prep        = 10,
-    cook        = 10,
-    servings    = 2,
-    calories    = 410,
-    dietary     = ['VEGAN', 'NO_DAIRY_LACTOSE', 'NO_SEAFOOD'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 10,
+    cook = 10,
+    servings = 2,
+    calories = 410,
+    dietary = ['VEGAN', 'NO_DAIRY_LACTOSE', 'NO_SEAFOOD'],
+    locked= False,
     instructions = (
         "1. Drain and rinse black beans. Heat in a pan with cumin, smoked paprika, and a pinch of salt for 3–4 minutes.\n"
         "2. Warm corn tortillas directly on a gas flame or dry pan for 30 seconds each side.\n"
@@ -576,29 +575,29 @@ create_recipe(
         "5. Serve immediately with lime wedges."
     ),
     ingredients = [
-        {'name': 'black beans',     'quantity': '400', 'unit': 'G',    'notes': '1 can, drained'},
-        {'name': 'corn tortillas',  'quantity': '4',   'unit': 'WHOLE'},
-        {'name': 'avocado',         'quantity': '1',   'unit': 'WHOLE'},
-        {'name': 'lime',            'quantity': '1',   'unit': 'WHOLE','notes': 'juiced'},
-        {'name': 'salsa',           'quantity': '4',   'unit': 'TBSP'},
-        {'name': 'red onion',       'quantity': '0.25','unit': 'WHOLE','notes': 'finely diced'},
-        {'name': 'fresh coriander', 'quantity': '1',   'unit': 'PINCH'},
-        {'name': 'cumin',           'quantity': '1',   'unit': 'TSP'},
-        {'name': 'smoked paprika',  'quantity': '0.5', 'unit': 'TSP'},
+        {'name': 'black beans', 'quantity': '400', 'unit': 'G', 'notes': '1 can, drained'},
+        {'name': 'corn tortillas', 'quantity': '4', 'unit': 'WHOLE'},
+        {'name': 'avocado', 'quantity': '1', 'unit': 'WHOLE'},
+        {'name': 'lime', 'quantity': '1', 'unit': 'WHOLE','notes': 'juiced'},
+        {'name': 'salsa', 'quantity': '4', 'unit': 'TBSP'},
+        {'name': 'red onion', 'quantity': '0.25','unit': 'WHOLE','notes': 'finely diced'},
+        {'name': 'fresh coriander', 'quantity': '1', 'unit': 'PINCH'},
+        {'name': 'cumin', 'quantity': '1', 'unit': 'TSP'},
+        {'name': 'smoked paprika', 'quantity': '0.5', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = coach2,
-    title       = "Athlete's Salmon & Sweet Potato Power Plate",
+    author= coach2,
+    title = "Athlete's Salmon & Sweet Potato Power Plate",
     description = "Premium performance meal optimised for muscle recovery and sustained energy.",
-    difficulty  = "MEDIUM",
-    prep        = 10,
-    cook        = 30,
-    servings    = 2,
-    calories    = 620,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
-    locked      = True,   # Premium content
+    difficulty = "MEDIUM",
+    prep = 10,
+    cook = 30,
+    servings = 2,
+    calories = 620,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked= True, # Premium content
     instructions = (
         "1. Preheat oven to 200°C (400°F). Cube sweet potatoes and toss with olive oil, salt, and paprika.\n"
         "2. Roast sweet potatoes for 25–30 minutes, flipping halfway, until caramelised.\n"
@@ -608,28 +607,28 @@ create_recipe(
         "6. Plate sweet potato, broccoli, and salmon. Drizzle with tahini thinned with lemon juice and water."
     ),
     ingredients = [
-        {'name': 'salmon fillet',   'quantity': '300', 'unit': 'G',    'notes': '2 fillets, skin-on'},
-        {'name': 'sweet potato',    'quantity': '400', 'unit': 'G',    'notes': 'cubed'},
-        {'name': 'broccoli',        'quantity': '200', 'unit': 'G',    'notes': 'cut into florets'},
-        {'name': 'olive oil',       'quantity': '2',   'unit': 'TBSP'},
-        {'name': 'tahini',          'quantity': '2',   'unit': 'TBSP'},
-        {'name': 'lemon juice',     'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'garlic',          'quantity': '1',   'unit': 'WHOLE', 'notes': 'clove, minced'},
-        {'name': 'smoked paprika',  'quantity': '1',   'unit': 'TSP'},
+        {'name': 'salmon fillet', 'quantity': '300', 'unit': 'G', 'notes': '2 fillets, skin-on'},
+        {'name': 'sweet potato', 'quantity': '400', 'unit': 'G', 'notes': 'cubed'},
+        {'name': 'broccoli', 'quantity': '200', 'unit': 'G', 'notes': 'cut into florets'},
+        {'name': 'olive oil', 'quantity': '2', 'unit': 'TBSP'},
+        {'name': 'tahini', 'quantity': '2', 'unit': 'TBSP'},
+        {'name': 'lemon juice', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'garlic', 'quantity': '1', 'unit': 'WHOLE', 'notes': 'clove, minced'},
+        {'name': 'smoked paprika', 'quantity': '1', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = staff2,
-    title       = "Elite Bulking Beef & Rice Bowl",
+    author= staff2,
+    title = "Elite Bulking Beef & Rice Bowl",
     description = "Premium high-calorie mass-gain meal for serious athletes in a caloric surplus.",
-    difficulty  = "MEDIUM",
-    prep        = 10,
-    cook        = 25,
-    servings    = 2,
-    calories    = 850,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
-    locked      = True,   # Premium content
+    difficulty = "MEDIUM",
+    prep = 10,
+    cook = 25,
+    servings = 2,
+    calories = 850,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE'],
+    locked= True, # Premium content
     instructions = (
         "1. Cook jasmine rice according to package instructions.\n"
         "2. Brown beef mince in a hot pan over high heat — don't stir too often, let it get a crust.\n"
@@ -639,30 +638,30 @@ create_recipe(
         "6. Serve beef mixture over rice, topped with a fried egg, sliced spring onion, and sesame seeds."
     ),
     ingredients = [
-        {'name': 'beef mince',      'quantity': '400', 'unit': 'G',    'notes': 'lean, 5% fat'},
-        {'name': 'jasmine rice',    'quantity': '1.5', 'unit': 'CUP'},
-        {'name': 'eggs',            'quantity': '2',   'unit': 'WHOLE'},
-        {'name': 'edamame',         'quantity': '100', 'unit': 'G',    'notes': 'shelled, frozen is fine'},
-        {'name': 'tamari soy sauce','quantity': '3',   'unit': 'TBSP'},
-        {'name': 'sesame oil',      'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'fresh ginger',    'quantity': '1',   'unit': 'TSP',  'notes': 'grated'},
-        {'name': 'garlic',          'quantity': '2',   'unit': 'WHOLE','notes': 'cloves, minced'},
-        {'name': 'spring onion',    'quantity': '2',   'unit': 'WHOLE','notes': 'sliced'},
-        {'name': 'sesame seeds',    'quantity': '1',   'unit': 'TSP'},
+        {'name': 'beef mince', 'quantity': '400', 'unit': 'G', 'notes': 'lean, 5% fat'},
+        {'name': 'jasmine rice', 'quantity': '1.5', 'unit': 'CUP'},
+        {'name': 'eggs', 'quantity': '2', 'unit': 'WHOLE'},
+        {'name': 'edamame', 'quantity': '100', 'unit': 'G', 'notes': 'shelled, frozen is fine'},
+        {'name': 'tamari soy sauce','quantity': '3', 'unit': 'TBSP'},
+        {'name': 'sesame oil', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'fresh ginger', 'quantity': '1', 'unit': 'TSP', 'notes': 'grated'},
+        {'name': 'garlic', 'quantity': '2', 'unit': 'WHOLE','notes': 'cloves, minced'},
+        {'name': 'spring onion', 'quantity': '2', 'unit': 'WHOLE','notes': 'sliced'},
+        {'name': 'sesame seeds', 'quantity': '1', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = staff1,
-    title       = "Greek Yogurt Protein Pancakes",
+    author= staff1,
+    title = "Greek Yogurt Protein Pancakes",
     description = "Fluffy high-protein pancakes ready in 15 minutes — perfect pre-workout fuel.",
-    difficulty  = "EASY",
-    prep        = 5,
-    cook        = 10,
-    servings    = 2,
-    calories    = 390,
-    dietary     = ['NO_NUTS', 'VEGETARIAN'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 5,
+    cook = 10,
+    servings = 2,
+    calories = 390,
+    dietary = ['NO_NUTS', 'VEGETARIAN'],
+    locked= False,
     instructions = (
         "1. In a bowl, whisk together oats (blended to flour), baking powder, and a pinch of salt.\n"
         "2. In a separate bowl, mix Greek yogurt, eggs, and vanilla extract until smooth.\n"
@@ -672,27 +671,27 @@ create_recipe(
         "6. Cook 1–2 more minutes until golden. Serve topped with fresh berries and a drizzle of honey."
     ),
     ingredients = [
-        {'name': 'rolled oats',      'quantity': '1',   'unit': 'CUP',  'notes': 'blended into flour'},
-        {'name': 'Greek yogurt',     'quantity': '150', 'unit': 'G',    'notes': 'plain, full-fat'},
-        {'name': 'eggs',             'quantity': '2',   'unit': 'WHOLE'},
-        {'name': 'baking powder',    'quantity': '1',   'unit': 'TSP'},
-        {'name': 'vanilla extract',  'quantity': '0.5', 'unit': 'TSP'},
-        {'name': 'mixed berries',    'quantity': '80',  'unit': 'G'},
-        {'name': 'honey',            'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'rolled oats', 'quantity': '1', 'unit': 'CUP', 'notes': 'blended into flour'},
+        {'name': 'Greek yogurt', 'quantity': '150', 'unit': 'G', 'notes': 'plain, full-fat'},
+        {'name': 'eggs', 'quantity': '2', 'unit': 'WHOLE'},
+        {'name': 'baking powder', 'quantity': '1', 'unit': 'TSP'},
+        {'name': 'vanilla extract', 'quantity': '0.5', 'unit': 'TSP'},
+        {'name': 'mixed berries', 'quantity': '80', 'unit': 'G'},
+        {'name': 'honey', 'quantity': '1', 'unit': 'TBSP'},
     ],
 )
 
 create_recipe(
-    author      = coach1,
-    title       = "Spicy Tuna Rice Cake Stack",
+    author= coach1,
+    title = "Spicy Tuna Rice Cake Stack",
     description = "A quick, no-cook high-protein snack or light lunch with zero prep drama.",
-    difficulty  = "EASY",
-    prep        = 8,
-    cook        = 0,
-    servings    = 1,
-    calories    = 280,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 8,
+    cook = 0,
+    servings = 1,
+    calories = 280,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS'],
+    locked= False,
     instructions = (
         "1. Drain canned tuna and place in a bowl.\n"
         "2. Mix tuna with sriracha, light mayo, soy sauce, and sesame oil.\n"
@@ -702,29 +701,29 @@ create_recipe(
         "6. Top with cucumber, spring onion, and a sprinkle of sesame seeds. Serve immediately."
     ),
     ingredients = [
-        {'name': 'canned tuna',      'quantity': '1',   'unit': 'WHOLE', 'notes': '130g can, drained'},
-        {'name': 'plain rice cakes', 'quantity': '4',   'unit': 'WHOLE'},
-        {'name': 'sriracha',         'quantity': '1',   'unit': 'TSP'},
-        {'name': 'light mayonnaise', 'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'soy sauce',        'quantity': '0.5', 'unit': 'TSP'},
-        {'name': 'sesame oil',       'quantity': '0.5', 'unit': 'TSP'},
-        {'name': 'spring onion',     'quantity': '1',   'unit': 'WHOLE', 'notes': 'thinly sliced'},
-        {'name': 'cucumber',         'quantity': '0.25','unit': 'WHOLE', 'notes': 'thinly sliced'},
-        {'name': 'sesame seeds',     'quantity': '0.5', 'unit': 'TSP'},
+        {'name': 'canned tuna', 'quantity': '1', 'unit': 'WHOLE', 'notes': '130g can, drained'},
+        {'name': 'plain rice cakes', 'quantity': '4', 'unit': 'WHOLE'},
+        {'name': 'sriracha', 'quantity': '1', 'unit': 'TSP'},
+        {'name': 'light mayonnaise', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'soy sauce', 'quantity': '0.5', 'unit': 'TSP'},
+        {'name': 'sesame oil', 'quantity': '0.5', 'unit': 'TSP'},
+        {'name': 'spring onion', 'quantity': '1', 'unit': 'WHOLE', 'notes': 'thinly sliced'},
+        {'name': 'cucumber', 'quantity': '0.25','unit': 'WHOLE', 'notes': 'thinly sliced'},
+        {'name': 'sesame seeds', 'quantity': '0.5', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = staff2,
-    title       = "Lentil & Vegetable Soup",
+    author= staff2,
+    title = "Lentil & Vegetable Soup",
     description = "A hearty, filling plant-based soup that batch cooks perfectly for the week.",
-    difficulty  = "EASY",
-    prep        = 10,
-    cook        = 30,
-    servings    = 4,
-    calories    = 290,
-    dietary     = ['VEGAN', 'NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS', 'NO_SEAFOOD'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 10,
+    cook = 30,
+    servings = 4,
+    calories = 290,
+    dietary = ['VEGAN', 'NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS', 'NO_SEAFOOD'],
+    locked= False,
     instructions = (
         "1. Heat olive oil in a large pot over medium heat. Add diced onion and cook for 5 minutes until soft.\n"
         "2. Add garlic, cumin, turmeric, and smoked paprika. Stir and cook for 1 minute until fragrant.\n"
@@ -735,33 +734,33 @@ create_recipe(
         "7. Serve with a squeeze of lemon juice. Keeps in the fridge for 5 days."
     ),
     ingredients = [
-        {'name': 'red lentils',      'quantity': '200', 'unit': 'G',    'notes': 'rinsed'},
-        {'name': 'onion',            'quantity': '1',   'unit': 'WHOLE','notes': 'diced'},
-        {'name': 'garlic',           'quantity': '3',   'unit': 'WHOLE','notes': 'cloves, minced'},
-        {'name': 'carrot',           'quantity': '2',   'unit': 'WHOLE','notes': 'diced'},
-        {'name': 'celery',           'quantity': '2',   'unit': 'WHOLE','notes': 'stalks, sliced'},
-        {'name': 'canned tomatoes',  'quantity': '400', 'unit': 'G',    'notes': '1 can'},
-        {'name': 'vegetable broth',  'quantity': '1',   'unit': 'L'},
-        {'name': 'baby spinach',     'quantity': '60',  'unit': 'G'},
-        {'name': 'olive oil',        'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'cumin',            'quantity': '1',   'unit': 'TSP'},
-        {'name': 'turmeric',         'quantity': '0.5', 'unit': 'TSP'},
-        {'name': 'smoked paprika',   'quantity': '1',   'unit': 'TSP'},
-        {'name': 'lemon juice',      'quantity': '1',   'unit': 'TBSP'},
+        {'name': 'red lentils', 'quantity': '200', 'unit': 'G', 'notes': 'rinsed'},
+        {'name': 'onion', 'quantity': '1', 'unit': 'WHOLE','notes': 'diced'},
+        {'name': 'garlic', 'quantity': '3', 'unit': 'WHOLE','notes': 'cloves, minced'},
+        {'name': 'carrot', 'quantity': '2', 'unit': 'WHOLE','notes': 'diced'},
+        {'name': 'celery', 'quantity': '2', 'unit': 'WHOLE','notes': 'stalks, sliced'},
+        {'name': 'canned tomatoes', 'quantity': '400', 'unit': 'G', 'notes': '1 can'},
+        {'name': 'vegetable broth', 'quantity': '1', 'unit': 'L'},
+        {'name': 'baby spinach', 'quantity': '60', 'unit': 'G'},
+        {'name': 'olive oil', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'cumin', 'quantity': '1', 'unit': 'TSP'},
+        {'name': 'turmeric', 'quantity': '0.5', 'unit': 'TSP'},
+        {'name': 'smoked paprika', 'quantity': '1', 'unit': 'TSP'},
+        {'name': 'lemon juice', 'quantity': '1', 'unit': 'TBSP'},
     ],
 )
 
 create_recipe(
-    author      = staff1,
-    title       = "Egg White & Veggie Omelette",
+    author= staff1,
+    title = "Egg White & Veggie Omelette",
     description = "A light, low-calorie breakfast packed with protein and micronutrients.",
-    difficulty  = "EASY",
-    prep        = 5,
-    cook        = 8,
-    servings    = 1,
-    calories    = 210,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS', 'VEGETARIAN'],
-    locked      = False,
+    difficulty = "EASY",
+    prep = 5,
+    cook = 8,
+    servings = 1,
+    calories = 210,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS', 'VEGETARIAN'],
+    locked= False,
     instructions = (
         "1. Whisk egg whites with a pinch of salt, pepper, and dried herbs.\n"
         "2. Dice capsicum, mushrooms, and spinach.\n"
@@ -772,25 +771,25 @@ create_recipe(
         "7. Season and serve immediately."
     ),
     ingredients = [
-        {'name': 'egg whites',       'quantity': '5',   'unit': 'WHOLE','notes': 'approx 150ml'},
-        {'name': 'red capsicum',     'quantity': '0.5', 'unit': 'WHOLE','notes': 'diced'},
-        {'name': 'mushrooms',        'quantity': '60',  'unit': 'G',    'notes': 'sliced'},
-        {'name': 'baby spinach',     'quantity': '30',  'unit': 'G'},
+        {'name': 'egg whites', 'quantity': '5', 'unit': 'WHOLE','notes': 'approx 150ml'},
+        {'name': 'red capsicum', 'quantity': '0.5', 'unit': 'WHOLE','notes': 'diced'},
+        {'name': 'mushrooms', 'quantity': '60', 'unit': 'G', 'notes': 'sliced'},
+        {'name': 'baby spinach', 'quantity': '30', 'unit': 'G'},
         {'name': 'dried mixed herbs','quantity': '0.5', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = coach3,
-    title       = "Slow-Cooker Chicken & White Bean Stew",
+    author= coach3,
+    title = "Slow-Cooker Chicken & White Bean Stew",
     description = "Set it and forget it — a high-protein, gut-friendly stew ready when you get home.",
-    difficulty  = "MEDIUM",
-    prep        = 15,
-    cook        = 360,
-    servings    = 4,
-    calories    = 440,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS'],
-    locked      = True,
+    difficulty = "MEDIUM",
+    prep = 15,
+    cook = 360,
+    servings = 4,
+    calories = 440,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS'],
+    locked= True,
     instructions = (
         "1. Season chicken thighs with salt, pepper, smoked paprika, and garlic powder.\n"
         "2. Add chicken to the slow cooker. Scatter drained white beans around the chicken.\n"
@@ -801,32 +800,32 @@ create_recipe(
         "7. Stir in kale and let wilt for 5 minutes before serving."
     ),
     ingredients = [
-        {'name': 'chicken thighs',   'quantity': '600', 'unit': 'G',    'notes': 'boneless, skinless'},
-        {'name': 'white beans',      'quantity': '400', 'unit': 'G',    'notes': '1 can, drained'},
-        {'name': 'onion',            'quantity': '1',   'unit': 'WHOLE','notes': 'diced'},
-        {'name': 'carrot',           'quantity': '2',   'unit': 'WHOLE','notes': 'chopped'},
-        {'name': 'celery',           'quantity': '2',   'unit': 'WHOLE','notes': 'stalks, chopped'},
-        {'name': 'canned tomatoes',  'quantity': '400', 'unit': 'G',    'notes': '1 can'},
-        {'name': 'chicken broth',    'quantity': '500', 'unit': 'ML'},
-        {'name': 'kale',             'quantity': '80',  'unit': 'G',    'notes': 'roughly chopped'},
-        {'name': 'rosemary',         'quantity': '1',   'unit': 'WHOLE','notes': 'fresh sprig'},
-        {'name': 'bay leaves',       'quantity': '2',   'unit': 'WHOLE'},
-        {'name': 'smoked paprika',   'quantity': '1',   'unit': 'TSP'},
-        {'name': 'garlic powder',    'quantity': '1',   'unit': 'TSP'},
+        {'name': 'chicken thighs', 'quantity': '600', 'unit': 'G', 'notes': 'boneless, skinless'},
+        {'name': 'white beans', 'quantity': '400', 'unit': 'G', 'notes': '1 can, drained'},
+        {'name': 'onion', 'quantity': '1', 'unit': 'WHOLE','notes': 'diced'},
+        {'name': 'carrot', 'quantity': '2', 'unit': 'WHOLE','notes': 'chopped'},
+        {'name': 'celery', 'quantity': '2', 'unit': 'WHOLE','notes': 'stalks, chopped'},
+        {'name': 'canned tomatoes', 'quantity': '400', 'unit': 'G', 'notes': '1 can'},
+        {'name': 'chicken broth', 'quantity': '500', 'unit': 'ML'},
+        {'name': 'kale', 'quantity': '80', 'unit': 'G', 'notes': 'roughly chopped'},
+        {'name': 'rosemary', 'quantity': '1', 'unit': 'WHOLE','notes': 'fresh sprig'},
+        {'name': 'bay leaves', 'quantity': '2', 'unit': 'WHOLE'},
+        {'name': 'smoked paprika', 'quantity': '1', 'unit': 'TSP'},
+        {'name': 'garlic powder', 'quantity': '1', 'unit': 'TSP'},
     ],
 )
 
 create_recipe(
-    author      = staff2,
-    title       = "Smoked Salmon & Avocado Protein Bowl",
+    author= staff2,
+    title = "Smoked Salmon & Avocado Protein Bowl",
     description = "A premium no-cook recovery bowl rich in omega-3s, healthy fats, and complete protein.",
-    difficulty  = "EASY",
-    prep        = 10,
-    cook        = 0,
-    servings    = 1,
-    calories    = 520,
-    dietary     = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS'],
-    locked      = True,
+    difficulty = "EASY",
+    prep = 10,
+    cook = 0,
+    servings = 1,
+    calories = 520,
+    dietary = ['NO_GLUTEN', 'NO_DAIRY_LACTOSE', 'NO_NUTS'],
+    locked= True,
     instructions = (
         "1. Cook quinoa in advance and allow to cool (or use pre-cooked).\n"
         "2. Halve and slice the avocado. Squeeze lemon juice over it to prevent browning.\n"
@@ -837,15 +836,15 @@ create_recipe(
         "7. Drizzle with olive oil and lemon juice. Finish with cracked black pepper and fresh dill."
     ),
     ingredients = [
-        {'name': 'smoked salmon',    'quantity': '100', 'unit': 'G'},
-        {'name': 'avocado',          'quantity': '0.5', 'unit': 'WHOLE'},
-        {'name': 'egg',              'quantity': '1',   'unit': 'WHOLE'},
-        {'name': 'cooked quinoa',    'quantity': '0.5', 'unit': 'CUP'},
-        {'name': 'cucumber',         'quantity': '0.25','unit': 'WHOLE', 'notes': 'peeled into ribbons'},
-        {'name': 'capers',           'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'lemon juice',      'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'olive oil',        'quantity': '1',   'unit': 'TBSP'},
-        {'name': 'fresh dill',       'quantity': '1',   'unit': 'PINCH'},
+        {'name': 'smoked salmon', 'quantity': '100', 'unit': 'G'},
+        {'name': 'avocado', 'quantity': '0.5', 'unit': 'WHOLE'},
+        {'name': 'egg', 'quantity': '1', 'unit': 'WHOLE'},
+        {'name': 'cooked quinoa', 'quantity': '0.5', 'unit': 'CUP'},
+        {'name': 'cucumber', 'quantity': '0.25','unit': 'WHOLE', 'notes': 'peeled into ribbons'},
+        {'name': 'capers', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'lemon juice', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'olive oil', 'quantity': '1', 'unit': 'TBSP'},
+        {'name': 'fresh dill', 'quantity': '1', 'unit': 'PINCH'},
     ],
 )
 
@@ -871,8 +870,8 @@ def create_exercise(title, description, instructions, muscle_group, difficulty, 
 
 # ── CHEST ──
 bench_press = create_exercise(
-    title        = "Barbell Bench Press",
-    description  = "The classic compound chest exercise for building upper body mass and strength.",
+    title = "Barbell Bench Press",
+    description = "The classic compound chest exercise for building upper body mass and strength.",
     instructions = (
         "1. Lie flat on the bench, feet firmly on the floor.\n"
         "2. Grip the bar slightly wider than shoulder-width, thumbs wrapped around.\n"
@@ -882,13 +881,13 @@ bench_press = create_exercise(
         "6. Keep your shoulder blades retracted and back slightly arched throughout."
     ),
     muscle_group = "CHEST",
-    difficulty   = "MEDIUM",
-    goal         = "STRENGTH",
+    difficulty= "MEDIUM",
+    goal= "STRENGTH",
 )
 
 incline_db_press = create_exercise(
-    title        = "Incline Dumbbell Press",
-    description  = "Targets the upper chest with a more natural pressing angle than the barbell version.",
+    title = "Incline Dumbbell Press",
+    description = "Targets the upper chest with a more natural pressing angle than the barbell version.",
     instructions = (
         "1. Set a bench to 30–45°. Sit back with a dumbbell in each hand resting on your thighs.\n"
         "2. Kick the dumbbells up as you lie back, positioning them at chest level.\n"
@@ -897,13 +896,13 @@ incline_db_press = create_exercise(
         "5. Keep your feet flat, core tight, and avoid flaring elbows excessively."
     ),
     muscle_group = "CHEST",
-    difficulty   = "MEDIUM",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "MEDIUM",
+    goal= "MUSCLE_GAIN",
 )
 
 push_up = create_exercise(
-    title        = "Push-Up",
-    description  = "A foundational bodyweight exercise that trains the chest, triceps, and shoulders.",
+    title = "Push-Up",
+    description = "A foundational bodyweight exercise that trains the chest, triceps, and shoulders.",
     instructions = (
         "1. Start in a high plank position, hands just wider than shoulder-width.\n"
         "2. Keep your body in a straight line from head to heels — don't let your hips sag.\n"
@@ -912,14 +911,14 @@ push_up = create_exercise(
         "5. Breathe in on the way down, out on the way up."
     ),
     muscle_group = "CHEST",
-    difficulty   = "EASY",
-    goal         = "STRENGTH",
+    difficulty= "EASY",
+    goal= "STRENGTH",
 )
 
 # ── BACK ──
 pull_up = create_exercise(
-    title        = "Pull-Up",
-    description  = "One of the best exercises for building a wide, strong back using only bodyweight.",
+    title = "Pull-Up",
+    description = "One of the best exercises for building a wide, strong back using only bodyweight.",
     instructions = (
         "1. Hang from a pull-up bar with an overhand grip slightly wider than shoulder-width.\n"
         "2. Depress and retract your shoulder blades before initiating the pull.\n"
@@ -929,13 +928,13 @@ pull_up = create_exercise(
         "6. Avoid swinging or kipping — keep the movement controlled."
     ),
     muscle_group = "BACK",
-    difficulty   = "HARD",
-    goal         = "STRENGTH",
+    difficulty= "HARD",
+    goal= "STRENGTH",
 )
 
 bent_over_row = create_exercise(
-    title        = "Barbell Bent-Over Row",
-    description  = "A compound pulling movement that builds thickness in the mid and upper back.",
+    title = "Barbell Bent-Over Row",
+    description = "A compound pulling movement that builds thickness in the mid and upper back.",
     instructions = (
         "1. Stand with feet hip-width apart, grip the barbell with an overhand grip.\n"
         "2. Hinge at the hips until your torso is roughly parallel to the floor, knees slightly bent.\n"
@@ -945,13 +944,13 @@ bent_over_row = create_exercise(
         "6. Lower the bar with control — don't let it crash down."
     ),
     muscle_group = "BACK",
-    difficulty   = "MEDIUM",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "MEDIUM",
+    goal= "MUSCLE_GAIN",
 )
 
 lat_pulldown = create_exercise(
-    title        = "Lat Pulldown",
-    description  = "A cable machine exercise that targets the latissimus dorsi for a wider back.",
+    title = "Lat Pulldown",
+    description = "A cable machine exercise that targets the latissimus dorsi for a wider back.",
     instructions = (
         "1. Sit at the lat pulldown machine and grip the bar wider than shoulder-width.\n"
         "2. Secure your thighs under the pad and sit tall with a slight arch in your lower back.\n"
@@ -961,14 +960,14 @@ lat_pulldown = create_exercise(
         "6. Avoid leaning back excessively — keep the torso relatively upright."
     ),
     muscle_group = "BACK",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 # ── LEGS ──
 barbell_squat = create_exercise(
-    title        = "Barbell Back Squat",
-    description  = "The king of lower body exercises — builds leg mass, strength, and overall athleticism.",
+    title = "Barbell Back Squat",
+    description = "The king of lower body exercises — builds leg mass, strength, and overall athleticism.",
     instructions = (
         "1. Set the barbell at upper-chest height on the rack. Step under it so the bar rests on your upper traps.\n"
         "2. Grip the bar just outside your shoulders and unrack it, stepping back with feet shoulder-width apart.\n"
@@ -978,13 +977,13 @@ barbell_squat = create_exercise(
         "6. Lock out at the top, exhale, then reset for the next rep."
     ),
     muscle_group = "LEGS",
-    difficulty   = "HARD",
-    goal         = "STRENGTH",
+    difficulty= "HARD",
+    goal= "STRENGTH",
 )
 
 romanian_deadlift = create_exercise(
-    title        = "Romanian Deadlift",
-    description  = "A hip-hinge movement that targets the hamstrings and glutes with excellent stretch.",
+    title = "Romanian Deadlift",
+    description = "A hip-hinge movement that targets the hamstrings and glutes with excellent stretch.",
     instructions = (
         "1. Stand with feet hip-width apart, holding a barbell or dumbbells in front of your thighs.\n"
         "2. Keep a slight bend in your knees — this stays fixed throughout the lift.\n"
@@ -994,13 +993,13 @@ romanian_deadlift = create_exercise(
         "6. Keep the bar close to your legs and your back flat at all times."
     ),
     muscle_group = "LEGS",
-    difficulty   = "MEDIUM",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "MEDIUM",
+    goal= "MUSCLE_GAIN",
 )
 
 walking_lunge = create_exercise(
-    title        = "Walking Lunge",
-    description  = "A dynamic unilateral exercise that builds leg strength, balance, and coordination.",
+    title = "Walking Lunge",
+    description = "A dynamic unilateral exercise that builds leg strength, balance, and coordination.",
     instructions = (
         "1. Stand tall with feet together, hands on hips or holding dumbbells at your sides.\n"
         "2. Step forward with your right foot and lower your left knee toward the floor.\n"
@@ -1010,13 +1009,13 @@ walking_lunge = create_exercise(
         "6. Keep your torso upright and core engaged throughout."
     ),
     muscle_group = "LEGS",
-    difficulty   = "EASY",
-    goal         = "WEIGHT_LOSS",
+    difficulty= "EASY",
+    goal= "WEIGHT_LOSS",
 )
 
 leg_press = create_exercise(
-    title        = "Leg Press",
-    description  = "A machine-based compound exercise for loading the quads, hamstrings, and glutes safely.",
+    title = "Leg Press",
+    description = "A machine-based compound exercise for loading the quads, hamstrings, and glutes safely.",
     instructions = (
         "1. Sit in the leg press machine with your back flat against the pad.\n"
         "2. Place feet shoulder-width apart on the platform, toes slightly turned out.\n"
@@ -1026,14 +1025,14 @@ leg_press = create_exercise(
         "6. Never let your lower back peel off the seat."
     ),
     muscle_group = "LEGS",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 # ── SHOULDERS ──
 overhead_press = create_exercise(
-    title        = "Barbell Overhead Press",
-    description  = "The primary compound movement for building strong, broad shoulders.",
+    title = "Barbell Overhead Press",
+    description = "The primary compound movement for building strong, broad shoulders.",
     instructions = (
         "1. Set the barbell at collar-bone height in a rack. Grip just outside shoulder-width.\n"
         "2. Unrack the bar, holding it at the top of your chest with elbows forward.\n"
@@ -1043,13 +1042,13 @@ overhead_press = create_exercise(
         "6. Keep your glutes squeezed and avoid excessive lower-back arch."
     ),
     muscle_group = "SHOULDERS",
-    difficulty   = "MEDIUM",
-    goal         = "STRENGTH",
+    difficulty= "MEDIUM",
+    goal= "STRENGTH",
 )
 
 lateral_raise = create_exercise(
-    title        = "Dumbbell Lateral Raise",
-    description  = "An isolation exercise targeting the lateral deltoid for wider-looking shoulders.",
+    title = "Dumbbell Lateral Raise",
+    description = "An isolation exercise targeting the lateral deltoid for wider-looking shoulders.",
     instructions = (
         "1. Stand with feet shoulder-width apart, a light dumbbell in each hand at your sides.\n"
         "2. With a slight bend in your elbows, raise your arms out to the sides until parallel to the floor.\n"
@@ -1059,13 +1058,13 @@ lateral_raise = create_exercise(
         "6. Avoid swinging — use lighter weight and full control."
     ),
     muscle_group = "SHOULDERS",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 face_pull = create_exercise(
-    title        = "Cable Face Pull",
-    description  = "A rear-delt and rotator cuff exercise that improves shoulder health and posture.",
+    title = "Cable Face Pull",
+    description = "A rear-delt and rotator cuff exercise that improves shoulder health and posture.",
     instructions = (
         "1. Set a cable pulley to head height with a rope attachment.\n"
         "2. Grip both ends of the rope with an overhand grip, step back to create tension.\n"
@@ -1075,14 +1074,14 @@ face_pull = create_exercise(
         "6. Return slowly to the start. Keep your torso upright — don't lean back."
     ),
     muscle_group = "SHOULDERS",
-    difficulty   = "EASY",
-    goal         = "STRENGTH",
+    difficulty= "EASY",
+    goal= "STRENGTH",
 )
 
 # ── ARMS ──
 barbell_curl = create_exercise(
-    title        = "Barbell Bicep Curl",
-    description  = "The fundamental bicep exercise for building arm size and strength.",
+    title = "Barbell Bicep Curl",
+    description = "The fundamental bicep exercise for building arm size and strength.",
     instructions = (
         "1. Stand with feet hip-width apart, gripping a barbell with an underhand grip at hip level.\n"
         "2. Keep your elbows pinned to your sides throughout the movement.\n"
@@ -1092,13 +1091,13 @@ barbell_curl = create_exercise(
         "6. Avoid swinging your body to generate momentum."
     ),
     muscle_group = "ARMS",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 tricep_dip = create_exercise(
-    title        = "Tricep Dip",
-    description  = "A bodyweight compound movement that builds the triceps and lower chest.",
+    title = "Tricep Dip",
+    description = "A bodyweight compound movement that builds the triceps and lower chest.",
     instructions = (
         "1. Grip parallel dip bars with arms extended, body hanging freely.\n"
         "2. Lean slightly forward (about 15–20°) to emphasise the triceps.\n"
@@ -1108,13 +1107,13 @@ tricep_dip = create_exercise(
         "6. Add weight with a dip belt once bodyweight becomes easy."
     ),
     muscle_group = "ARMS",
-    difficulty   = "MEDIUM",
-    goal         = "STRENGTH",
+    difficulty= "MEDIUM",
+    goal= "STRENGTH",
 )
 
 hammer_curl = create_exercise(
-    title        = "Hammer Curl",
-    description  = "A neutral-grip curl that targets the brachialis and brachioradialis for thicker arms.",
+    title = "Hammer Curl",
+    description = "A neutral-grip curl that targets the brachialis and brachioradialis for thicker arms.",
     instructions = (
         "1. Stand holding dumbbells at your sides with a neutral grip (palms facing each other).\n"
         "2. Keeping your elbows tucked, curl one or both dumbbells toward your shoulders.\n"
@@ -1123,14 +1122,14 @@ hammer_curl = create_exercise(
         "5. Alternate arms or do both together — either works."
     ),
     muscle_group = "ARMS",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 # ── CORE ──
 plank = create_exercise(
-    title        = "Plank",
-    description  = "The foundational isometric core exercise for building stability and endurance.",
+    title = "Plank",
+    description = "The foundational isometric core exercise for building stability and endurance.",
     instructions = (
         "1. Get into a forearm plank position — elbows directly under your shoulders.\n"
         "2. Form a straight line from head to heels — no sagging hips or raised glutes.\n"
@@ -1139,13 +1138,13 @@ plank = create_exercise(
         "5. Hold for the prescribed time. Build from 20 seconds up to 60+ seconds progressively."
     ),
     muscle_group = "CORE",
-    difficulty   = "EASY",
-    goal         = "STRENGTH",
+    difficulty= "EASY",
+    goal= "STRENGTH",
 )
 
 cable_crunch = create_exercise(
-    title        = "Cable Crunch",
-    description  = "A weighted core exercise that allows progressive overload on the abdominals.",
+    title = "Cable Crunch",
+    description = "A weighted core exercise that allows progressive overload on the abdominals.",
     instructions = (
         "1. Attach a rope to a high cable pulley. Kneel facing the machine.\n"
         "2. Hold the rope beside your head, elbows pointing down.\n"
@@ -1155,13 +1154,13 @@ cable_crunch = create_exercise(
         "6. The weight should make 10–15 reps challenging."
     ),
     muscle_group = "CORE",
-    difficulty   = "MEDIUM",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "MEDIUM",
+    goal= "MUSCLE_GAIN",
 )
 
 hanging_leg_raise = create_exercise(
-    title        = "Hanging Leg Raise",
-    description  = "An advanced core exercise that targets the lower abs and hip flexors.",
+    title = "Hanging Leg Raise",
+    description = "An advanced core exercise that targets the lower abs and hip flexors.",
     instructions = (
         "1. Hang from a pull-up bar with a shoulder-width overhand grip.\n"
         "2. Keep your legs together and start with them hanging straight down.\n"
@@ -1171,14 +1170,14 @@ hanging_leg_raise = create_exercise(
         "6. Bend your knees slightly if the straight-leg version is too difficult at first."
     ),
     muscle_group = "CORE",
-    difficulty   = "HARD",
-    goal         = "STRENGTH",
+    difficulty= "HARD",
+    goal= "STRENGTH",
 )
 
 # ── FULL BODY / CARDIO ──
 deadlift = create_exercise(
-    title        = "Conventional Deadlift",
-    description  = "The ultimate full-body strength exercise — works nearly every muscle in the body.",
+    title = "Conventional Deadlift",
+    description = "The ultimate full-body strength exercise — works nearly every muscle in the body.",
     instructions = (
         "1. Stand with feet hip-width apart, bar over mid-foot. Grip just outside your legs.\n"
         "2. Hinge down, keeping your chest up, back flat, and hips above your knees.\n"
@@ -1188,13 +1187,13 @@ deadlift = create_exercise(
         "6. Hinge back down with control — don't round your lower back on the descent."
     ),
     muscle_group = "FULL_BODY",
-    difficulty   = "HARD",
-    goal         = "STRENGTH",
+    difficulty= "HARD",
+    goal= "STRENGTH",
 )
 
 burpee = create_exercise(
-    title        = "Burpee",
-    description  = "A high-intensity full-body exercise that spikes heart rate and burns calories fast.",
+    title = "Burpee",
+    description = "A high-intensity full-body exercise that spikes heart rate and burns calories fast.",
     instructions = (
         "1. Stand with feet shoulder-width apart.\n"
         "2. Drop your hands to the floor and jump your feet back into a push-up position.\n"
@@ -1204,13 +1203,13 @@ burpee = create_exercise(
         "6. Land softly and immediately begin the next rep."
     ),
     muscle_group = "FULL_BODY",
-    difficulty   = "HARD",
-    goal         = "WEIGHT_LOSS",
+    difficulty= "HARD",
+    goal= "WEIGHT_LOSS",
 )
 
 kettlebell_swing = create_exercise(
-    title        = "Kettlebell Swing",
-    description  = "A ballistic hip-hinge exercise that builds power, burns fat, and conditions the posterior chain.",
+    title = "Kettlebell Swing",
+    description = "A ballistic hip-hinge exercise that builds power, burns fat, and conditions the posterior chain.",
     instructions = (
         "1. Stand with feet shoulder-width apart, kettlebell on the floor slightly in front of you.\n"
         "2. Hinge at the hips and grip the kettlebell with both hands.\n"
@@ -1220,13 +1219,13 @@ kettlebell_swing = create_exercise(
         "6. This is a hip hinge, not a squat — your hips drive the movement, not your arms."
     ),
     muscle_group = "FULL_BODY",
-    difficulty   = "MEDIUM",
-    goal         = "CARDIO",
+    difficulty= "MEDIUM",
+    goal= "CARDIO",
 )
 
 box_jump = create_exercise(
-    title        = "Box Jump",
-    description  = "A plyometric exercise that develops explosive leg power and cardiovascular fitness.",
+    title = "Box Jump",
+    description = "A plyometric exercise that develops explosive leg power and cardiovascular fitness.",
     instructions = (
         "1. Stand facing a sturdy box, feet shoulder-width apart.\n"
         "2. Dip into a quarter squat, swinging your arms back.\n"
@@ -1236,13 +1235,13 @@ box_jump = create_exercise(
         "6. Start with a lower box and progress height gradually."
     ),
     muscle_group = "LEGS",
-    difficulty   = "MEDIUM",
-    goal         = "CARDIO",
+    difficulty= "MEDIUM",
+    goal= "CARDIO",
 )
 
 mountain_climber = create_exercise(
-    title        = "Mountain Climber",
-    description  = "A dynamic core and cardio exercise that works the abs, shoulders, and hip flexors.",
+    title = "Mountain Climber",
+    description = "A dynamic core and cardio exercise that works the abs, shoulders, and hip flexors.",
     instructions = (
         "1. Start in a high plank position, wrists under shoulders, body in a straight line.\n"
         "2. Drive your right knee toward your chest, then quickly switch — bringing the left knee in as the right goes back.\n"
@@ -1252,15 +1251,15 @@ mountain_climber = create_exercise(
         "6. Slow the tempo down if you need to maintain form."
     ),
     muscle_group = "CORE",
-    difficulty   = "MEDIUM",
-    goal         = "CARDIO",
+    difficulty= "MEDIUM",
+    goal= "CARDIO",
 )
 
 
 # ── SHOULDERS ──
 overhead_arnold_press = create_exercise(
-    title        = "Arnold Press",
-    description  = "A dumbbell shoulder press variation that hits all three deltoid heads through rotation.",
+    title = "Arnold Press",
+    description = "A dumbbell shoulder press variation that hits all three deltoid heads through rotation.",
     instructions = (
         "1. Sit on an upright bench holding two dumbbells at shoulder height, palms facing you.\n"
         "2. As you press the dumbbells upward, rotate your wrists outward so your palms face away at the top.\n"
@@ -1270,13 +1269,13 @@ overhead_arnold_press = create_exercise(
         "6. Control the descent — don't drop the weights."
     ),
     muscle_group = "SHOULDERS",
-    difficulty   = "MEDIUM",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "MEDIUM",
+    goal= "MUSCLE_GAIN",
 )
 
 cable_lateral_raise = create_exercise(
-    title        = "Cable Lateral Raise",
-    description  = "A cable variation of the lateral raise that maintains constant tension on the side deltoid.",
+    title = "Cable Lateral Raise",
+    description = "A cable variation of the lateral raise that maintains constant tension on the side deltoid.",
     instructions = (
         "1. Stand sideways to a low cable pulley, handle in the far hand, arm across your body.\n"
         "2. Keep a slight bend in your elbow throughout the movement.\n"
@@ -1286,14 +1285,14 @@ cable_lateral_raise = create_exercise(
         "6. Complete all reps on one side before switching."
     ),
     muscle_group = "SHOULDERS",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 # ── ARMS ──
 close_grip_bench = create_exercise(
-    title        = "Close-Grip Bench Press",
-    description  = "A barbell pressing variation that shifts the emphasis to the triceps.",
+    title = "Close-Grip Bench Press",
+    description = "A barbell pressing variation that shifts the emphasis to the triceps.",
     instructions = (
         "1. Lie flat on a bench and grip the barbell with hands shoulder-width apart or slightly narrower.\n"
         "2. Unrack the bar and hold it above your lower chest.\n"
@@ -1303,13 +1302,13 @@ close_grip_bench = create_exercise(
         "6. Avoid gripping too narrow as this strains the wrists."
     ),
     muscle_group = "ARMS",
-    difficulty   = "MEDIUM",
-    goal         = "STRENGTH",
+    difficulty= "MEDIUM",
+    goal= "STRENGTH",
 )
 
 preacher_curl = create_exercise(
-    title        = "Preacher Curl",
-    description  = "An isolation curl performed on a preacher bench that eliminates cheating and targets the bicep peak.",
+    title = "Preacher Curl",
+    description = "An isolation curl performed on a preacher bench that eliminates cheating and targets the bicep peak.",
     instructions = (
         "1. Sit at the preacher bench and rest your upper arms on the angled pad, armpits at the top edge.\n"
         "2. Grip the barbell or EZ-bar with a supinated (underhand) grip.\n"
@@ -1319,14 +1318,14 @@ preacher_curl = create_exercise(
         "6. Keep your upper arms pressed firmly into the pad throughout."
     ),
     muscle_group = "ARMS",
-    difficulty   = "EASY",
-    goal         = "MUSCLE_GAIN",
+    difficulty= "EASY",
+    goal= "MUSCLE_GAIN",
 )
 
 # ── CORE ──
 ab_wheel_rollout = create_exercise(
-    title        = "Ab Wheel Rollout",
-    description  = "One of the most effective core exercises, training anti-extension strength of the entire trunk.",
+    title = "Ab Wheel Rollout",
+    description = "One of the most effective core exercises, training anti-extension strength of the entire trunk.",
     instructions = (
         "1. Kneel on a mat and grip the ab wheel handles with both hands directly below your shoulders.\n"
         "2. Brace your core hard — your lower back must not arch during the movement.\n"
@@ -1336,13 +1335,13 @@ ab_wheel_rollout = create_exercise(
         "6. Beginners: limit the range of motion. Advanced: aim to reach full extension."
     ),
     muscle_group = "CORE",
-    difficulty   = "HARD",
-    goal         = "STRENGTH",
+    difficulty= "HARD",
+    goal= "STRENGTH",
 )
 
 dead_bug = create_exercise(
-    title        = "Dead Bug",
-    description  = "A beginner-friendly core stability exercise that trains deep abdominal control and coordination.",
+    title = "Dead Bug",
+    description = "A beginner-friendly core stability exercise that trains deep abdominal control and coordination.",
     instructions = (
         "1. Lie on your back with your arms extended straight above your chest and knees bent at 90° in the air (tabletop position).\n"
         "2. Press your lower back firmly into the floor — maintain this contact throughout.\n"
@@ -1352,14 +1351,14 @@ dead_bug = create_exercise(
         "6. Move slowly and with control — this is about stability, not speed."
     ),
     muscle_group = "CORE",
-    difficulty   = "EASY",
-    goal         = "FLEXIBILITY",
+    difficulty= "EASY",
+    goal= "FLEXIBILITY",
 )
 
 # ── FULL BODY ──
 turkish_get_up = create_exercise(
-    title        = "Turkish Get-Up",
-    description  = "A complex full-body movement that builds shoulder stability, core strength, and mobility simultaneously.",
+    title = "Turkish Get-Up",
+    description = "A complex full-body movement that builds shoulder stability, core strength, and mobility simultaneously.",
     instructions = (
         "1. Lie on your back, holding a kettlebell in your right hand, arm extended toward the ceiling.\n"
         "2. Bend your right knee, foot flat on the floor. Keep your eyes on the kettlebell at all times.\n"
@@ -1370,13 +1369,13 @@ turkish_get_up = create_exercise(
         "7. Complete all reps on one side before switching. Start with no weight to learn the pattern."
     ),
     muscle_group = "FULL_BODY",
-    difficulty   = "HARD",
-    goal         = "STRENGTH",
+    difficulty= "HARD",
+    goal= "STRENGTH",
 )
 
 farmers_carry = create_exercise(
-    title        = "Farmer's Carry",
-    description  = "A loaded carry exercise that builds grip strength, core stability, and total body conditioning.",
+    title = "Farmer's Carry",
+    description = "A loaded carry exercise that builds grip strength, core stability, and total body conditioning.",
     instructions = (
         "1. Stand between two heavy dumbbells or kettlebells.\n"
         "2. Hinge down and pick them up with a neutral grip, keeping your back flat.\n"
@@ -1386,8 +1385,8 @@ farmers_carry = create_exercise(
         "6. Set the weights down with control at the end of each rep."
     ),
     muscle_group = "FULL_BODY",
-    difficulty   = "MEDIUM",
-    goal         = "STRENGTH",
+    difficulty= "MEDIUM",
+    goal= "STRENGTH",
 )
 
 # ─────────────────────────────────────────────
@@ -1428,195 +1427,195 @@ def create_workout(author, title, description, body, difficulty, duration_minute
 
 
 create_workout(
-    author           = staff1,
-    title            = "Beginner Full Body Starter",
-    description      = "A 3-day-a-week full body routine for complete beginners to build a foundation.",
-    body             = (
+    author = staff1,
+    title = "Beginner Full Body Starter",
+    description= "A 3-day-a-week full body routine for complete beginners to build a foundation.",
+    body = (
         "This plan is designed for people who are new to resistance training. "
         "Each session hits all major muscle groups with simple, effective movements. "
         "Rest 60–90 seconds between sets and focus on learning proper form before adding weight. "
         "Perform this workout 3 times per week with at least one rest day between sessions."
     ),
-    difficulty       = "EASY",
+    difficulty = "EASY",
     duration_minutes = 45,
-    goal             = "STRENGTH",
-    locked           = False,
-    exercises_list   = [
-        {'exercise': push_up,          'sets': 3, 'reps': '10',    'rest_seconds': 60},
-        {'exercise': barbell_squat,    'sets': 3, 'reps': '10',    'rest_seconds': 90},
-        {'exercise': lat_pulldown,     'sets': 3, 'reps': '10',    'rest_seconds': 60},
-        {'exercise': plank,            'sets': 3, 'reps': '30s',   'rest_seconds': 45},
-        {'exercise': walking_lunge,    'sets': 2, 'reps': '12',    'rest_seconds': 60},
+    goal = "STRENGTH",
+    locked = False,
+    exercises_list= [
+        {'exercise': push_up, 'sets': 3, 'reps': '10', 'rest_seconds': 60},
+        {'exercise': barbell_squat, 'sets': 3, 'reps': '10', 'rest_seconds': 90},
+        {'exercise': lat_pulldown, 'sets': 3, 'reps': '10', 'rest_seconds': 60},
+        {'exercise': plank, 'sets': 3, 'reps': '30s', 'rest_seconds': 45},
+        {'exercise': walking_lunge, 'sets': 2, 'reps': '12', 'rest_seconds': 60},
     ],
 )
 
 create_workout(
-    author           = staff1,
-    title            = "Intermediate Push Day",
-    description      = "A chest, shoulder, and tricep focused session for those on a push/pull/legs split.",
-    body             = (
+    author = staff1,
+    title = "Intermediate Push Day",
+    description= "A chest, shoulder, and tricep focused session for those on a push/pull/legs split.",
+    body = (
         "Push day focuses on all pressing muscles — chest, anterior delts, and triceps. "
         "Start with the heavy compound movements when you're freshest, then move to isolation work. "
         "Rest 90–120 seconds on the main lifts and 60 seconds on isolation exercises. "
         "Aim to progressively add weight or reps each week."
     ),
-    difficulty       = "MEDIUM",
+    difficulty = "MEDIUM",
     duration_minutes = 60,
-    goal             = "MUSCLE_GAIN",
-    locked           = False,
-    exercises_list   = [
-        {'exercise': bench_press,      'sets': 4, 'reps': '6-8',   'rest_seconds': 120, 'notes': 'Main lift — push for progressive overload'},
+    goal = "MUSCLE_GAIN",
+    locked = False,
+    exercises_list= [
+        {'exercise': bench_press, 'sets': 4, 'reps': '6-8', 'rest_seconds': 120, 'notes': 'Main lift — push for progressive overload'},
         {'exercise': incline_db_press, 'sets': 3, 'reps': '10-12', 'rest_seconds': 90},
-        {'exercise': overhead_press,   'sets': 3, 'reps': '8-10',  'rest_seconds': 90},
-        {'exercise': lateral_raise,    'sets': 3, 'reps': '15',    'rest_seconds': 60},
-        {'exercise': tricep_dip,       'sets': 3, 'reps': '10-12', 'rest_seconds': 60},
-        {'exercise': face_pull,        'sets': 2, 'reps': '15',    'rest_seconds': 45,  'notes': "Shoulder health — don't skip this"},
+        {'exercise': overhead_press, 'sets': 3, 'reps': '8-10', 'rest_seconds': 90},
+        {'exercise': lateral_raise, 'sets': 3, 'reps': '15', 'rest_seconds': 60},
+        {'exercise': tricep_dip, 'sets': 3, 'reps': '10-12', 'rest_seconds': 60},
+        {'exercise': face_pull, 'sets': 2, 'reps': '15', 'rest_seconds': 45, 'notes': "Shoulder health — don't skip this"},
     ],
 )
 
 create_workout(
-    author           = staff2,
-    title            = "Intermediate Pull Day",
-    description      = "A back and bicep session designed to build width, thickness, and arm size.",
-    body             = (
+    author = staff2,
+    title = "Intermediate Pull Day",
+    description= "A back and bicep session designed to build width, thickness, and arm size.",
+    body = (
         "Pull day targets all the major pulling muscles — lats, rhomboids, traps, rear delts, and biceps. "
         "Focus on driving your elbows, not your hands, on every pulling movement. "
         "The mind-muscle connection is especially important here. "
         "Pair with Push Day and Leg Day for a complete PPL split."
     ),
-    difficulty       = "MEDIUM",
+    difficulty = "MEDIUM",
     duration_minutes = 55,
-    goal             = "MUSCLE_GAIN",
-    locked           = False,
-    exercises_list   = [
-        {'exercise': pull_up,          'sets': 4, 'reps': '6-8',   'rest_seconds': 120, 'notes': 'Add weight if bodyweight is easy'},
-        {'exercise': bent_over_row,    'sets': 4, 'reps': '8-10',  'rest_seconds': 90},
-        {'exercise': lat_pulldown,     'sets': 3, 'reps': '10-12', 'rest_seconds': 75},
-        {'exercise': face_pull,        'sets': 3, 'reps': '15',    'rest_seconds': 60},
-        {'exercise': barbell_curl,     'sets': 3, 'reps': '10-12', 'rest_seconds': 60},
-        {'exercise': hammer_curl,      'sets': 3, 'reps': '12',    'rest_seconds': 45},
+    goal = "MUSCLE_GAIN",
+    locked = False,
+    exercises_list= [
+        {'exercise': pull_up, 'sets': 4, 'reps': '6-8', 'rest_seconds': 120, 'notes': 'Add weight if bodyweight is easy'},
+        {'exercise': bent_over_row, 'sets': 4, 'reps': '8-10', 'rest_seconds': 90},
+        {'exercise': lat_pulldown, 'sets': 3, 'reps': '10-12', 'rest_seconds': 75},
+        {'exercise': face_pull, 'sets': 3, 'reps': '15', 'rest_seconds': 60},
+        {'exercise': barbell_curl, 'sets': 3, 'reps': '10-12', 'rest_seconds': 60},
+        {'exercise': hammer_curl, 'sets': 3, 'reps': '12', 'rest_seconds': 45},
     ],
 )
 
 create_workout(
-    author           = staff2,
-    title            = "Leg Day — Strength Focus",
-    description      = "A heavy lower body session built around the squat and deadlift for maximum strength.",
-    body             = (
+    author = staff2,
+    title = "Leg Day — Strength Focus",
+    description= "A heavy lower body session built around the squat and deadlift for maximum strength.",
+    body = (
         "This leg day prioritises strength in the squat and deadlift pattern. "
         "The session starts with the most demanding exercises and finishes with accessory work. "
         "Rest 2–3 minutes between your heavy sets — don't rush it. "
         "Aim to add weight to the bar every 1–2 weeks."
     ),
-    difficulty       = "HARD",
+    difficulty = "HARD",
     duration_minutes = 75,
-    goal             = "STRENGTH",
-    locked           = False,
-    exercises_list   = [
-        {'exercise': barbell_squat,     'sets': 5, 'reps': '5',     'rest_seconds': 180, 'notes': 'Work up to a heavy top set'},
-        {'exercise': romanian_deadlift, 'sets': 4, 'reps': '8',     'rest_seconds': 120},
-        {'exercise': leg_press,         'sets': 3, 'reps': '10-12', 'rest_seconds': 90},
-        {'exercise': walking_lunge,     'sets': 3, 'reps': '12',    'rest_seconds': 75,  'notes': '12 reps each leg'},
-        {'exercise': hanging_leg_raise, 'sets': 3, 'reps': '12',    'rest_seconds': 60},
+    goal = "STRENGTH",
+    locked = False,
+    exercises_list= [
+        {'exercise': barbell_squat, 'sets': 5, 'reps': '5', 'rest_seconds': 180, 'notes': 'Work up to a heavy top set'},
+        {'exercise': romanian_deadlift, 'sets': 4, 'reps': '8', 'rest_seconds': 120},
+        {'exercise': leg_press, 'sets': 3, 'reps': '10-12', 'rest_seconds': 90},
+        {'exercise': walking_lunge, 'sets': 3, 'reps': '12', 'rest_seconds': 75, 'notes': '12 reps each leg'},
+        {'exercise': hanging_leg_raise, 'sets': 3, 'reps': '12', 'rest_seconds': 60},
     ],
 )
 
 create_workout(
-    author           = coach2,
-    title            = "Fat Burn HIIT Circuit",
-    description      = "A high-intensity circuit designed to maximise calorie burn and cardiovascular fitness.",
-    body             = (
+    author = coach2,
+    title = "Fat Burn HIIT Circuit",
+    description= "A high-intensity circuit designed to maximise calorie burn and cardiovascular fitness.",
+    body = (
         "This HIIT circuit uses full-body movements to keep your heart rate elevated throughout. "
         "Perform each exercise back-to-back with minimal rest, then take a 90-second break between rounds. "
         "Complete 3–5 rounds depending on your fitness level. "
         "This style of training keeps your metabolism elevated for hours after the session."
     ),
-    difficulty       = "HARD",
+    difficulty = "HARD",
     duration_minutes = 30,
-    goal             = "WEIGHT_LOSS",
-    locked           = False,
-    exercises_list   = [
-        {'exercise': burpee,           'sets': 4, 'reps': '10',    'rest_seconds': 20,  'notes': 'Minimal rest — keep moving'},
-        {'exercise': mountain_climber, 'sets': 4, 'reps': '30s',   'rest_seconds': 15},
-        {'exercise': box_jump,         'sets': 4, 'reps': '8',     'rest_seconds': 30},
-        {'exercise': kettlebell_swing, 'sets': 4, 'reps': '15',    'rest_seconds': 30},
-        {'exercise': walking_lunge,    'sets': 3, 'reps': '20',    'rest_seconds': 20,  'notes': '20 total steps'},
+    goal = "WEIGHT_LOSS",
+    locked = False,
+    exercises_list= [
+        {'exercise': burpee, 'sets': 4, 'reps': '10', 'rest_seconds': 20, 'notes': 'Minimal rest — keep moving'},
+        {'exercise': mountain_climber, 'sets': 4, 'reps': '30s', 'rest_seconds': 15},
+        {'exercise': box_jump, 'sets': 4, 'reps': '8', 'rest_seconds': 30},
+        {'exercise': kettlebell_swing, 'sets': 4, 'reps': '15', 'rest_seconds': 30},
+        {'exercise': walking_lunge, 'sets': 3, 'reps': '20', 'rest_seconds': 20, 'notes': '20 total steps'},
     ],
 )
 
 create_workout(
-    author           = coach3,
-    title            = "Cardio & Core Conditioning",
-    description      = "A moderate-intensity session combining cardiovascular work with core strengthening.",
-    body             = (
+    author = coach3,
+    title = "Cardio & Core Conditioning",
+    description= "A moderate-intensity session combining cardiovascular work with core strengthening.",
+    body = (
         "This workout pairs cardio movements with core exercises in a steady-state format. "
         "It's ideal for active recovery days or as a complement to heavier strength sessions. "
         "Focus on breathing and maintaining good form throughout — this isn't a race. "
         "The core exercises are performed with control, not speed."
     ),
-    difficulty       = "MEDIUM",
+    difficulty = "MEDIUM",
     duration_minutes = 40,
-    goal             = "CARDIO",
-    locked           = False,
-    exercises_list   = [
-        {'exercise': kettlebell_swing, 'sets': 3, 'reps': '20',    'rest_seconds': 60},
-        {'exercise': mountain_climber, 'sets': 3, 'reps': '40s',   'rest_seconds': 45},
-        {'exercise': plank,            'sets': 4, 'reps': '45s',   'rest_seconds': 30},
-        {'exercise': cable_crunch,     'sets': 3, 'reps': '15',    'rest_seconds': 45},
-        {'exercise': hanging_leg_raise,'sets': 3, 'reps': '10',    'rest_seconds': 60},
-        {'exercise': burpee,           'sets': 3, 'reps': '8',     'rest_seconds': 60},
+    goal = "CARDIO",
+    locked = False,
+    exercises_list= [
+        {'exercise': kettlebell_swing, 'sets': 3, 'reps': '20', 'rest_seconds': 60},
+        {'exercise': mountain_climber, 'sets': 3, 'reps': '40s', 'rest_seconds': 45},
+        {'exercise': plank, 'sets': 4, 'reps': '45s', 'rest_seconds': 30},
+        {'exercise': cable_crunch, 'sets': 3, 'reps': '15', 'rest_seconds': 45},
+        {'exercise': hanging_leg_raise,'sets': 3, 'reps': '10', 'rest_seconds': 60},
+        {'exercise': burpee, 'sets': 3, 'reps': '8', 'rest_seconds': 60},
     ],
 )
 
 create_workout(
-    author           = staff1,
-    title            = "Advanced Powerlifting Program",
-    description      = "An elite strength program built around the competition lifts for experienced athletes.",
-    body             = (
+    author = staff1,
+    title = "Advanced Powerlifting Program",
+    description= "An elite strength program built around the competition lifts for experienced athletes.",
+    body = (
         "This program is for experienced lifters with a solid base of strength. "
         "The three main lifts — squat, bench, and deadlift — are trained with heavy loads at low rep ranges. "
         "Accessory work targets weak points and prevents injury. "
         "Rest fully between heavy sets — strength training is not a race. "
         "This plan requires access to a barbell, rack, and bench."
     ),
-    difficulty       = "HARD",
+    difficulty = "HARD",
     duration_minutes = 90,
-    goal             = "STRENGTH",
-    locked           = True,
-    exercises_list   = [
-        {'exercise': barbell_squat,     'sets': 5, 'reps': '3',     'rest_seconds': 240, 'notes': 'Heavy — 85–90% of 1RM'},
-        {'exercise': bench_press,       'sets': 5, 'reps': '3',     'rest_seconds': 240, 'notes': 'Heavy — 85–90% of 1RM'},
-        {'exercise': deadlift,          'sets': 3, 'reps': '3',     'rest_seconds': 300, 'notes': 'Max effort sets'},
-        {'exercise': overhead_press,    'sets': 4, 'reps': '5',     'rest_seconds': 180},
-        {'exercise': bent_over_row,     'sets': 4, 'reps': '5',     'rest_seconds': 180},
-        {'exercise': cable_crunch,      'sets': 3, 'reps': '15',    'rest_seconds': 60,  'notes': 'Core bracing for heavy lifts'},
+    goal = "STRENGTH",
+    locked = True,
+    exercises_list= [
+        {'exercise': barbell_squat, 'sets': 5, 'reps': '3', 'rest_seconds': 240, 'notes': 'Heavy — 85–90% of 1RM'},
+        {'exercise': bench_press, 'sets': 5, 'reps': '3', 'rest_seconds': 240, 'notes': 'Heavy — 85–90% of 1RM'},
+        {'exercise': deadlift, 'sets': 3, 'reps': '3', 'rest_seconds': 300, 'notes': 'Max effort sets'},
+        {'exercise': overhead_press, 'sets': 4, 'reps': '5', 'rest_seconds': 180},
+        {'exercise': bent_over_row, 'sets': 4, 'reps': '5', 'rest_seconds': 180},
+        {'exercise': cable_crunch, 'sets': 3, 'reps': '15', 'rest_seconds': 60, 'notes': 'Core bracing for heavy lifts'},
     ],
 )
 
 create_workout(
-    author           = staff2,
-    title            = "Muscle Gain Hypertrophy Split",
-    description      = "A premium upper/lower hypertrophy program optimised for maximum muscle growth.",
-    body             = (
+    author = staff2,
+    title = "Muscle Gain Hypertrophy Split",
+    description= "A premium upper/lower hypertrophy program optimised for maximum muscle growth.",
+    body = (
         "This program applies hypertrophy-specific training principles: moderate weight, higher volume, "
         "and short rest periods to maximise metabolic stress and muscle damage. "
         "Each exercise should be taken close to failure — leave 1–2 reps in reserve. "
         "Nutrition is critical: ensure you're in a caloric surplus with adequate protein (1.6–2.2g per kg). "
         "Train 4 days per week — Upper A / Lower A / Rest / Upper B / Lower B."
     ),
-    difficulty       = "HARD",
+    difficulty = "HARD",
     duration_minutes = 70,
-    goal             = "MUSCLE_GAIN",
-    locked           = True,
-    exercises_list   = [
-        {'exercise': incline_db_press,  'sets': 4, 'reps': '10-12', 'rest_seconds': 75,  'notes': 'Upper A — upper chest focus'},
-        {'exercise': bent_over_row,     'sets': 4, 'reps': '10-12', 'rest_seconds': 75},
-        {'exercise': overhead_press,    'sets': 3, 'reps': '12-15', 'rest_seconds': 60},
-        {'exercise': lat_pulldown,      'sets': 3, 'reps': '12-15', 'rest_seconds': 60},
-        {'exercise': lateral_raise,     'sets': 4, 'reps': '15-20', 'rest_seconds': 45},
-        {'exercise': barbell_curl,      'sets': 3, 'reps': '12-15', 'rest_seconds': 45},
-        {'exercise': tricep_dip,        'sets': 3, 'reps': '12-15', 'rest_seconds': 45},
-        {'exercise': cable_crunch,      'sets': 3, 'reps': '15',    'rest_seconds': 45},
+    goal = "MUSCLE_GAIN",
+    locked = True,
+    exercises_list= [
+        {'exercise': incline_db_press, 'sets': 4, 'reps': '10-12', 'rest_seconds': 75, 'notes': 'Upper A — upper chest focus'},
+        {'exercise': bent_over_row, 'sets': 4, 'reps': '10-12', 'rest_seconds': 75},
+        {'exercise': overhead_press, 'sets': 3, 'reps': '12-15', 'rest_seconds': 60},
+        {'exercise': lat_pulldown, 'sets': 3, 'reps': '12-15', 'rest_seconds': 60},
+        {'exercise': lateral_raise, 'sets': 4, 'reps': '15-20', 'rest_seconds': 45},
+        {'exercise': barbell_curl, 'sets': 3, 'reps': '12-15', 'rest_seconds': 45},
+        {'exercise': tricep_dip, 'sets': 3, 'reps': '12-15', 'rest_seconds': 45},
+        {'exercise': cable_crunch, 'sets': 3, 'reps': '15', 'rest_seconds': 45},
     ],
 )
 
@@ -1632,16 +1631,16 @@ def create_equipment(name, description, quantity):
     EquipmentList.objects.create(name=name, description=description, quantity=quantity)
     print(f"  [created] Equipment: '{name}' x{quantity}")
 
-create_equipment("Barbell",          "Olympic 20kg barbell for compound lifts.",                      8)
-create_equipment("Dumbbells",        "Adjustable dumbbell rack ranging from 2.5kg to 50kg.",         20)
-create_equipment("Squat Rack",       "Full power rack with safety bars and pull-up attachment.",      4)
-create_equipment("Bench Press",      "Flat bench press station with barbell and weight plates.",      4)
-create_equipment("Cable Machine",    "Dual-pulley cable station for rows, pulldowns, and curls.",     3)
-create_equipment("Treadmill",        "Motorised treadmill with incline and heart rate monitor.",      6)
-create_equipment("Rowing Machine",   "Air-resistance rowing ergometer for full-body cardio.",         4)
-create_equipment("Kettlebells",      "Cast-iron kettlebell set from 8kg to 32kg.",                   16)
-create_equipment("Leg Press",        "Plate-loaded 45-degree leg press machine.",                     2)
-create_equipment("Pull-Up Station",  "Wall-mounted pull-up and dip station with multiple grips.",     3)
+create_equipment("Barbell", "Olympic 20kg barbell for compound lifts.", 8)
+create_equipment("Dumbbells", "Adjustable dumbbell rack ranging from 2.5kg to 50kg.", 20)
+create_equipment("Squat Rack", "Full power rack with safety bars and pull-up attachment.", 4)
+create_equipment("Bench Press", "Flat bench press station with barbell and weight plates.", 4)
+create_equipment("Cable Machine", "Dual-pulley cable station for rows, pulldowns, and curls.", 3)
+create_equipment("Treadmill", "Motorised treadmill with incline and heart rate monitor.", 6)
+create_equipment("Rowing Machine", "Air-resistance rowing ergometer for full-body cardio.", 4)
+create_equipment("Kettlebells", "Cast-iron kettlebell set from 8kg to 32kg.", 16)
+create_equipment("Leg Press", "Plate-loaded 45-degree leg press machine.", 2)
+create_equipment("Pull-Up Station", "Wall-mounted pull-up and dip station with multiple grips.", 3)
 
 
 # ─────────────────────────────────────────────
@@ -1687,10 +1686,10 @@ gym_schedule_data = [
 for day, open_time, close_time, is_open, is_open_24h in gym_schedule_data:
     obj, created = GymInfo.objects.get_or_create(day=day)
     if created:
-        obj.open_time    = open_time
-        obj.close_time   = close_time
-        obj.is_open      = is_open
-        obj.is_open_24h  = is_open_24h
+        obj.open_time = open_time
+        obj.close_time= close_time
+        obj.is_open= is_open
+        obj.is_open_24h = is_open_24h
         obj.save()
         print(f"  [created] {obj}")
     else:
@@ -1701,15 +1700,15 @@ for day, open_time, close_time, is_open, is_open_24h in gym_schedule_data:
 # ─────────────────────────────────────────────
 print("\n── Creating Challenge Participations ──")
 
-pushup_challenge  = Challenge.objects.get(title="7-Day Push-Up Challenge")
-steps_challenge   = Challenge.objects.get(title="10K Steps Daily")
+pushup_challenge = Challenge.objects.get(title="7-Day Push-Up Challenge")
+steps_challenge= Challenge.objects.get(title="10K Steps Daily")
 
 participations = [
-    (member1, pushup_challenge, 7),   # completed
-    (member1, steps_challenge,  10),  # in progress
-    (member2, pushup_challenge, 4),   # in progress
-    (member2, steps_challenge,  14),  # completed
-    (member3, pushup_challenge, 2),   # just started
+    (member1, pushup_challenge, 7), # completed
+    (member1, steps_challenge, 10), # in progress
+    (member2, pushup_challenge, 4), # in progress
+    (member2, steps_challenge, 14), # completed
+    (member3, pushup_challenge, 2), # just started
 ]
 
 for user, challenge, progress in participations:
@@ -1732,8 +1731,8 @@ for user, challenge, progress in participations:
 # ─────────────────────────────────────────────
 print("\n── Creating Coach Availabilities, Appointments & Reviews ──")
 
-now        = timezone.now()
-tz         = timezone.get_current_timezone()
+now = timezone.now()
+tz= timezone.get_current_timezone()
 
 def make_dt(days_offset, hour):
     """Return a timezone-aware datetime offset from today."""
@@ -1780,64 +1779,64 @@ def get_or_create_review(coach, member, appointment, rating, comment):
 
 
 # ── Coach 1 (Mike) ──
-# Past slots this month → accepted appointments with reviews
+# previous slots this month → accepted appointments with reviews
 for days_ago, hour, member, rating, comment in [
-    (-14, 9,  member1, 5, "Mike is an outstanding coach. His technique cues are incredibly precise and he always pushes me to improve without being overwhelming. Highly recommend."),
+    (-14, 9, member1, 5, "Mike is an outstanding coach. His technique cues are incredibly precise and he always pushes me to improve without being overwhelming. Highly recommend."),
     (-10, 11, member2, 4, "Really solid session. Mike knows his stuff and explains everything well. Would have given 5 stars but we ran a bit over time."),
-    (-6,  14, member3, 5, "Best coaching session I have had. Mike adapted the entire workout to my shoulder issue on the spot. Super professional."),
-    (-3,  9,  member1, 4, "Great as always. Mike keeps things fresh every session. Minor scheduling mix-up at the start but nothing serious."),
+    (-6, 14, member3, 5, "Best coaching session I have had. Mike adapted the entire workout to my shoulder issue on the spot. Super professional."),
+    (-3, 9, member1, 4, "Great as always. Mike keeps things fresh every session. Minor scheduling mix-up at the start but nothing serious."),
 ]:
     start = make_dt(days_ago, hour)
-    end   = make_dt(days_ago, hour + 1)
-    slot, _  = get_or_create_availability(coach1, start, end)
-    appt, _  = get_or_create_appointment(coach1, member, slot, start, end, 'ACCEPTED')
+    end= make_dt(days_ago, hour + 1)
+    slot, _ = get_or_create_availability(coach1, start, end)
+    appt, _ = get_or_create_appointment(coach1, member, slot, start, end, 'ACCEPTED')
     get_or_create_review(coach1, member, appt, rating, comment)
 
 # Future open slots for coach1
 for days_ahead, hour in [(3, 9), (3, 14), (7, 10), (10, 9), (10, 14)]:
     start = make_dt(days_ahead, hour)
-    end   = make_dt(days_ahead, hour + 1)
+    end= make_dt(days_ahead, hour + 1)
     get_or_create_availability(coach1, start, end)
 
 # ── Coach 2 (Emma) ──
 for days_ago, hour, member, rating, comment in [
     (-12, 10, member2, 5, "Emma is phenomenal. Her energy is contagious and she made a tough workout feel fun. Already booked my next session."),
-    (-8,  13, member1, 3, "Session was okay. Emma is knowledgeable but the workout felt a bit generic for my level. Hoping for more personalisation next time."),
-    (-4,  10, member3, 5, "Emma completely transformed my approach to cardio. I learned more in one hour with her than in months on my own."),
+    (-8, 13, member1, 3, "Session was okay. Emma is knowledgeable but the workout felt a bit generic for my level. Hoping for more personalisation next time."),
+    (-4, 10, member3, 5, "Emma completely transformed my approach to cardio. I learned more in one hour with her than in months on my own."),
 ]:
     start = make_dt(days_ago, hour)
-    end   = make_dt(days_ago, hour + 1)
-    slot, _  = get_or_create_availability(coach2, start, end)
-    appt, _  = get_or_create_appointment(coach2, member, slot, start, end, 'ACCEPTED')
+    end= make_dt(days_ago, hour + 1)
+    slot, _ = get_or_create_availability(coach2, start, end)
+    appt, _ = get_or_create_appointment(coach2, member, slot, start, end, 'ACCEPTED')
     get_or_create_review(coach2, member, appt, rating, comment)
 
 # Future open slots for coach2
 for days_ahead, hour in [(2, 10), (5, 13), (8, 10), (12, 13)]:
     start = make_dt(days_ahead, hour)
-    end   = make_dt(days_ahead, hour + 1)
+    end= make_dt(days_ahead, hour + 1)
     get_or_create_availability(coach2, start, end)
 
 # ── Coach 3 (David) ──
 for days_ago, hour, member, rating, comment in [
-    (-15, 8,  member3, 4, "David really knows his stuff when it comes to strength training. Good session overall, communication could be a bit clearer."),
-    (-9,  15, member1, 5, "Incredible session with David. He spotted a major form issue in my deadlift that I have had for years. Total game changer."),
-    (-5,  8,  member2, 4, "David is great — very technical and detail-oriented. Not for everyone but perfect if you want to really dial in your form."),
+    (-15, 8, member3, 4, "David really knows his stuff when it comes to strength training. Good session overall, communication could be a bit clearer."),
+    (-9, 15, member1, 5, "Incredible session with David. He spotted a major form issue in my deadlift that I have had for years. Total game changer."),
+    (-5, 8, member2, 4, "David is great — very technical and detail-oriented. Not for everyone but perfect if you want to really dial in your form."),
 ]:
     start = make_dt(days_ago, hour)
-    end   = make_dt(days_ago, hour + 1)
-    slot, _  = get_or_create_availability(coach3, start, end)
-    appt, _  = get_or_create_appointment(coach3, member, slot, start, end, 'ACCEPTED')
+    end= make_dt(days_ago, hour + 1)
+    slot, _ = get_or_create_availability(coach3, start, end)
+    appt, _ = get_or_create_appointment(coach3, member, slot, start, end, 'ACCEPTED')
     get_or_create_review(coach3, member, appt, rating, comment)
 
 # Future open slots for coach3
 for days_ahead, hour in [(4, 8), (4, 15), (6, 8), (11, 15)]:
     start = make_dt(days_ahead, hour)
-    end   = make_dt(days_ahead, hour + 1)
+    end= make_dt(days_ahead, hour + 1)
     get_or_create_availability(coach3, start, end)
 
 # A couple of pending appointments (no review yet — visible in coach schedule)
 pending_start = make_dt(1, 10)
-pending_end   = make_dt(1, 11)
+pending_end= make_dt(1, 11)
 pending_slot, _ = get_or_create_availability(coach1, pending_start, pending_end)
 get_or_create_appointment(coach1, member2, pending_slot, pending_start, pending_end, 'PENDING')
 
@@ -1848,12 +1847,12 @@ get_or_create_appointment(coach1, member2, pending_slot, pending_start, pending_
 print("\n── Creating Messages ──")
 
 messages_data = [
-    (member1, coach1, "Question about my program",       "Hi Mike, I wanted to ask about the progression plan you mentioned. Should I increase weight every week or every two weeks?", True),
-    (coach1,  member1, "Re: Question about my program",  "Hey Alice! Great question. For beginners I recommend increasing every two weeks. Focus on form first, then load. See you next session!", True),
-    (member2, coach2,  "Nutrition advice",               "Hi Emma, do you have any recommendations for pre-workout nutrition? I always feel low energy halfway through our sessions.", True),
-    (coach2,  member2, "Re: Nutrition advice",           "Hi Bob! Try a small meal 90 minutes before — oats with a banana works great. Stay hydrated too. Let me know how it goes!", False),
-    (member3, coach1,  "Cancellation notice",            "Hi Mike, unfortunately I need to cancel our session next Monday. Something came up at work. Can we reschedule to later in the week?", False),
-    (member1, coach3,  "First session questions",        "Hi David, I have never worked with a strength coach before. What should I bring and what can I expect from our first session?", False),
+    (member1, coach1, "Question about my program", "Hi Mike, I wanted to ask about the progression plan you mentioned. Should I increase weight every week or every two weeks?", True),
+    (coach1, member1, "Re: Question about my program", "Hey Alice! Great question. For beginners I recommend increasing every two weeks. Focus on form first, then load. See you next session!", True),
+    (member2, coach2, "Nutrition advice", "Hi Emma, do you have any recommendations for pre-workout nutrition? I always feel low energy halfway through our sessions.", True),
+    (coach2, member2, "Re: Nutrition advice", "Hi Bob! Try a small meal 90 minutes before — oats with a banana works great. Stay hydrated too. Let me know how it goes!", False),
+    (member3, coach1, "Cancellation notice", "Hi Mike, unfortunately I need to cancel our session next Monday. Something came up at work. Can we reschedule to later in the week?", False),
+    (member1, coach3, "First session questions", "Hi David, I have never worked with a strength coach before. What should I bring and what can I expect from our first session?", False),
 ]
 
 for sender, recipient, subject, body, is_read in messages_data:
@@ -1870,10 +1869,10 @@ for sender, recipient, subject, body, is_read in messages_data:
 print("\n── Creating Contact Messages ──")
 
 contact_data = [
-    ("Alice Johnson",  "alice@example.com",  "Issue with booking system",      "I tried to book a session with Coach Mike but the calendar keeps showing an error after I select a time slot. Please help!", True),
-    ("Bob Martinez",   "bob@example.com",    "Membership upgrade question",    "I am currently on the Standard plan and would like to know what additional benefits the Platinum plan includes before upgrading.", False),
-    ("Carol Davis",    "carol@example.com",  "Feedback on workout plans",      "I really enjoy the locked workout plans. Any chance you could add more HIIT-focused content? The current selection is great but more variety would be amazing.", False),
-    ("Anonymous User", "visitor@example.com","Website accessibility issue",    "Some of the text on the recipes page is very hard to read on mobile. The contrast between the text and background could be improved.", False),
+    ("Alice Johnson", "alice@example.com", "Issue with booking system", "I tried to book a session with Coach Mike but the calendar keeps showing an error after I select a time slot. Please help!", True),
+    ("Bob Martinez", "bob@example.com", "Membership upgrade question", "I am currently on the Standard plan and would like to know what additional benefits the Platinum plan includes before upgrading.", False),
+    ("Carol Davis", "carol@example.com", "Feedback on workout plans", "I really enjoy the locked workout plans. Any chance you could add more HIIT-focused content? The current selection is great but more variety would be amazing.", False),
+    ("Anonymous User", "visitor@example.com","Website accessibility issue", "Some of the text on the recipes page is very hard to read on mobile. The contrast between the text and background could be improved.", False),
 ]
 
 for name, email, subject, message_body, is_read in contact_data:

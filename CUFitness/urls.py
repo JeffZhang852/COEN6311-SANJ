@@ -36,7 +36,6 @@ urlpatterns = [
 # region User Authentication
     path("register/", views.Register.as_view(), name="register"),
     path("login/", views.login_user, name='login'),
-    path("coach_login/", views.coach_login, name='coach_login'),
     path('logout/', views.logout_user, name='logout'),
 # endregion
 
@@ -53,7 +52,6 @@ urlpatterns = [
     path('staff_login/', views.staff_login, name='staff_login'),
     path('staff_profile/', views.staff_profile, name='staff_profile'),
     path('coach_requests/', views.coach_requests, name='coach_requests'),
-    path('staff_reports/', views.staff_reports, name='staff_reports'),
     path('staff_messages/', views.staff_messages, name='staff_messages'),
     path('staff_settings/', views.staff_settings, name='staff_settings'),
     # path to user profiles from staff_home page
@@ -109,9 +107,16 @@ urlpatterns = [
 
 # endregion
 
+# region Coach Pages
+    path("coach_login/", views.coach_login, name='coach_login'),
+    path('coach_profile/', views.coach_profile_page, name='coach_profile'),
+    path('coach_home/', views.coach_home, name='coach_home'),
+    path('coach_settings/', views.coach_settings, name='coach_settings'),
+    path('coach_schedule/', views.coach_schedule, name='coach_schedule'),
+# endregion
+
 
     # Coach Schedule & Availability AJAX
-    path('coach_schedule/', views.coach_schedule, name='coach_schedule'),
     path('api/availability/add/', views.ajax_add_availability, name='ajax_add_availability'),
     path('api/availability/<int:slot_id>/edit/', views.ajax_edit_availability, name='ajax_edit_availability'),
     path('api/availability/<int:slot_id>/delete/', views.ajax_delete_availability, name='ajax_delete_availability'),
@@ -135,48 +140,8 @@ urlpatterns = [
     path('reply_message/<int:message_id>/', views.reply_message, name='reply_message'),
     path('mark_read/<int:message_id>/', views.mark_read, name='mark_read'),
 
-    # Coach Profile
-    path('coach_profile/', views.coach_profile_page, name='coach_profile'),
-    path('coach_home/', views.coach_home, name='coach_home'),
-    path('coach_settings/', views.coach_settings, name='coach_settings'),
-
     # REST API endpoints
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
 
-    # ========== Potentially Not Used URLs ==========
-    # Legacy coach pages
-    # path('coach/availability/', views.manage_availability, name='manage_availability'),
-    # path('coach/availability/delete/<int:slot_id>/', views.delete_availability, name='delete_availability'),
-    # path('coach/appointments/', views.manage_appointments, name='manage_appointments'),
-
-    # Duplicate or older URLs (kept commented for reference)
-    # path('recipes/', views.user_recipes, name='recipes'),
-    # path('exercises/', views.user_exercises, name='exercises'),
-    # path('user profile/', views.user_profile, name='user_profile'),
-    # path('user profile/upload_picture/', views.upload_picture, name='upload_picture'),
-    # path('user profile/delete-picture/', views.delete_picture, name='delete_picture'),
-    # path('user settings/', views.user_settings, name='user_settings'),
-    # path('user inbox/', views.user_inbox, name='user_inbox'),
-    # path('user calendar/', views.user_calendar, name='user_calendar'),
-    # path('user saved recipes/', views.user_saved_recipes, name='user_saved_recipes'),
-    # path('user saved workouts/', views.user_saved_workouts, name='user_saved_workouts'),
-    # path('staff_articles/', views.staff_articles, name='staff_articles'),  # duplicate
-    # path('create_article/', views.create_article, name='create_article'),
-    # path('edit_article/<int:id>/edit/', views.edit_article, name='edit_article'),
-    # path('delete_article/<int:id>/delete/', views.delete_article, name='delete_article'),
-    # path('staff_recipes/', views.staff_recipes, name='staff_recipes'),  # duplicate
-    # path('create_recipe/', views.create_recipe, name='create_recipe'),
-    # path('recipe/<int:id>/edit/', views.edit_recipe, name='edit_recipe'),
-    # path('recipe/<int:id>/delete/', views.delete_recipe, name='delete_recipe'),
-    # path('staff_workouts/', views.staff_workouts, name='staff_workouts'),  # duplicate
-    # path('create_workouts/', views.create_workouts, name='create_workouts'),
-    # path('workout/<int:id>/edit/', views.edit_workout, name='edit_workout'),
-    # path('workout/<int:id>/delete/', views.delete_workout, name='delete_workout'),
-    # path('staff_exercises/', views.staff_exercises, name='staff_exercises'),  # duplicate
-    # path('create_exercises/', views.create_exercises, name='create_exercises'),
-    # path('staff_challenges/', views.staff_challenges, name='staff_challenges'),  # duplicate
-    # path('challenge/<int:id>/', views.challenge_detail, name='challenge_detail'),
-    # path('user_challenges/', views.user_challenges, name='user_challenges'),
-    #path('workout_details/<int:id>/', views.workout_details, name='workout_details'),
 ]

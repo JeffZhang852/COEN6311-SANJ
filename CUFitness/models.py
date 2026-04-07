@@ -377,7 +377,7 @@ class WorkoutPlan(models.Model):
     # Premium content – requires login if True
     locked = models.BooleanField(default=False, help_text='Premium content — requires login to view')
 
-    description = models.CharField(max_length=100, help_text='Brief summary of the workout plan')
+    description = models.CharField(max_length=250, help_text='Brief summary of the workout plan')
     body = models.TextField(help_text='Detailed overview of the plan')
 
     # Timestamps

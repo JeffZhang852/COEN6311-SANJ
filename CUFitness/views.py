@@ -29,7 +29,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError as DRFVa
 
 # Local import
 from .forms import (
-    ArticleForm, ChallengeForm, ContactMessageForm, CustomUserCreationForm,
+    ArticleForm, ContactMessageForm, CustomUserCreationForm,
     ExerciseForm, IngredientFormSet, PrivacySettingsForm, ProfilePictureForm,
     RecipeForm, UpdateEmailForm, UpdatePasswordForm, ChallengeForm, WorkoutPlanForm,
 )
@@ -466,7 +466,7 @@ def delete_availability(request, slot_id):
     if request.method == 'POST':
         slot.delete()
         messages.success(request, 'Slot deleted.')
-    return redirect('manage_availability')
+    return redirect('coach_schedule')
 
 @login_required(login_url='login')
 @user_passes_test(is_coach)
@@ -640,11 +640,6 @@ def handle_coach_request(request, user_id):
     else:
         messages.error(request, 'Invalid action.')
     return redirect('coach_requests')
-
-@login_required(login_url='staff_login')
-@user_passes_test(is_staff_user)
-def staff_reports(request):
-    return render(request, 'CUFitness/staff/staff_reports.html')
 
 @login_required(login_url='staff_login')
 @user_passes_test(is_staff_user)
@@ -905,9 +900,7 @@ def staff_create_exercise(request):
     if request.method == 'POST':
         form = ExerciseForm(request.POST)
         if form.is_valid():
-            exercise = form.save(commit=False)
-            exercise.created_by = request.user
-            exercise.save()
+            form.save()
             messages.success(request, 'Exercise created successfully.')
             return redirect('staff_exercises')
     else:
