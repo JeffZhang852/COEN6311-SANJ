@@ -248,7 +248,7 @@ Superuser access via the Django admin panel at `/admin/`. Full control over all 
 python manage.py test CUFitness
 ```
 
-The test suite covers model validation, authentication, access control, article/recipe/workout CRUD, settings (email/password updates), coach request workflow, calendar views, appointment booking flow, and all public pages.
+The tests covers model validation, authentication, access control, article/recipe/workout CRUD, settings (email/password updates), coach request workflow, calendar views, appointment booking flow, and all public pages.
 
 ---
 
@@ -256,29 +256,29 @@ The test suite covers model validation, authentication, access control, article/
 
 ```
 COEN6311-SANJ/
-├── COEN6311/               # Django project config
-│   ├── settings.py         # Project settings
-│   ├── urls.py             # Root URL routing
+├── COEN6311/             
+│   ├── settings.py        
+│   ├── urls.py            
 │   ├── wsgi.py
 │   └── asgi.py
-├── CUFitness/              # Main application
-│   ├── migrations/         # Database migrations
-│   ├── static/             # CSS files (per-role: general, staff, user, coach)
-│   ├── templates/          # HTML templates (per-role subdirectories)
-│   ├── models.py           # All database models
-│   ├── views.py            # All view logic (general, user, coach, staff, API)
-│   ├── urls.py             # App-level URL routing
-│   ├── forms.py            # Django forms
-│   ├── managers.py         # Custom user manager (email-based auth)
-│   ├── serializers.py      # DRF serializers
-│   ├── admin.py            # Django admin configuration
-│   ├── apps.py             # App config + background chatbot model loader
-│   └── tests.py            # Automated test suite
-├── media/                  # User-uploaded files (profile pictures)
-│   └── defaults/           # Default profile picture
-├── db.sqlite3              # SQLite database (pre-seeded by seed_data.py)
-├── manage.py               # Django management CLI
-├── seed_data.py            # Test data seeder
-├── requirements.txt        # Python dependencies (UTF-16 encoded — see Setup)
+├── CUFitness/             
+│   ├── migrations/       
+│   ├── static/           
+│   ├── templates/        
+│   ├── models.py         
+│   ├── views.py          
+│   ├── urls.py            
+│   ├── forms.py           
+│   ├── managers.py         
+│   ├── serializers.py      
+│   ├── admin.py            
+│   ├── apps.py            
+│   └── tests.py            
+├── media/                  
+│   └── defaults/           
+├── db.sqlite3              
+├── manage.py               
+├── seed_data.py            
+├── requirements.txt       
 └── CHANGELOG.md            # Project changelog
 ```
